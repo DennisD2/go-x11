@@ -38,16 +38,15 @@ func main() {
 	appClass := "AppClass"
 	var ctx = new(AppContext)
 	var options = new(OptionDescList)
+	var noptions = 0
+	var argc = 0
+	//var argv = new(ArgList) WRONG FIX IT
+	fallbackResources := ""
 	var argList = new(ArgList)
+	var narglist = 0
 
-	c_appClass := C.CString(appClass)
-	var cargc C.int = 0
-	var cargv **C.char
-	var cnumOptions C.uint = 0
-	c_fallbackResources := C.XtNewString(C.CString(""))
-	cnumArgs := C.uint(0)
-	shell := C.XtAppInitialize(&ctx.appContext, c_appClass, options.optionDescList, cnumOptions,
-		&cargc, cargv, &c_fallbackResources, argList.argList, cnumArgs)
+	shell := AppInitialize(ctx, appClass, *options, noptions,
+		&argc, "*argv", fallbackResources, argList, narglist)
 
 	/* Convert the first argument to the form expected by Motif */
 	xmstr := C.XmStringCreateLtoR(C.CString("hehe"), C.XmFONTLIST_DEFAULT_TAG)
@@ -61,7 +60,7 @@ func main() {
 	wargs.value = convertIt(xmstr)
 
 	msg := C.XtCreateManagedWidget(C.CString("message"),
-		C.xmLabelWidgetClass, shell,
+		C.xmLabelWidgetClass, shell.widget,
 		&wargs,
 		wargc)
 	fmt.Printf("%x\n", msg)
@@ -72,7 +71,7 @@ func main() {
 	 * Realize the shell and enter an event loop.
 	 */
 	C.hello1()
-	C.XtRealizeWidget(shell)
+	C.XtRealizeWidget(shell.widget)
 	C.XtAppMainLoop(ctx.appContext)
 
 	C.hello1()
