@@ -1,28 +1,30 @@
-package main
+package xt
 
 import "C"
 
 // #cgo CFLAGS: -std=c99 -Wno-incompatible-pointer-types
-// #cgo LDFLAGS: -lXt -lX11
+// #cgo LDFLAGS: -lXt -lXm -lX11
 // #include <stdlib.h>
 // #include <X11/Intrinsic.h>
+// #include <Xm/Xm.h>
+// #include <Xm/Label.h>
 import "C"
 import "unsafe"
 
 type Widget struct {
-	widget C.Widget
+	Widget C.Widget
 }
 
 type AppContext struct {
-	appContext C.XtAppContext
+	AppContext C.XtAppContext
 }
 
 type OptionDescList struct {
-	optionDescList C.XrmOptionDescList
+	OptionDescList C.XrmOptionDescList
 }
 
 type ArgList struct {
-	argList C.ArgList
+	ArgList C.ArgList
 }
 
 type _XtString struct {
@@ -30,7 +32,7 @@ type _XtString struct {
 }
 
 func convertIt_ArgList(in *ArgList) C.ArgList {
-	return in.argList
+	return in.ArgList
 }
 
 func convertIt_XtString(in []string) **C.char {
@@ -56,32 +58,32 @@ func AppInitialize(ctx *AppContext, appClass string, options OptionDescList, num
 
 	var cargv = convertIt_XtString(argv)
 	c_fallbackResources := C.XtNewString(C.CString(""))
-	shell := C.XtAppInitialize(&ctx.appContext, c_appClass, options.optionDescList, cnum_options,
-		&cargc, cargv, &c_fallbackResources, (*C.struct___1)(unsafe.Pointer(wargs.argList)), cnum_wargs)
+	shell := C.XtAppInitialize(&ctx.AppContext, c_appClass, options.OptionDescList, cnum_options,
+		&cargc, cargv, &c_fallbackResources, (*C.struct___0)(unsafe.Pointer(wargs.ArgList)), cnum_wargs)
 
 	r := new(Widget)
-	r.widget = shell
+	r.Widget = shell
 	return *r
 }
 
-func CreateManagedWidget(name string, widgetClass C.WidgetClass, parent Widget, args C.ArgList, num_args int) Widget {
+func CreateManagedWidget(name string, widgetClass unsafe.Pointer, parent Widget, args unsafe.Pointer, num_args int) Widget {
 	c_name := C.CString(name)
 	defer C.free(unsafe.Pointer(c_name))
 
 	var cnum_args = C.uint(num_args)
-	
-	widget := C.XtCreateManagedWidget(c_name, widgetClass, parent.widget,
-		(*C.struct___1)(unsafe.Pointer(args)), cnum_args)
+
+	widget := C.XtCreateManagedWidget(c_name, (*C.struct__WidgetClassRec)(widgetClass),
+		parent.Widget, (*C.struct___0)(args), cnum_args)
 
 	r := new(Widget)
-	r.widget = widget
+	r.Widget = widget
 	return *r
 }
 
 func RealizeWidget(w Widget) {
-	C.XtRealizeWidget(w.widget)
+	C.XtRealizeWidget(w.Widget)
 }
 
 func AppMainLoop(ctx *AppContext) {
-	C.XtAppMainLoop(ctx.appContext)
+	C.XtAppMainLoop(ctx.AppContext)
 }
