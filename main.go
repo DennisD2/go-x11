@@ -7,26 +7,8 @@ package main
 // #include <hello.h>
 import "C"
 import (
-	"fmt"
 	"unsafe"
 )
-
-/*
-
-/
-extern Widget XtAppInitialize(
-XtAppContext*       ,
-_Xconst _XtString  ,
-XrmOptionDescList  ,
-Cardinal            ,
-int*                ,
-_XtString*          ,
-String*             ,
-ArgList             ,
-Cardinal
-)
-
-*/
 
 func convertIt(in C.XmString) C.XtArgVal {
 	return *(*C.XtArgVal)(unsafe.Pointer(&in))
@@ -40,13 +22,13 @@ func main() {
 	var options = new(OptionDescList)
 	var noptions = 0
 	var argc = 0
-	//var argv = new(ArgList) WRONG FIX IT
+	var argv []string
 	fallbackResources := ""
 	var argList = new(ArgList)
 	var narglist = 0
 
 	shell := AppInitialize(ctx, appClass, *options, noptions,
-		&argc, "*argv", fallbackResources, argList, narglist)
+		&argc, argv, fallbackResources, argList, narglist)
 
 	/* Convert the first argument to the form expected by Motif */
 	xmstr := C.XmStringCreateLtoR(C.CString("hehe"), C.XmFONTLIST_DEFAULT_TAG)
@@ -59,11 +41,12 @@ func main() {
 	wargs.name = C.XmNlabelString
 	wargs.value = convertIt(xmstr)
 
-	msg := C.XtCreateManagedWidget(C.CString("message"),
+	/*msg := */
+	C.XtCreateManagedWidget(C.CString("message"),
 		C.xmLabelWidgetClass, shell.widget,
 		&wargs,
 		wargc)
-	fmt.Printf("%x\n", msg)
+	//fmt.Printf("%x\n", msg)
 
 	C.XmStringFree(xmstr) /* Free the compound string */
 

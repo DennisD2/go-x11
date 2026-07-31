@@ -25,12 +25,27 @@ type ArgList struct {
 	argList C.ArgList
 }
 
+type _XtString struct {
+	_XtString *C._XtString
+}
+
 func convertIt_ArgList(in *ArgList) C.ArgList {
 	return in.argList
 }
 
+func convertIt_XtString(in []string) **C.char {
+	if len(in) == 0 {
+		return nil
+	}
+	ret := make([]*C.char, len(in))
+	for i, arg := range in {
+		ret[i] = C.CString(arg)
+	}
+	return &ret[0]
+}
+
 func AppInitialize(ctx *AppContext, appClass string, options OptionDescList, num_options int,
-	argc *int, argv string, fallbackResources string, wargs *ArgList, num_wargs int) Widget {
+	argc *int, argv []string, fallbackResources string, wargs *ArgList, num_wargs int) Widget {
 
 	c_appClass := C.CString(appClass)
 	defer C.free(unsafe.Pointer(c_appClass))
@@ -39,7 +54,7 @@ func AppInitialize(ctx *AppContext, appClass string, options OptionDescList, num
 	var cargc = C.int(*argc)
 	var cnum_wargs = C.uint(num_wargs)
 
-	var cargv **C.char // XXX NEED TO BE MADE WORKING
+	var cargv = convertIt_XtString(argv)
 	c_fallbackResources := C.XtNewString(C.CString(""))
 	shell := C.XtAppInitialize(&ctx.appContext, c_appClass, options.optionDescList, cnum_options,
 		&cargc, cargv, &c_fallbackResources, (*C.struct___1)(unsafe.Pointer(wargs.argList)), cnum_wargs)
