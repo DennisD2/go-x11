@@ -35,18 +35,14 @@ func main() {
 
 	/* Create a Motif XmLabel widget to display the string */
 	/* C.XmNlabelString, xmstr, */
-	var wargc C.uint = 1
 	var wargs C.Arg
 	//C.XtSetArg(wargs[0], C.XmNlabelString, "hehe test")
 	wargs.name = C.XmNlabelString
 	wargs.value = convertIt(xmstr)
 
-	/*msg := */
-	C.XtCreateManagedWidget(C.CString("message"),
-		C.xmLabelWidgetClass, shell.widget,
-		&wargs,
-		wargc)
-	//fmt.Printf("%x\n", msg)
+	msg := CreateManagedWidget("message",
+		C.xmLabelWidgetClass, shell, (C.ArgList)(unsafe.Pointer(&wargs)), 1)
+	_ = msg
 
 	C.XmStringFree(xmstr) /* Free the compound string */
 
@@ -54,8 +50,8 @@ func main() {
 	 * Realize the shell and enter an event loop.
 	 */
 	C.hello1()
-	C.XtRealizeWidget(shell.widget)
-	C.XtAppMainLoop(ctx.appContext)
+	RealizeWidget(shell)
+	AppMainLoop(ctx)
 
 	C.hello1()
 }

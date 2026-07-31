@@ -63,3 +63,25 @@ func AppInitialize(ctx *AppContext, appClass string, options OptionDescList, num
 	r.widget = shell
 	return *r
 }
+
+func CreateManagedWidget(name string, widgetClass C.WidgetClass, parent Widget, args C.ArgList, num_args int) Widget {
+	c_name := C.CString(name)
+	defer C.free(unsafe.Pointer(c_name))
+
+	var cnum_args = C.uint(num_args)
+	
+	widget := C.XtCreateManagedWidget(c_name, widgetClass, parent.widget,
+		(*C.struct___1)(unsafe.Pointer(args)), cnum_args)
+
+	r := new(Widget)
+	r.widget = widget
+	return *r
+}
+
+func RealizeWidget(w Widget) {
+	C.XtRealizeWidget(w.widget)
+}
+
+func AppMainLoop(ctx *AppContext) {
+	C.XtAppMainLoop(ctx.appContext)
+}
