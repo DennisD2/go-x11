@@ -145,12 +145,6 @@ var XmN_Strings = map[XmN_StringID]*C.char{
 	// many more strings will come here in future
 }
 
-func CreateArgList() ArgList {
-	// Initialize an empty ArgList (nil pointer). Caller may pass this to
-	// AddArgListLabelString which returns a newly allocated Arg array.
-	return ArgList{ArgList: nil}
-}
-
 // AddArgListLabelString allocates an Arg array with a single (name, XmString) pair.
 // Returns pointer to the Arg array and the count (1). Caller must call FreeArgList.
 // AddArgListLabelString allocates an Arg array with a single (name, XmString) pair.
