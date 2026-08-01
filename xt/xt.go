@@ -46,20 +46,20 @@ func convertIt_XtString(in []string) **C.char {
 	return &ret[0]
 }
 
-func AppInitialize(ctx *AppContext, appClass string, options OptionDescList, num_options int,
-	argc *int, argv []string, fallbackResources string, wargs *ArgList, num_wargs int) Widget {
+func AppInitialize(appContext *AppContext, appClass string, options OptionDescList, numOptions int,
+	argc *int, argv []string, fallbackResources string, wargs *ArgList, numWargs int) Widget {
 
 	c_appClass := C.CString(appClass)
 	defer C.free(unsafe.Pointer(c_appClass))
 
-	var cnum_options = C.uint(num_options)
+	var cnumOptions = C.uint(numOptions)
 	var cargc = C.int(*argc)
-	var cnum_wargs = C.uint(num_wargs)
+	var cnumWargs = C.uint(numWargs)
 
 	var cargv = convertIt_XtString(argv)
 	c_fallbackResources := C.XtNewString(C.CString(""))
-	shell := C.XtAppInitialize(&ctx.AppContext, c_appClass, options.OptionDescList, cnum_options,
-		&cargc, cargv, &c_fallbackResources, (*C.struct___0)(unsafe.Pointer(wargs.ArgList)), cnum_wargs)
+	shell := C.XtAppInitialize(&appContext.AppContext, c_appClass, options.OptionDescList, cnumOptions,
+		&cargc, cargv, &c_fallbackResources, (*C.struct___0)(unsafe.Pointer(wargs.ArgList)), cnumWargs)
 
 	r := new(Widget)
 	r.Widget = shell
