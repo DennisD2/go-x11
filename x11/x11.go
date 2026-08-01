@@ -178,17 +178,19 @@ var XmN_Strings = map[XmN_StringID]*C.char{
 	// many more strings will come here in future
 }
 
-// AppendArgList allocates an Arg array with a single (name, XtArgVal) pair.
-// Returns an ArgList object containing the allocated C array and the count (1).
+// EmptyArgList creates an empty ArgList
 // Caller must call FreeArgList when done.
-func CreateArgList() *ArgList {
+func EmptyArgList() *ArgList {
 	return &ArgList{ArgList: nil, Size: 0}
 }
 
 // AppendArgList appends a (name, value) pair to an existing ArgList.
-// If argList.ArgList is nil and count==0 this behaves like AddArgListLabelString.
-// Returns the updated ArgList and the new count. Caller must call FreeArgList when done.
-func AppendArgList(argList ArgList, nameId XmN_StringID, value XtArgVal) (*ArgList, int) {
+// If argList.ArgList is nil a new ArgList is created on-the-fly.
+// Returns the updated ArgList. Caller must call FreeArgList when done.
+func AppendArgList(argList *ArgList, nameId XmN_StringID, value XtArgVal) *ArgList {
+	if argList == nil {
+		argList = EmptyArgList()
+	}
 	newCount := argList.Size + 1 // read current size and add 1
 	argSize := unsafe.Sizeof(C.Arg{})
 	total := C.size_t(uintptr(argSize) * uintptr(newCount))
@@ -200,14 +202,14 @@ func AppendArgList(argList ArgList, nameId XmN_StringID, value XtArgVal) (*ArgLi
 	}
 	if p == nil {
 		// allocation failed; return original
-		return &argList, newCount
+		return argList
 	}
 	// compute pointer to the new element
 	elemPtr := unsafe.Pointer(uintptr(p) + uintptr(newCount-1)*argSize)
 	carg := (*C.Arg)(elemPtr)
 	carg.name = XmN_Strings[nameId]
 	carg.value = value.ArgVal
-	return &ArgList{ArgList: C.ArgList(p), Size: newCount}, newCount
+	return &ArgList{ArgList: C.ArgList(p), Size: newCount}
 }
 
 // ============================================================================
@@ -215,7 +217,7 @@ func AppendArgList(argList ArgList, nameId XmN_StringID, value XtArgVal) (*ArgLi
 // ============================================================================
 
 // FreeArgList frees memory allocated by AddArgListLabelString
-func FreeArgList(argList *ArgList, count int) {
+func FreeArgList(argList *ArgList) {
 	if argList.ArgList == nil {
 		return
 	}

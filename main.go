@@ -28,9 +28,7 @@ func main() {
 
 	/* Create a Motif XmLabel widget to display the string */
 	value := x11.XtArgValFromXmString(xmstr)
-	args := x11.CreateArgList()
-	var n int
-	args, n = x11.AppendArgList(*args, x11.XmNlabelString, value)
+	args := x11.AppendArgList(nil, x11.XmNlabelString, value)
 
 	widgetClass := x11.LabelWidgetClass()
 
@@ -38,7 +36,7 @@ func main() {
 	_ = msg // just to prevent 'unused msg'
 
 	x11.XmStringFree(xmstr) /* Free the compound string */
-	x11.FreeArgList(args, n)
+	x11.FreeArgList(args)
 
 	/*
 	 * Realize the shell and enter an event loop.
