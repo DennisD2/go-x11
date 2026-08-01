@@ -156,19 +156,36 @@ func CreateArgList() ArgList {
 // AddArgListLabelString allocates an Arg array with a single (name, XmString) pair.
 // Returns an ArgList object containing the allocated C array and the count (1).
 // Caller must call FreeArgList when done.
+// AddArgListLabelString allocates an Arg array with a single (name, XmString) pair.
+// Returns an ArgList object containing the allocated C array and the count (1).
+// Caller must call FreeArgList when done.
 func AddArgListLabelString(nameId XmN_StringID, value XmString) (ArgList, int) {
-	// allocate space for one Arg
-	size := C.size_t(unsafe.Sizeof(C.Arg{}))
-	p := C.malloc(size)
-	if p == nil {
-		return ArgList{ArgList: nil}, 0
+	return AppendArgListLabelString(ArgList{ArgList: nil}, 0, nameId, value)
+}
+
+// AppendArgListLabelString appends a (name, XmString) pair to an existing ArgList.
+// If argList.ArgList is nil and count==0 this behaves like AddArgListLabelString.
+// Returns the updated ArgList and the new count. Caller must call FreeArgList when done.
+func AppendArgListLabelString(argList ArgList, count int, nameId XmN_StringID, value XmString) (ArgList, int) {
+	newCount := count + 1
+	argSize := unsafe.Sizeof(C.Arg{})
+	total := C.size_t(uintptr(argSize) * uintptr(newCount))
+	var p unsafe.Pointer
+	if argList.ArgList == nil {
+		p = C.malloc(total)
+	} else {
+		p = C.realloc(unsafe.Pointer(argList.ArgList), total)
 	}
-	carg := (*C.Arg)(p)
-	// set name to the static C string for the given nameId
+	if p == nil {
+		// allocation failed; return original
+		return argList, count
+	}
+	// compute pointer to the new element
+	elemPtr := unsafe.Pointer(uintptr(p) + uintptr(count)*argSize)
+	carg := (*C.Arg)(elemPtr)
 	carg.name = XmN_Strings[nameId]
-	// set value by reinterpreting the XmString as an XtArgVal
 	carg.value = *(*C.XtArgVal)(unsafe.Pointer(&value.XmString))
-	return ArgList{ArgList: C.ArgList(carg)}, 1
+	return ArgList{ArgList: C.ArgList(p)}, newCount
 }
 
 // ============================================================================
