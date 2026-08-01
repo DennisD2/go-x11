@@ -20,7 +20,6 @@ func convertIt(in xm.XmString) C.XtArgVal {
 func main() {
 	C.hello1()
 
-	appClass := "AppClass"
 	var ctx = new(xt.AppContext)
 	var options = new(xt.OptionDescList)
 	var noptions = 0
@@ -30,14 +29,13 @@ func main() {
 	var argList = new(xt.ArgList)
 	var narglist = 0
 
-	shell := xt.AppInitialize(ctx, appClass, *options, noptions,
+	shell := xt.AppInitialize(ctx, "AppClass", *options, noptions,
 		&argc, argv, fallbackResources, argList, narglist)
 
 	/* Convert the first argument to the form expected by Motif */
 	xmstr := xm.StringCreateLtoR("hehe", unsafe.Pointer(C.XmFONTLIST_DEFAULT_TAG))
 
 	/* Create a Motif XmLabel widget to display the string */
-	/* C.XmNlabelString, xmstr, */
 	var wargs []C.Arg = make([]C.Arg, 1)
 	//C.XtSetArg(wargs[0], C.XmNlabelString, "hehe test")
 	wargs[0].name = C.XmNlabelString
