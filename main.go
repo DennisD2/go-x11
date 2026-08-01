@@ -4,7 +4,7 @@ package main
 import "C"
 
 import (
-	"go-xt/x11"
+	"go-x11/x11"
 )
 
 func main() {
