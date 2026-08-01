@@ -1,0 +1,52 @@
+name: Go build
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          # Install development libraries required for X11/Motif linking
+          sudo apt-get install -y build-essential libx11-dev libxt-dev libmotif-dev || true
+          # some runners may not have libmotif-dev; continue to allow diagnostics
+
+      - name: Cache Go build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Build
+        env:
+          CGO_ENABLED: '1'
+        run: |
+          go version
+          go env
+          go build -v ./...
+
+      - name: Run tests
+        if: success()
+        env:
+          CGO_ENABLED: '1'
+        run: |
+          go test -v ./...
