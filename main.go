@@ -9,8 +9,8 @@ import "C"
 import (
 	"unsafe"
 
-	"go-xt/xt"
 	"go-xt/xm"
+	"go-xt/xt"
 )
 
 func convertIt(in xm.XmString) C.XtArgVal {
@@ -38,14 +38,15 @@ func main() {
 
 	/* Create a Motif XmLabel widget to display the string */
 	/* C.XmNlabelString, xmstr, */
-	var wargs C.Arg
+	var wargs []C.Arg = make([]C.Arg, 1)
 	//C.XtSetArg(wargs[0], C.XmNlabelString, "hehe test")
-	wargs.name = C.XmNlabelString
-	wargs.value = convertIt(xmstr)
+	wargs[0].name = C.XmNlabelString
+	wargs[0].value = convertIt(xmstr)
 
-	msg := xt.CreateManagedWidget("message",
-		unsafe.Pointer(C.xmLabelWidgetClass), shell, unsafe.Pointer(&wargs), 1)
-	_ = msg
+	widgetClass := xt.WidgetClass(unsafe.Pointer(C.xmLabelWidgetClass))
+
+	msg := xt.CreateManagedWidget("message", widgetClass, shell, unsafe.Pointer(&wargs[0]), 1)
+	_ = msg // just to prevent 'unused msg'
 
 	xm.StringFree(xmstr) /* Free the compound string */
 

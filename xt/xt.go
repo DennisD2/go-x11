@@ -31,9 +31,11 @@ type _XtString struct {
 	_XtString *C._XtString
 }
 
-func convertIt_ArgList(in *ArgList) C.ArgList {
+type WidgetClass unsafe.Pointer
+
+/*func convertIt_ArgList(in *ArgList) C.ArgList {
 	return in.ArgList
-}
+}*/
 
 func convertIt_XtString(in []string) **C.char {
 	if len(in) == 0 {
@@ -66,13 +68,14 @@ func AppInitialize(appContext *AppContext, appClass string, options OptionDescLi
 	return *r
 }
 
-func CreateManagedWidget(name string, widgetClass unsafe.Pointer, parent Widget, args unsafe.Pointer, num_args int) Widget {
+func CreateManagedWidget(name string, widgetClass WidgetClass, parent Widget,
+	args unsafe.Pointer, num_args int) Widget {
 	c_name := C.CString(name)
 	defer C.free(unsafe.Pointer(c_name))
 
 	var cnum_args = C.uint(num_args)
 
-	widget := C.XtCreateManagedWidget(c_name, (*C.struct__WidgetClassRec)(widgetClass),
+	widget := C.XtCreateManagedWidget(c_name, (*C.struct__WidgetClassRec)(unsafe.Pointer(widgetClass)),
 		parent.Widget, (*C.struct___0)(args), cnum_args)
 
 	r := new(Widget)
