@@ -83,14 +83,21 @@ func AppInitialize(appContext *AppContext, appClass string, options OptionDescLi
 }
 
 // CreateManagedWidget creates a managed Xt widget
-func CreateManagedWidget(name string, widgetClass WidgetClass, parent Widget, args unsafe.Pointer, num_args int) Widget {
+func CreateManagedWidget(name string, widgetClass WidgetClass, parent Widget, args ArgList, num_args int) Widget {
 	c_name := C.CString(name)
 	defer C.free(unsafe.Pointer(c_name))
 
 	var cnum_args = C.uint(num_args)
 
+	var cargs *C.struct___0
+	if args.ArgList != nil {
+		cargs = (*C.struct___0)(unsafe.Pointer(args.ArgList))
+	} else {
+		cargs = nil
+	}
+
 	widget := C.XtCreateManagedWidget(c_name, (*C.struct__WidgetClassRec)(unsafe.Pointer(widgetClass)),
-		parent.Widget, (*C.struct___0)(args), cnum_args)
+		parent.Widget, cargs, cnum_args)
 
 	return Widget{Widget: widget}
 }
@@ -146,31 +153,34 @@ func CreateArgList() ArgList {
 
 // AddArgListLabelString allocates an Arg array with a single (name, XmString) pair.
 // Returns pointer to the Arg array and the count (1). Caller must call FreeArgList.
-func AddArgListLabelString(argList *ArgList, nameId XmN_StringID, value XmString) (unsafe.Pointer, int) {
+// AddArgListLabelString allocates an Arg array with a single (name, XmString) pair.
+// Returns an ArgList object containing the allocated C array and the count (1).
+// Caller must call FreeArgList when done.
+func AddArgListLabelString(nameId XmN_StringID, value XmString) (ArgList, int) {
 	// allocate space for one Arg
 	size := C.size_t(unsafe.Sizeof(C.Arg{}))
 	p := C.malloc(size)
 	if p == nil {
-		return nil, 0
+		return ArgList{ArgList: nil}, 0
 	}
 	carg := (*C.Arg)(p)
 	// set name to the static C string for the given nameId
 	carg.name = XmN_Strings[nameId]
 	// set value by reinterpreting the XmString as an XtArgVal
 	carg.value = *(*C.XtArgVal)(unsafe.Pointer(&value.XmString))
-	return unsafe.Pointer(carg), 1
+	return ArgList{ArgList: C.ArgList(carg)}, 1
 }
 
 // ============================================================================
 // Arg List Helpers
 // ============================================================================
 
-// FreeArgList frees memory allocated by NewArgListLabelString
-func FreeArgList(p unsafe.Pointer, count int) {
-	if p == nil {
+// FreeArgList frees memory allocated by AddArgListLabelString
+func FreeArgList(argList ArgList, count int) {
+	if argList.ArgList == nil {
 		return
 	}
-	C.free(p)
+	C.free(unsafe.Pointer(argList.ArgList))
 }
 
 // ============================================================================
