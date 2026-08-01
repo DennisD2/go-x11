@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	x11.Hello()
+	x11.WrapperInfo()
 
 	var ctx = new(x11.AppContext)
 	var options = new(x11.OptionDescList)
@@ -40,9 +40,7 @@ func main() {
 	/*
 	 * Realize the shell and enter an event loop.
 	 */
-	x11.Hello()
 	x11.RealizeWidget(shell)
 	x11.AppMainLoop(ctx)
 
-	x11.Hello()
 }

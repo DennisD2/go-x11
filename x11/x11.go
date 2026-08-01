@@ -5,7 +5,7 @@ package x11
 // #include <X11/Intrinsic.h>
 // #include <Xm/Xm.h>
 // #include <Xm/Label.h>
-// #include "hello.h"
+// #include "wrapperInfo.h"
 import "C"
 
 import (
@@ -155,6 +155,6 @@ func FreeArgList(p unsafe.Pointer, count int) {
 // ============================================================================
 
 // Hello calls the C hello1() function (for testing)
-func Hello() {
-	C.hello1()
+func WrapperInfo() {
+	C.wrapperInfo()
 }
