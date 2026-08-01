@@ -1,13 +1,15 @@
 package x11
 
+import "C"
+
 // #cgo CFLAGS: -std=c99 -Wno-incompatible-pointer-types
+// #cgo LDFLAGS: -lXt -lXm -lX11
 // #include <stdlib.h>
 // #include <X11/Intrinsic.h>
 // #include <Xm/Xm.h>
 // #include <Xm/Label.h>
-// #include "wrapperInfo.h"
+// #include "hello.h"
 import "C"
-
 import (
 	"unsafe"
 )
@@ -18,27 +20,27 @@ import (
 
 // Widget wraps C.Widget
 type Widget struct {
-	Widget C.Widget
+	w C.Widget
 }
 
 // AppContext wraps C.XtAppContext
 type AppContext struct {
-	AppContext C.XtAppContext
+	ctx C.XtAppContext
 }
 
 // OptionDescList wraps C.XrmOptionDescList
 type OptionDescList struct {
-	OptionDescList C.XrmOptionDescList
+	opts C.XrmOptionDescList
 }
 
 // ArgList wraps C.ArgList (kept for AppInitialize compatibility)
 type ArgList struct {
-	ArgList C.ArgList
+	args C.ArgList
 }
 
 // XmString wraps C.XmString (Motif compound string)
 type XmString struct {
-	XmString C.XmString
+	s C.XmString
 }
 
 // WidgetClass is an opaque handle to a widget class
@@ -75,11 +77,11 @@ func AppInitialize(appContext *AppContext, appClass string, options OptionDescLi
 		cargv = nil
 	}
 
-	var c_fallbackResources = C.XtNewString(C.CString(""))
-	shell := C.XtAppInitialize(&appContext.AppContext, c_appClass, options.OptionDescList, cnumOptions,
-		&cargc, cargv, &c_fallbackResources, (*C.struct___0)(unsafe.Pointer(wargs.ArgList)), cnumWargs)
+	c_fallbackResources := C.XtNewString(C.CString(""))
+	shell := C.XtAppInitialize(&appContext.ctx, c_appClass, options.opts, cnumOptions,
+		&cargc, cargv, &c_fallbackResources, (*C.struct___0)(unsafe.Pointer(wargs.args)), cnumWargs)
 
-	return Widget{Widget: shell}
+	return Widget{w: shell}
 }
 
 // CreateManagedWidget creates a managed Xt widget
@@ -90,19 +92,19 @@ func CreateManagedWidget(name string, widgetClass WidgetClass, parent Widget, ar
 	var cnum_args = C.uint(num_args)
 
 	widget := C.XtCreateManagedWidget(c_name, (*C.struct__WidgetClassRec)(unsafe.Pointer(widgetClass)),
-		parent.Widget, (*C.struct___0)(args), cnum_args)
+		parent.w, (*C.struct___0)(args), cnum_args)
 
-	return Widget{Widget: widget}
+	return Widget{w: widget}
 }
 
 // RealizeWidget makes a widget visible
 func RealizeWidget(w Widget) {
-	C.XtRealizeWidget(w.Widget)
+	C.XtRealizeWidget(w.w)
 }
 
 // AppMainLoop enters the Xt event loop
 func AppMainLoop(ctx *AppContext) {
-	C.XtAppMainLoop(ctx.AppContext)
+	C.XtAppMainLoop(ctx.ctx)
 }
 
 // ============================================================================
@@ -114,56 +116,37 @@ func XmStringCreateLtoR(text string) XmString {
 	c_text := C.CString(text)
 	defer C.free(unsafe.Pointer(c_text))
 	xmstr := C.XmStringCreateLtoR(c_text, C.XmFONTLIST_DEFAULT_TAG)
-	return XmString{XmString: xmstr}
+	return XmString{s: xmstr}
 }
 
 // XmStringFree frees an XmString
 func XmStringFree(s XmString) {
-	C.XmStringFree(s.XmString)
+	C.XmStringFree(s.s)
 }
+
+// ============================================================================
+// Widget Class Accessors
+// ============================================================================
 
 // LabelWidgetClass returns the Xm Label widget class
 func LabelWidgetClass() WidgetClass {
 	return WidgetClass(unsafe.Pointer(C.xmLabelWidgetClass))
 }
 
-type XmN_StringID int
-
-const (
-	XmNlabelString = 1
-)
-
-var XmN_Strings = map[XmN_StringID]*C.char{
-	XmNlabelString: C.XmNlabelString,
-	// many more strings will come here in future
-}
-
-func CreateArgList() ArgList {
-	// Initialize an empty ArgList (nil pointer). Caller may pass this to
-	// AddArgListLabelString which returns a newly allocated Arg array.
-	return ArgList{ArgList: nil}
-}
-
-// AddArgListLabelString allocates an Arg array with a single (name, XmString) pair.
-// Returns pointer to the Arg array and the count (1). Caller must call FreeArgList.
-func AddArgListLabelString(argList *ArgList, nameId XmN_StringID, value XmString) (unsafe.Pointer, int) {
-	// allocate space for one Arg
-	size := C.size_t(unsafe.Sizeof(C.Arg{}))
-	p := C.malloc(size)
-	if p == nil {
-		return nil, 0
-	}
-	carg := (*C.Arg)(p)
-	// set name to the static C string for the given nameId
-	carg.name = XmN_Strings[nameId]
-	// set value by reinterpreting the XmString as an XtArgVal
-	carg.value = *(*C.XtArgVal)(unsafe.Pointer(&value.XmString))
-	return unsafe.Pointer(carg), 1
-}
-
 // ============================================================================
 // Arg List Helpers
 // ============================================================================
+
+// NewArgListLabelString allocates an Arg array for XmNlabelString with an XmString value
+func NewArgListLabelString(x XmString) (unsafe.Pointer, int) {
+	var n C.uint = 1
+	size := C.size_t(unsafe.Sizeof(C.Arg{})) * C.size_t(n)
+	p := C.malloc(size)
+	arg0 := (*C.Arg)(p)
+	arg0.name = C.XmNlabelString
+	arg0.value = *(*C.XtArgVal)(unsafe.Pointer(&x.s))
+	return p, int(n)
+}
 
 // FreeArgList frees memory allocated by NewArgListLabelString
 func FreeArgList(p unsafe.Pointer, count int) {
@@ -178,6 +161,6 @@ func FreeArgList(p unsafe.Pointer, count int) {
 // ============================================================================
 
 // Hello calls the C hello1() function (for testing)
-func WrapperInfo() {
-	C.wrapperInfo()
+func Hello() {
+	C.hello1()
 }
