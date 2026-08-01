@@ -41,6 +41,11 @@ type XmString struct {
 	XmString C.XmString
 }
 
+// XtArgVal wraps C.XtArgVal (generic argument value)
+type XtArgVal struct {
+	ArgVal C.XtArgVal
+}
+
 // WidgetClass is an opaque handle to a widget class
 type WidgetClass unsafe.Pointer
 
@@ -129,6 +134,11 @@ func XmStringFree(s XmString) {
 	C.XmStringFree(s.XmString)
 }
 
+// XtArgValFromXmString converts an XmString into an XtArgVal wrapper
+func XtArgValFromXmString(x XmString) XtArgVal {
+	return XtArgVal{ArgVal: *(*C.XtArgVal)(unsafe.Pointer(&x.XmString))}
+}
+
 // LabelWidgetClass returns the Xm Label widget class
 func LabelWidgetClass() WidgetClass {
 	return WidgetClass(unsafe.Pointer(C.xmLabelWidgetClass))
@@ -153,14 +163,14 @@ var XmN_Strings = map[XmN_StringID]*C.char{
 // AddArgListLabelString allocates an Arg array with a single (name, XmString) pair.
 // Returns an ArgList object containing the allocated C array and the count (1).
 // Caller must call FreeArgList when done.
-func AddArgListLabelString(nameId XmN_StringID, value XmString) (ArgList, int) {
-	return AppendArgListLabelString(ArgList{ArgList: nil}, 0, nameId, value)
+func AddArgListLabelString(nameId XmN_StringID, value XtArgVal) (ArgList, int) {
+	return AppendArgList(ArgList{ArgList: nil}, 0, nameId, value)
 }
 
-// AppendArgListLabelString appends a (name, XmString) pair to an existing ArgList.
+// AppendArgList appends a (name, value) pair to an existing ArgList.
 // If argList.ArgList is nil and count==0 this behaves like AddArgListLabelString.
 // Returns the updated ArgList and the new count. Caller must call FreeArgList when done.
-func AppendArgListLabelString(argList ArgList, count int, nameId XmN_StringID, value XmString) (ArgList, int) {
+func AppendArgList(argList ArgList, count int, nameId XmN_StringID, value XtArgVal) (ArgList, int) {
 	newCount := count + 1
 	argSize := unsafe.Sizeof(C.Arg{})
 	total := C.size_t(uintptr(argSize) * uintptr(newCount))
@@ -178,7 +188,7 @@ func AppendArgListLabelString(argList ArgList, count int, nameId XmN_StringID, v
 	elemPtr := unsafe.Pointer(uintptr(p) + uintptr(count)*argSize)
 	carg := (*C.Arg)(elemPtr)
 	carg.name = XmN_Strings[nameId]
-	carg.value = *(*C.XtArgVal)(unsafe.Pointer(&value.XmString))
+	carg.value = value.ArgVal
 	return ArgList{ArgList: C.ArgList(p)}, newCount
 }
 

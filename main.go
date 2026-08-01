@@ -27,7 +27,8 @@ func main() {
 	xmstr := x11.XmStringCreateLtoR("hehe")
 
 	/* Create a Motif XmLabel widget to display the string */
-	args, n := x11.AddArgListLabelString(x11.XmNlabelString, xmstr)
+	argval := x11.XtArgValFromXmString(xmstr)
+	args, n := x11.AddArgListLabelString(x11.XmNlabelString, argval)
 
 	widgetClass := x11.LabelWidgetClass()
 
