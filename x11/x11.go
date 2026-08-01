@@ -139,6 +139,27 @@ func XtArgValFromXmString(x XmString) XtArgVal {
 	return XtArgVal{ArgVal: *(*C.XtArgVal)(unsafe.Pointer(&x.XmString))}
 }
 
+// XtArgValFromInt converts a Go int into an XtArgVal wrapper.
+func XtArgValFromInt(i int) XtArgVal {
+	ci := C.long(i)
+	return XtArgVal{ArgVal: *(*C.XtArgVal)(unsafe.Pointer(&ci))}
+}
+
+// XtArgValFromString converts a Go string into an XtArgVal that holds a C string pointer.
+// The returned value owns the C string memory; free it with XtArgValFreeString when done.
+func XtArgValFromString(s string) XtArgVal {
+	cs := C.CString(s)
+	return XtArgVal{ArgVal: *(*C.XtArgVal)(unsafe.Pointer(&cs))}
+}
+
+// XtArgValFreeString frees a C string previously created by XtArgValFromString.
+func XtArgValFreeString(v XtArgVal) {
+	if v.ArgVal == 0 {
+		return
+	}
+	C.free(unsafe.Pointer(uintptr(v.ArgVal)))
+}
+
 // LabelWidgetClass returns the Xm Label widget class
 func LabelWidgetClass() WidgetClass {
 	return WidgetClass(unsafe.Pointer(C.xmLabelWidgetClass))
