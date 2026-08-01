@@ -21,10 +21,10 @@ jobs:
 
       - name: Install system dependencies
         run: |
+          set -e
           sudo apt-get update
           # Install development libraries required for X11/Motif linking
-          sudo apt-get install -y build-essential libx11-dev libxt-dev libmotif-dev || true
-          # some runners may not have libmotif-dev; continue to allow diagnostics
+          sudo apt-get install -y --no-install-recommends build-essential libx11-dev libxt-dev libmotif-dev
 
       - name: Cache Go build
         uses: actions/cache@v4
