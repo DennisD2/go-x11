@@ -27,12 +27,14 @@ func main() {
 	xmstr := x11.XmStringCreateLtoR("hehe")
 
 	/* Create a Motif XmLabel widget to display the string */
-	argval := x11.XtArgValFromXmString(xmstr)
-	args, n := x11.AddArgListLabelString(x11.XmNlabelString, argval)
+	value := x11.XtArgValFromXmString(xmstr)
+	args := x11.CreateArgList()
+	var n int
+	args, n = x11.AppendArgList(*args, x11.XmNlabelString, value)
 
 	widgetClass := x11.LabelWidgetClass()
 
-	msg := x11.CreateManagedWidget("message", widgetClass, shell, args, n)
+	msg := x11.CreateManagedWidget("message", widgetClass, shell, args, args.Size)
 	_ = msg // just to prevent 'unused msg'
 
 	x11.XmStringFree(xmstr) /* Free the compound string */

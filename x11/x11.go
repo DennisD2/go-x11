@@ -35,6 +35,7 @@ type OptionDescList struct {
 // ArgList wraps C.ArgList (kept for AppInitialize compatibility)
 type ArgList struct {
 	ArgList C.ArgList
+	Size    int
 }
 
 // XmString wraps C.XmString (Motif compound string)
@@ -89,7 +90,7 @@ func AppInitialize(appContext *AppContext, appClass string, options OptionDescLi
 }
 
 // CreateManagedWidget creates a managed Xt widget
-func CreateManagedWidget(name string, widgetClass WidgetClass, parent Widget, args ArgList, num_args int) Widget {
+func CreateManagedWidget(name string, widgetClass WidgetClass, parent Widget, args *ArgList, num_args int) Widget {
 	c_name := C.CString(name)
 	defer C.free(unsafe.Pointer(c_name))
 
@@ -177,23 +178,18 @@ var XmN_Strings = map[XmN_StringID]*C.char{
 	// many more strings will come here in future
 }
 
-// AddArgListLabelString allocates an Arg array with a single (name, XmString) pair.
-// Returns pointer to the Arg array and the count (1). Caller must call FreeArgList.
-// AddArgListLabelString allocates an Arg array with a single (name, XmString) pair.
+// AppendArgList allocates an Arg array with a single (name, XtArgVal) pair.
 // Returns an ArgList object containing the allocated C array and the count (1).
 // Caller must call FreeArgList when done.
-// AddArgListLabelString allocates an Arg array with a single (name, XmString) pair.
-// Returns an ArgList object containing the allocated C array and the count (1).
-// Caller must call FreeArgList when done.
-func AddArgListLabelString(nameId XmN_StringID, value XtArgVal) (ArgList, int) {
-	return AppendArgList(ArgList{ArgList: nil}, 0, nameId, value)
+func CreateArgList() *ArgList {
+	return &ArgList{ArgList: nil, Size: 0}
 }
 
 // AppendArgList appends a (name, value) pair to an existing ArgList.
 // If argList.ArgList is nil and count==0 this behaves like AddArgListLabelString.
 // Returns the updated ArgList and the new count. Caller must call FreeArgList when done.
-func AppendArgList(argList ArgList, count int, nameId XmN_StringID, value XtArgVal) (ArgList, int) {
-	newCount := count + 1
+func AppendArgList(argList ArgList, nameId XmN_StringID, value XtArgVal) (*ArgList, int) {
+	newCount := argList.Size + 1 // read current size and add 1
 	argSize := unsafe.Sizeof(C.Arg{})
 	total := C.size_t(uintptr(argSize) * uintptr(newCount))
 	var p unsafe.Pointer
@@ -204,14 +200,14 @@ func AppendArgList(argList ArgList, count int, nameId XmN_StringID, value XtArgV
 	}
 	if p == nil {
 		// allocation failed; return original
-		return argList, count
+		return &argList, newCount
 	}
 	// compute pointer to the new element
-	elemPtr := unsafe.Pointer(uintptr(p) + uintptr(count)*argSize)
+	elemPtr := unsafe.Pointer(uintptr(p) + uintptr(newCount-1)*argSize)
 	carg := (*C.Arg)(elemPtr)
 	carg.name = XmN_Strings[nameId]
 	carg.value = value.ArgVal
-	return ArgList{ArgList: C.ArgList(p)}, newCount
+	return &ArgList{ArgList: C.ArgList(p), Size: newCount}, newCount
 }
 
 // ============================================================================
@@ -219,7 +215,7 @@ func AppendArgList(argList ArgList, count int, nameId XmN_StringID, value XtArgV
 // ============================================================================
 
 // FreeArgList frees memory allocated by AddArgListLabelString
-func FreeArgList(argList ArgList, count int) {
+func FreeArgList(argList *ArgList, count int) {
 	if argList.ArgList == nil {
 		return
 	}
