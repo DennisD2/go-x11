@@ -1,10 +1,6 @@
 package main
 
 // #cgo LDFLAGS: -lXm -lXt -lX11
-// #include <X11/Intrinsic.h>
-// #include <Xm/Xm.h>          /* Required by all Motif applications */
-// #include <Xm/Label.h>       /* Required by XmLabel widget */
-// #include "x11/hello.h"
 import "C"
 
 import (
