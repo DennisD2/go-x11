@@ -21,7 +21,6 @@ func main() {
 
 	shell := x11.AppInitialize(ctx, "AppClass", *options, noptions,
 		&argc, argv, fallbackResources, argList, narglist)
-	_ = shell
 
 	/* Convert the first argument to the form expected by Motif */
 	xmstr := x11.XmStringCreateLtoR("hehe")
@@ -33,7 +32,7 @@ func main() {
 	widgetClass := x11.LabelWidgetClass()
 
 	msg := x11.CreateManagedWidget("message", widgetClass, shell, args, args.Size)
-	_ = msg // just to prevent 'unused msg'
+	_ = msg
 
 	x11.XmStringFree(xmstr) /* Free the compound string */
 	x11.FreeArgList(args)
