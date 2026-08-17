@@ -85,8 +85,6 @@ import "C"
 // ============================================================================
 
 // String defines
-// var XtNWidth = C.GoString(C.XtNwidth)
-// var XtNHeight = C.GoString(C.XtNheight)
 var XtNaccelerators = C.GoString(C.XtNaccelerators)
 var XtNallowHoriz = C.GoString(C.XtNallowHoriz)
 var XtNallowVert = C.GoString(C.XtNallowVert)
