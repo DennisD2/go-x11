@@ -1,8 +1,11 @@
+
+#include <X11/Intrinsic.h>
+#include <Xm/Xm.h>
+
 // options: void* -> XrmOptionDescList
 // argv_in_out: void* -> String*
 // fallback_resources: void* -> String*
 // args: void* -> ArgList
-
 extern Widget call_XtAppInitialize(
     XtAppContext *app_context_return,
     char *application_class,
