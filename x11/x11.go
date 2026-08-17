@@ -56,7 +56,7 @@ type WidgetClass unsafe.Pointer
 // ============================================================================
 
 // AppInitialize initializes an Xt application
-func AppInitialize(appContext *AppContext, appClass string, options OptionDescList, numOptions int,
+func AppInitialize(appContext *AppContext, appClass string, options *OptionDescList, numOptions int,
 	argc *int, argv []string, fallbackResources string, wargs *ArgList, numWargs int) Widget {
 
 	c_appClass := C.CString(appClass)

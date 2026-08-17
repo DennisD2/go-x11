@@ -19,7 +19,7 @@ func main() {
 	var argList = new(x11.ArgList)
 	var narglist = 0
 
-	shell := x11.AppInitialize(ctx, "AppClass", *options, noptions,
+	shell := x11.AppInitialize(ctx, "AppClass", options, noptions,
 		&argc, argv, fallbackResources, argList, narglist)
 
 	/* Convert the first argument to the form expected by Motif */
