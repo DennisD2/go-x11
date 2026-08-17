@@ -30,8 +30,8 @@ func main() {
 
 	/* define some args */
 	args := x11.AppendArgList(nil, x11.XmNlabelString, x11.XtArgValFromXmString(xmStr))
-	args = x11.AppendArgList(args, x11.XtNWidth, 400)
-	args = x11.AppendArgList(args, x11.XtNHeight, 200)
+	args = x11.AppendArgList(args, x11.XtNwidth, 400)
+	args = x11.AppendArgList(args, x11.XtNheight, 200)
 	/* Create a Motif XmLabel widget to display the string */
 	widgetClass := x11.PushButtonWidgetClass() // x11.LabelWidgetClass()
 	msg := x11.CreateManagedWidget("message", widgetClass, shell, args)
