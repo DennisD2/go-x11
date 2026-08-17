@@ -181,7 +181,7 @@ var XtNshells = C.GoString(C.XtNshells)
 var XtNnumShells = C.GoString(C.XtNnumShells)
 
 // Wrapper types
-type AppContext struct{ ctx C.XtAppContext }
+type XtAppContext struct{ ctx C.XtAppContext }
 type Widget struct{ w C.Widget }
 type WidgetClass struct{ c C.WidgetClass }
 
@@ -401,7 +401,7 @@ func WrapperInfo() {
 // Xt functions
 // ============================================================================
 func XtAppInitialize(
-	appContext *AppContext,
+	appContext *XtAppContext,
 	appClass string,
 	options []OptionDescRec,
 	goArgs []string,
@@ -491,8 +491,7 @@ func XtAppInitialize(
 	return Widget{w: cWidget}
 }
 
-// CreateManagedWidget creates a managed Xt widget
-func CreateManagedWidget(name string, widgetClass WidgetClass, parent Widget, args *ArgList) Widget {
+func XtCreateWidget(name string, widgetClass WidgetClass, parent Widget, args *ArgList) Widget {
 	cName := C.CString(name)
 	defer C.free(unsafe.Pointer(cName))
 
@@ -528,13 +527,24 @@ func CreateManagedWidget(name string, widgetClass WidgetClass, parent Widget, ar
 	return Widget{w: widget}
 }
 
+func ManageChild(w Widget) {
+	C.XtManageChild(w.w)
+}
+
+// CreateManagedWidget creates a managed Xt widget
+func XtCreateManagedWidget(name string, widgetClass WidgetClass, parent Widget, args *ArgList) Widget {
+	w := XtCreateWidget(name, widgetClass, parent, args)
+	C.XtManageChild(w.w)
+	return w
+}
+
 // RealizeWidget makes a widget visible
 func XtRealizeWidget(w Widget) {
 	C.XtRealizeWidget(w.w)
 }
 
 // AppMainLoop enters the Xt event loop
-func XtAppMainLoop(ctx *AppContext) {
+func XtAppMainLoop(ctx *XtAppContext) {
 	C.XtAppMainLoop(ctx.ctx)
 }
 

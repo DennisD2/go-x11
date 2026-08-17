@@ -9,7 +9,7 @@ import (
 func main() {
 	x11.WrapperInfo()
 
-	var appContext x11.AppContext
+	var appContext x11.XtAppContext
 
 	var options []x11.OptionDescRec
 	fallbacks := []string{""}
@@ -34,7 +34,7 @@ func main() {
 	args = x11.AppendArgList(args, x11.XtNheight, 200)
 	/* Create a Motif XmLabel widget to display the string */
 	widgetClass := x11.PushButtonWidgetClass() // x11.LabelWidgetClass()
-	msg := x11.CreateManagedWidget("message", widgetClass, shell, args)
+	msg := x11.XtCreateManagedWidget("message", widgetClass, shell, args)
 	_ = msg
 
 	x11.XmStringFree(xmStr) /* Free the compound string */
