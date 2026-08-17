@@ -3,9 +3,9 @@
 Work in progress.
 
 Idea is to offer all libX* functions and associated defines+structures+whatever in a single package called "x11".
-Parameter names, meaningw and return values should be as close to the original C API to make it possible to
-use existing documents (e.g. *The definitive guides to the XWindow system*) to develop.
-The Go code (here: main.c) does not need to use "C" go module, unsafe pointers and such. From the user side, everything
+Parameter names, meanings and return values should be as close to the original C API to make it possible to
+use existing documents (e.g. *The definitive guides to the XWindow system*) and knowhow to develop.
+The Go code (example here: main.c) does not need to use "C" go module, unsafe pointers and such. From the user side, everything
 is clean Go code. Inside the x11 module, all these nasty conversion and casting things are encapsulated.
 This is the approach for the code.
 
