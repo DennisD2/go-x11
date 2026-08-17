@@ -1,1 +1,1 @@
-void wrapperInfo();
+extern void wrapperInfo();

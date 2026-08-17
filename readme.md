@@ -1,5 +1,9 @@
 ## go-x11 - Go Wrapper for X11 libraries
 
+Work in progress.
+
+## Internals
+
 Uses CGO to access C code.
 
 Analysis of created CGO wrapper code:
