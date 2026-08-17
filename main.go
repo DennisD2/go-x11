@@ -24,7 +24,7 @@ func main() {
 		initArgs,
 	)
 
-	/* Convert the first argument to the form expected by Motif */
+	/* Convert some string to the form expected by Motif */
 	xmStr := x11.XmStringCreateLtoR("please click me!")
 
 	/* define some args */
