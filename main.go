@@ -28,6 +28,7 @@ func main() {
 	/* Convert the first argument to the form expected by Motif */
 	xmStr := x11.XmStringCreateLtoR("hehe")
 
+	/* define some args */
 	args := x11.AppendArgList(nil, x11.XmNlabelString, x11.XtArgValFromXmString(xmStr))
 	args = x11.AppendArgList(args, x11.XtNWidth, 400)
 	args = x11.AppendArgList(args, x11.XtNHeight, 200)
@@ -38,8 +39,9 @@ func main() {
 
 	x11.XmStringFree(xmStr) /* Free the compound string */
 
+	/* add a callback */
 	x11.XtAddCallback(msg, x11.XmNactivateCallback, func() {
-		println("Button wurde angeklickt! Hier läuft nativer Go-Code!")
+		println("Button was selected! Pure Go code + X11 did this!")
 	})
 
 	x11.XtRealizeWidget(shell)
