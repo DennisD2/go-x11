@@ -11,11 +11,68 @@ import (
 #include <stdint.h>
 #include <stdlib.h>
 
+// Xt includes
 #include <X11/Intrinsic.h>
 
+// Xm includes
 #include <Xm/Xm.h>
-#include <Xm/Label.h>
-#include <Xm/PushB.h>
+#include "Xm/ArrowB.h"
+#include "Xm/ArrowBG.h"
+#include "Xm/BulletinB.h"
+#include "Xm/CascadeB.h"
+#include "Xm/CascadeBG.h"
+#include "Xm/ClipWindowP.h"
+#include "Xm/ComboBox.h"
+#include "Xm/Command.h"
+#include "Xm/DesktopP.h"
+#include "Xm/DialogS.h"
+#include "Xm/DialogSEP.h"
+#include "Xm/DragC.h"
+#include "Xm/DragIcon.h"
+#include "Xm/DrawingA.h"
+#include "Xm/DrawnB.h"
+#include "Xm/DropDown.h"
+#include "Xm/DropSMgr.h"
+#include "Xm/DropTrans.h"
+#include "Xm/Ext18List.h"
+#include "Xm/ExtObjectP.h"
+#include "Xm/FileSB.h"
+#include "Xm/Form.h"
+#include "Xm/Frame.h"
+#include "Xm/Gadget.h"
+#include "Xm/GrabShell.h"
+#include "Xm/Label.h"
+#include "Xm/LabelG.h"
+#include "Xm/List.h"
+#include "Xm/MainW.h"
+#include "Xm/Manager.h"
+#include "Xm/MenuShell.h"
+#include "Xm/MessageB.h"
+#include "Xm/MultiList.h"
+#include "Xm/Notebook.h"
+#include "Xm/PanedW.h"
+#include "Xm/Primitive.h"
+#include "Xm/Print.h"
+#include "Xm/ProtocolsP.h"
+#include "Xm/PushB.h"
+#include "Xm/PushBG.h"
+#include "Xm/RowColumn.h"
+#include "Xm/SSpinB.h"
+#include "Xm/SashP.h"
+#include "Xm/Scale.h"
+#include "Xm/ScrollBar.h"
+#include "Xm/ScrolledW.h"
+#include "Xm/SelectioB.h"
+#include "Xm/SeparatoG.h"
+#include "Xm/Separator.h"
+#include "Xm/ShellEP.h"
+#include "Xm/SpinB.h"
+#include "Xm/TearOffBP.h"
+#include "Xm/ToggleB.h"
+#include "Xm/ToggleBG.h"
+#include "Xm/VendorS.h"
+#include "Xm/VendorSEP.h"
+
 
 #include "cheader.h"
 #include "wrapperInfo.h"
@@ -67,12 +124,173 @@ type ArgList struct {
 // string defines
 var XmNlabelString = C.GoString(C.XmNlabelString)
 
-// LabelWidgetClass returns the Xm Label widget class
+func ArrowButtonWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmArrowButtonWidgetClass}
+}
+func ArrowButtonGadgetClass() WidgetClass {
+	return WidgetClass{c: C.xmArrowButtonGadgetClass}
+}
+func BulletinBoardWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmBulletinBoardWidgetClass}
+}
+func CascadeButtonWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmCascadeButtonWidgetClass}
+}
+func CascadeButtonGadgetClass() WidgetClass {
+	return WidgetClass{c: C.xmCascadeButtonGadgetClass}
+}
+func ClipWindowWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmClipWindowWidgetClass}
+}
+func ComboBoxWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmComboBoxWidgetClass}
+}
+func CommandWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmCommandWidgetClass}
+}
+func DesktopClass() WidgetClass {
+	return WidgetClass{c: C.xmDesktopClass}
+}
+func DialogShellWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmDialogShellWidgetClass}
+}
+func DialogShellExtObjectClass() WidgetClass {
+	return WidgetClass{c: C.xmDialogShellExtObjectClass}
+}
+func DragContextClass() WidgetClass {
+	return WidgetClass{c: C.xmDragContextClass}
+}
+func DragIconObjectClass() WidgetClass {
+	return WidgetClass{c: C.xmDragIconObjectClass}
+}
+func DrawingAreaWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmDrawingAreaWidgetClass}
+}
+func DrawnButtonWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmDrawnButtonWidgetClass}
+}
+func DropDownWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmDropDownWidgetClass}
+}
+func DropSiteManagerObjectClass() WidgetClass {
+	return WidgetClass{c: C.xmDropSiteManagerObjectClass}
+}
+func DropTransferObjectClass() WidgetClass {
+	return WidgetClass{c: C.xmDropTransferObjectClass}
+}
+func Ext18ListWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmExt18ListWidgetClass}
+}
+func ExtObjectClass() WidgetClass {
+	return WidgetClass{c: C.xmExtObjectClass}
+}
+func FileSelectionBoxWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmFileSelectionBoxWidgetClass}
+}
+func FormWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmFormWidgetClass}
+}
+func FrameWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmFrameWidgetClass}
+}
+func GadgetClass() WidgetClass {
+	return WidgetClass{c: C.xmGadgetClass}
+}
+func GrabShellWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmGrabShellWidgetClass}
+}
 func LabelWidgetClass() WidgetClass {
 	return WidgetClass{c: C.xmLabelWidgetClass}
 }
+func LabelGadgetClass() WidgetClass {
+	return WidgetClass{c: C.xmLabelGadgetClass}
+}
+func ListWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmListWidgetClass}
+}
+func MainWindowWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmMainWindowWidgetClass}
+}
+func ManagerWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmManagerWidgetClass}
+}
+func MenuShellWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmMenuShellWidgetClass}
+}
+func MessageBoxWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmMessageBoxWidgetClass}
+}
+func MultiListWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmMultiListWidgetClass}
+}
+func NotebookWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmNotebookWidgetClass}
+}
+func PanedWindowWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmPanedWindowWidgetClass}
+}
+func PrimitiveWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmPrimitiveWidgetClass}
+}
+func PrintShellWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmPrintShellWidgetClass}
+}
+func ProtocolObjectClass() WidgetClass {
+	return WidgetClass{c: C.xmProtocolObjectClass}
+}
 func PushButtonWidgetClass() WidgetClass {
 	return WidgetClass{c: C.xmPushButtonWidgetClass}
+}
+func PushButtonGadgetClass() WidgetClass {
+	return WidgetClass{c: C.xmPushButtonGadgetClass}
+}
+func RowColumnWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmRowColumnWidgetClass}
+}
+func SimpleSpinBoxWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmSimpleSpinBoxWidgetClass}
+}
+func SashWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmSashWidgetClass}
+}
+func ScaleWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmScaleWidgetClass}
+}
+func ScrollBarWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmScrollBarWidgetClass}
+}
+func ScrolledWindowWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmScrolledWindowWidgetClass}
+}
+func SelectionBoxWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmSelectionBoxWidgetClass}
+}
+func SeparatorGadgetClass() WidgetClass {
+	return WidgetClass{c: C.xmSeparatorGadgetClass}
+}
+func SeparatorWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmSeparatorWidgetClass}
+}
+func ShellExtObjectClass() WidgetClass {
+	return WidgetClass{c: C.xmShellExtObjectClass}
+}
+func SpinBoxWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmSpinBoxWidgetClass}
+}
+func TearOffButtonWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmTearOffButtonWidgetClass}
+}
+func ToggleButtonWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmToggleButtonWidgetClass}
+}
+func ToggleButtonGadgetClass() WidgetClass {
+	return WidgetClass{c: C.xmToggleButtonGadgetClass}
+}
+func vendorShellWidgetClass() WidgetClass {
+	return WidgetClass{c: C.vendorShellWidgetClass}
+}
+func VendorShellExtObjectClass() WidgetClass {
+	return WidgetClass{c: C.xmVendorShellExtObjectClass}
 }
 
 // XmString wraps C.XmString (Motif compound string)
