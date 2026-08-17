@@ -1,6 +1,5 @@
 package main
 
-import "C"
 import (
 	"go-x11/x11"
 	"os"
@@ -26,14 +25,14 @@ func main() {
 	)
 
 	/* Convert the first argument to the form expected by Motif */
-	xmStr := x11.XmStringCreateLtoR("hehe")
+	xmStr := x11.XmStringCreateLtoR("please click me!")
 
 	/* define some args */
 	args := x11.AppendArgList(nil, x11.XmNlabelString, x11.XtArgValFromXmString(xmStr))
 	args = x11.AppendArgList(args, x11.XtNwidth, 400)
 	args = x11.AppendArgList(args, x11.XtNheight, 200)
-	/* Create a Motif XmLabel widget to display the string */
-	widgetClass := x11.PushButtonWidgetClass() // x11.LabelWidgetClass()
+	/* Create a Motif widget to display the string */
+	widgetClass := x11.PushButtonWidgetClass() // or x11.LabelWidgetClass()
 	msg := x11.XtCreateManagedWidget("message", widgetClass, shell, args)
 	_ = msg
 
