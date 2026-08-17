@@ -10,7 +10,9 @@ import (
 #cgo LDFLAGS: -lXm -lXt -lX11
 #include <stdint.h>
 #include <stdlib.h>
+
 #include <X11/Intrinsic.h>
+
 #include <Xm/Xm.h>
 #include <Xm/Label.h>
 #include <Xm/PushB.h>
@@ -21,25 +23,25 @@ import (
 */
 import "C"
 
-var XmNlabelString = C.GoString(C.XmNlabelString)
+// ============================================================================
+// Xt definitions
+// ============================================================================
+
+// String defines
 var XtNWidth = C.GoString(C.XtNwidth)
 var XtNHeight = C.GoString(C.XtNheight)
 
-// LabelWidgetClass returns the Xm Label widget class
-func LabelWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmLabelWidgetClass}
-}
-
-func PushButtonWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmPushButtonWidgetClass}
-}
-
-// Wrapper-Typen
+// Wrapper types
 type AppContext struct{ ctx C.XtAppContext }
 type Widget struct{ w C.Widget }
-
 type WidgetClass struct{ c C.WidgetClass }
 
+// XtArgVal wraps C.XtArgVal (generic argument value)
+type XtArgVal struct {
+	ArgVal C.XtArgVal
+}
+
+// OptionDescRec Go structure
 type OptionDescRec struct {
 	Option    string
 	Specifier string
@@ -47,20 +49,30 @@ type OptionDescRec struct {
 	Value     string
 }
 
+// Arg Go structure
 type Arg struct {
 	Name  string
 	Value uintptr
 }
 
-// ArgList wraps C.ArgList
+// ArgList Go structure
 type ArgList struct {
 	Slice []Arg
 	Size  int // Ermöglicht den Aufruf 'args.Size' in main
 }
 
-// XtArgVal wraps C.XtArgVal (generic argument value)
-type XtArgVal struct {
-	ArgVal C.XtArgVal
+// ============================================================================
+// Xm definitions
+// ============================================================================
+// string defines
+var XmNlabelString = C.GoString(C.XmNlabelString)
+
+// LabelWidgetClass returns the Xm Label widget class
+func LabelWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmLabelWidgetClass}
+}
+func PushButtonWidgetClass() WidgetClass {
+	return WidgetClass{c: C.xmPushButtonWidgetClass}
 }
 
 // XmString wraps C.XmString (Motif compound string)
@@ -68,10 +80,16 @@ type XmString struct {
 	XmString C.XmString
 }
 
+// ============================================================================
+// Wrapper own definitions
+// ============================================================================
 func WrapperInfo() {
 	C.wrapperInfo()
 }
 
+// ============================================================================
+// Xt functions
+// ============================================================================
 func XtAppInitialize(
 	appContext *AppContext,
 	appClass string,
@@ -81,11 +99,11 @@ func XtAppInitialize(
 	args []Arg,
 ) Widget {
 
-	// 1. Anwendungsklasse
+	// handle appClass
 	cAppClass := C.CString(appClass)
 	defer C.free(unsafe.Pointer(cAppClass))
 
-	// 2. Options-Liste (C-Speicher)
+	// handle options
 	var cOptions unsafe.Pointer
 	numOptions := C.Cardinal(len(options))
 	if len(options) > 0 {
@@ -105,7 +123,7 @@ func XtAppInitialize(
 		}
 	}
 
-	// 3. Argument-Vektor (argc / argv) -> Geändert auf C.malloc wegen cgo-Pointer-Rules
+	// handle argc+argv
 	argc := C.int(len(goArgs))
 	// Wir allozieren das char** Array direkt im C-Speicher
 	cArgsPtr := C.malloc(C.size_t(len(goArgs)+1) * C.size_t(unsafe.Sizeof(uintptr(0))))
@@ -119,7 +137,7 @@ func XtAppInitialize(
 	}
 	cArgsArray[len(goArgs)] = nil // NULL-Terminierung am Ende
 
-	// 4. Fallback Resources -> Geändert auf C.malloc wegen cgo-Pointer-Rules
+	// handle fallbackResources
 	var cFallbacks unsafe.Pointer
 	if len(fallbackResources) > 0 {
 		cFallbacks = C.malloc(C.size_t(len(fallbackResources)+1) * C.size_t(unsafe.Sizeof(uintptr(0))))
@@ -133,7 +151,7 @@ func XtAppInitialize(
 		cFBArray[len(fallbackResources)] = nil // NULL-Terminierung
 	}
 
-	// 5. ArgList
+	// handle ArgList
 	var cArgsList unsafe.Pointer
 	numArgs := C.Cardinal(len(args))
 	if len(args) > 0 {
@@ -149,14 +167,14 @@ func XtAppInitialize(
 		cArgsList = cArgsSlice
 	}
 
-	// 6. Aufruf über unsere C-Hilfsfunktion (Jetzt absolut sicher vor GC-Verschiebungen)
+	// call Xt function via wrapper
 	cWidget := C.call_XtAppInitialize(
 		&appContext.ctx,
 		cAppClass,
 		cOptions, numOptions,
 		&argc,
-		cArgsPtr,   // Übergabe des reinen C-Speicher-Pointers
-		cFallbacks, // Übergabe des reinen C-Speicher-Pointers
+		cArgsPtr,
+		cFallbacks,
 		cArgsList, numArgs,
 	)
 
@@ -171,24 +189,24 @@ func CreateManagedWidget(name string, widgetClass WidgetClass, parent Widget, ar
 	var cArgsList unsafe.Pointer
 	var numArgs C.Cardinal = 0
 
-	// Wenn args nicht nil ist und Elemente enthält, konvertieren wir es für C
+	// convert args
 	if args != nil && len(args.Slice) > 0 {
 		numArgs = C.Cardinal(len(args.Slice))
 		cArgsSlice := C.malloc(C.size_t(len(args.Slice)) * C.sizeof_Arg)
 		defer C.free(cArgsSlice)
 
-		// Cast auf das temporäre C-Array
+		// casting to C array
 		cArgsArray := (*[1 << 20]C.Arg)(cArgsSlice)[:len(args.Slice):len(args.Slice)]
 		for i, arg := range args.Slice {
 			cArgsArray[i].name = C.CString(arg.Name)
 			cArgsArray[i].value = C.XtArgVal(arg.Value)
 
-			// Die C-Strings für die Namen müssen nach dem Xt-Aufruf wieder freigegeben werden
+			//  free these strings
 			defer C.free(unsafe.Pointer(cArgsArray[i].name))
 		}
 		cArgsList = cArgsSlice
 	}
-	// Aufruf über Ihren funktionierenden call_XtCreateManagedWidget Helper
+	// call Xt function via wrapper
 	widget := C.call_XtCreateManagedWidget(
 		cName,
 		widgetClass.c,
@@ -239,9 +257,6 @@ func XtArgValFreeString(v XtArgVal) {
 // AppendArgList appends a (name, value) pair to an existing ArgList.
 // If argList.ArgList is nil a new ArgList is created on-the-fly.
 // Returns the updated ArgList. Caller must call FreeArgList when done.
-
-// AppendArgList fügt ein neues Argument hinzu und gibt die aktualisierte Liste zurück.
-// Wenn die übergebene Liste nil ist, wird eine neue erstellt.
 func AppendArgList(list *ArgList, name string, value uintptr) *ArgList {
 	if list == nil {
 		list = &ArgList{
@@ -249,22 +264,22 @@ func AppendArgList(list *ArgList, name string, value uintptr) *ArgList {
 		}
 	}
 
-	// Neues Argument an das interne Slice anhängen
+	// append
 	list.Slice = append(list.Slice, Arg{
 		Name:  name,
 		Value: value,
 	})
 
-	// Size-Zähler für main aktualisieren
+	// update size counter
 	list.Size = len(list.Slice)
 
 	return list
 }
 
 // ============================================================================
-// callback code
+// Xt callback code
 // ============================================================================
-
+// string defines
 var XmNactivateCallback = C.GoString(C.XmNactivateCallback)
 
 var (
@@ -273,9 +288,11 @@ var (
 	nextCallbackID   uintptr = 1
 )
 
+// We need to make this function callable by C, so "export" keyword
+//
 //export goCallbackDispatcher
 func goCallbackDispatcher(w C.Widget, client_data C.XtPointer, call_data C.XtPointer) {
-	// Wir holen uns die ID zurück, die wir als client_data übergeben haben
+	// get ID
 	callbackID := uintptr(client_data)
 
 	callbackMutex.Lock()
@@ -283,24 +300,24 @@ func goCallbackDispatcher(w C.Widget, client_data C.XtPointer, call_data C.XtPoi
 	callbackMutex.Unlock()
 
 	if exists && goFunc != nil {
-		// Hier wird die originale Go-Funktion aus main ausgeführt!
+		// execute go function which serves as callback
 		goFunc()
 	}
 }
 
-// XtAddCallback registriert eine Go-Funktion für ein Widget-Event
+// XtAddCallback registers a Go-Funktion for a Widget-Event
 func XtAddCallback(widget Widget, callbackName string, goFunction func()) {
 	cName := C.CString(callbackName)
 	defer C.free(unsafe.Pointer(cName))
 
-	// Go-Funktion registrieren und ID generieren
+	// register Go-Funktion and create ID
 	callbackMutex.Lock()
 	id := nextCallbackID
 	callbackRegistry[id] = goFunction
 	nextCallbackID++
 	callbackMutex.Unlock()
 
-	// Aufruf unseres C-Helpers mit der ID
+	// call Xt function via wrapper
 	C.call_XtAddCallback(widget.w, cName, C.uintptr_t(id))
 }
 
