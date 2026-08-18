@@ -52,7 +52,7 @@ import (
 #include "Xm/Notebook.h"
 #include "Xm/PanedW.h"
 #include "Xm/Primitive.h"
-#include "Xm/Print.h"
+//#include "Xm/Print.h"
 #include "Xm/ProtocolsP.h"
 #include "Xm/PushB.h"
 #include "Xm/PushBG.h"
@@ -79,6 +79,12 @@ import (
 
 */
 import "C"
+
+// ============================================================================
+// X definitions
+// ============================================================================
+// Wrapper types
+type XEvent struct{ e C.XEvent }
 
 // ============================================================================
 // Xt definitions
@@ -324,9 +330,10 @@ func PanedWindowWidgetClass() WidgetClass {
 func PrimitiveWidgetClass() WidgetClass {
 	return WidgetClass{c: C.xmPrimitiveWidgetClass}
 }
-func PrintShellWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmPrintShellWidgetClass}
-}
+
+//	func PrintShellWidgetClass() WidgetClass {
+//		return WidgetClass{c: C.xmPrintShellWidgetClass}
+//	}
 func ProtocolObjectClass() WidgetClass {
 	return WidgetClass{c: C.xmProtocolObjectClass}
 }
@@ -400,6 +407,22 @@ func WrapperInfo() {
 // ============================================================================
 // Xt functions
 // ============================================================================
+
+func XtDispatchEvent(e *XEvent) {
+	cep := &(e.e)
+	C.XtDispatchEvent(cep)
+}
+
+func XtNextEvent(e *XEvent) {
+	cep := &(e.e)
+	C.XtNextEvent(cep)
+}
+
+func XtAppNextEvent(appContext XtAppContext, e *XEvent) {
+	cep := &(e.e)
+	C.XtAppNextEvent(appContext.ctx, cep)
+}
+
 func XtAppInitialize(
 	appContext *XtAppContext,
 	appClass string,
