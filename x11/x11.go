@@ -334,6 +334,7 @@ func PrimitiveWidgetClass() WidgetClass {
 //	func PrintShellWidgetClass() WidgetClass {
 //		return WidgetClass{c: C.xmPrintShellWidgetClass}
 //	}
+
 func ProtocolObjectClass() WidgetClass {
 	return WidgetClass{c: C.xmProtocolObjectClass}
 }
