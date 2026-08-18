@@ -61,10 +61,13 @@ Xt Functions:
 ## Xm - Motif
 Wrapper structs for:
 * XmString
+* XmStringCharset
 
 Xm Functions:
+* XmStringCreate
 * XmStringCreateLtoR
 * XmStringFree
+* XmStringConcat
 
 ## Misc. and helpers
 Xt Args handling helpers:
@@ -72,6 +75,10 @@ Xt Args handling helpers:
 * XtArgValFromInt
 * XtArgValFromString
 * XtArgValFreeString
+
+## From libXS (See Young's Book)
+* Xs_concat_words
+
 
 ## Try it
 in main.go, a single Motif widget is created, and a callback is appended to it.
