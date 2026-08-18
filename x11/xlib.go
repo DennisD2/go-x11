@@ -1,6 +1,7 @@
 package x11
 
-// Below is simngle place where we have CFLAGS and LDFLAGS located.
+/* Below is single place where we have CFLAGS and LDFLAGS located. */
+
 /* #cgo CFLAGS: -std=c99 -Wno-incompatible-pointer-types
 #cgo LDFLAGS: -lXm -lXt -lX11
 #include <stdint.h>

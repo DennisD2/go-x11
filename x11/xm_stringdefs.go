@@ -4,10 +4,6 @@ package x11
 #include <stdint.h>
 #include <stdlib.h>
 
-// Xt includes
-#include <X11/Intrinsic.h>
-#include <X11/Shell.h>
-
 // Xm includes
 #include <Xm/XmStrDefs.h>
 #include <Xm/Xm.h>
