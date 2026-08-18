@@ -1,7 +1,6 @@
 package x11
 
-/* #cgo CFLAGS: -std=c99 -Wno-incompatible-pointer-types
-#cgo LDFLAGS: -lXm -lXt -lX11
+/*
 #include <stdint.h>
 #include <stdlib.h>
 

@@ -1,13 +1,11 @@
 package x11
 
-import "C"
 import (
 	"sync"
 	"unsafe"
 )
 
-/* #cgo CFLAGS: -std=c99 -Wno-incompatible-pointer-types
-#cgo LDFLAGS: -lXm -lXt -lX11
+/*
 #include <stdint.h>
 #include <stdlib.h>
 
