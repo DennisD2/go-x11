@@ -1,11 +1,13 @@
 package x11
 
+// Execute tests via: "go test -v ./..."
+
 import "testing"
 
 func TestXmStringCreateLtoR(t *testing.T) {
 	text := "hello world"
 	xs := XmStringCreateLtoR(text, XmSTRING_DEFAULT_CHARSET)
-	if xs.XmString == nil {
+	if xs.s == nil {
 		t.Fatalf("XmStringCreateLtoR returned nil for %q", text)
 	}
 

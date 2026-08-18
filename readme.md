@@ -73,8 +73,11 @@ Xt Args handling helpers:
 * XtArgValFromString
 * XtArgValFreeString
 
-## Test it
+## Try it
 in main.go, a single Motif widget is created, and a callback is appended to it.
+
+## Tests
+Execute tests via: "go test -v ./..."
 
 ## Internals
 
