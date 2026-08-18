@@ -5,6 +5,15 @@
 
 // options: void* -> XrmOptionDescList
 // argv_in_out: void* -> String*
+extern Widget call_XtInitialize(
+    char *shell_name,
+    char *application_class,
+    void *options, Cardinal num_options,
+    int *argc_in_out, void *argv_in_out
+);
+
+// options: void* -> XrmOptionDescList
+// argv_in_out: void* -> String*
 // fallback_resources: void* -> String*
 // args: void* -> ArgList
 extern Widget call_XtAppInitialize(

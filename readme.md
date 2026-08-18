@@ -31,12 +31,16 @@ Go structs for:
 * XmString
 
 Xt Functions:
+* XtInitialize
 * XtAppInitialize
 * XtCreateWidget
 * XtCreateManagedWidget
 * XtRealizeWidget
 * XtAppMainLoop
 * XtAddCallback
+* XtDispatchEvent
+* XtNextEvent
+* XtAppNextEvent
 
 Xm Functions:
 * XmStringCreateLtoR

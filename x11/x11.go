@@ -424,11 +424,67 @@ func XtAppNextEvent(appContext XtAppContext, e *XEvent) {
 	C.XtAppNextEvent(appContext.ctx, cep)
 }
 
+func XtInitialize(
+	shellName string,
+	appClass string,
+	options []OptionDescRec,
+	argv []string,
+) Widget {
+	cAppClass := C.CString(appClass)
+	defer C.free(unsafe.Pointer(cAppClass))
+	cShellName := C.CString(shellName)
+	defer C.free(unsafe.Pointer(cShellName))
+
+	var cOptions unsafe.Pointer
+	numOptions := C.Cardinal(len(options))
+	if len(options) > 0 {
+		cOptions = C.malloc(C.size_t(len(options)) * C.sizeof_XrmOptionDescRec)
+		defer C.free(cOptions)
+
+		for i, opt := range options {
+			cOpt := C.CString(opt.Option)
+			cSpec := C.CString(opt.Specifier)
+			cVal := C.CString(opt.Value)
+
+			C.set_option_rec(cOptions, C.int(i), cOpt, cSpec, C.int(opt.Kind), cVal)
+
+			defer C.free(unsafe.Pointer(cOpt))
+			defer C.free(unsafe.Pointer(cSpec))
+			defer C.free(unsafe.Pointer(cVal))
+		}
+	}
+
+	// handle argc+argv
+	argc := C.int(len(argv))
+	// Wir allozieren das char** Array direkt im C-Speicher
+	cArgvPtr := C.malloc(C.size_t(len(argv)+1) * C.size_t(unsafe.Sizeof(uintptr(0))))
+	defer C.free(cArgvPtr)
+
+	// Cast auf ein bearbeitbares Go-Slice aus C-Pointern
+	cArgsArray := (*[1 << 20]*C.char)(cArgvPtr)[: len(argv)+1 : len(argv)+1]
+	for i, arg := range argv {
+		cArgsArray[i] = C.CString(arg)
+		defer C.free(unsafe.Pointer(cArgsArray[i]))
+	}
+	cArgsArray[len(argv)] = nil // NULL-Terminierung am Ende
+
+	// call Xt function via wrapper
+	cWidget := C.call_XtInitialize(
+		cShellName,
+		cAppClass,
+		cOptions, numOptions,
+		&argc,
+		cArgvPtr,
+	)
+
+	return Widget{w: cWidget}
+}
+
 func XtAppInitialize(
 	appContext *XtAppContext,
 	appClass string,
 	options []OptionDescRec,
-	goArgs []string,
+	argv []string,
 	fallbackResources []string,
 	args []Arg,
 ) Widget {
@@ -458,18 +514,18 @@ func XtAppInitialize(
 	}
 
 	// handle argc+argv
-	argc := C.int(len(goArgs))
+	argc := C.int(len(argv))
 	// Wir allozieren das char** Array direkt im C-Speicher
-	cArgsPtr := C.malloc(C.size_t(len(goArgs)+1) * C.size_t(unsafe.Sizeof(uintptr(0))))
-	defer C.free(cArgsPtr)
+	cArgvPtr := C.malloc(C.size_t(len(argv)+1) * C.size_t(unsafe.Sizeof(uintptr(0))))
+	defer C.free(cArgvPtr)
 
 	// Cast auf ein bearbeitbares Go-Slice aus C-Pointern
-	cArgsArray := (*[1 << 20]*C.char)(cArgsPtr)[: len(goArgs)+1 : len(goArgs)+1]
-	for i, arg := range goArgs {
+	cArgsArray := (*[1 << 20]*C.char)(cArgvPtr)[: len(argv)+1 : len(argv)+1]
+	for i, arg := range argv {
 		cArgsArray[i] = C.CString(arg)
 		defer C.free(unsafe.Pointer(cArgsArray[i]))
 	}
-	cArgsArray[len(goArgs)] = nil // NULL-Terminierung am Ende
+	cArgsArray[len(argv)] = nil // NULL-Terminierung am Ende
 
 	// handle fallbackResources
 	var cFallbacks unsafe.Pointer
@@ -507,9 +563,10 @@ func XtAppInitialize(
 		cAppClass,
 		cOptions, numOptions,
 		&argc,
-		cArgsPtr,
+		cArgvPtr, /* XtString* argv_in_out */
 		cFallbacks,
-		cArgsList, numArgs,
+		cArgsList, /* ArgList args */
+		numArgs,
 	)
 
 	return Widget{w: cWidget}

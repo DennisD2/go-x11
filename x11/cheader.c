@@ -7,6 +7,19 @@
 #include "cheader.h"
 #include "_cgo_export.h"
 
+extern Widget call_XtInitialize(
+    char *shell_name,
+    char *application_class,
+    void *options, Cardinal num_options,
+    int *argc_in_out, void *argv_in_out
+) {
+    return XtInitialize(
+            (String)shell_name,
+            (String)application_class,
+            (XrmOptionDescList)options, num_options,
+            argc_in_out, (String*)argv_in_out
+        );
+    }
 
 // options: void* -> XrmOptionDescList
 // argv_in_out: void* -> String*
