@@ -84,6 +84,9 @@ import "C"
 // X definitions
 // ============================================================================
 // Wrapper types
+type Display struct{ d *C.Display }
+type Screen struct{ s *C.Screen }
+type Window struct{ w C.Window }
 type XEvent struct{ e C.XEvent }
 
 // ============================================================================
@@ -622,6 +625,35 @@ func XtCreateManagedWidget(name string, widgetClass WidgetClass, parent Widget, 
 // RealizeWidget makes a widget visible
 func XtRealizeWidget(w Widget) {
 	C.XtRealizeWidget(w.w)
+}
+
+func XtIsRealized(w Widget) bool {
+	return C.XtIsRealized(w.w) == C.TRUE
+}
+
+func XtIsManaged(w Widget) bool {
+	return C.XtIsManaged(w.w) == C.TRUE
+}
+
+func XtDestroyWidget(w Widget) {
+	C.XtDestroyWidget(w.w)
+}
+
+// not sure thatbthis works as expected - test
+func XtDisplay(w Widget) *Display {
+	cd := C.XtDisplay(w.w)
+	return &Display{d: cd}
+}
+
+func XtScreen(w Widget) *Screen {
+	cs := C.XtScreen(w.w)
+	return &Screen{s: cs}
+}
+
+// returns object, not reference
+func XtWindow(w Widget) Window {
+	cw := C.XtWindow(w.w)
+	return Window{w: cw}
 }
 
 // AppMainLoop enters the Xt event loop

@@ -18,6 +18,15 @@ and some "glue" C functions inside x11 package where nasty casts are required, w
 
 What do we have so far:
 
+## Xlib
+Wrapper structs for:
+
+* Display
+* Screen
+* Window
+* XEvent
+
+## Xt - X Toolkit
 Wrapper structs for:
 * XtAppContext
 * Widget
@@ -28,7 +37,6 @@ Go structs for:
 * OptionDescRec
 * Arg
 * ArgList
-* XmString
 
 Xt Functions:
 * XtInitialize
@@ -41,11 +49,22 @@ Xt Functions:
 * XtDispatchEvent
 * XtNextEvent
 * XtAppNextEvent
+* XtIsRealized
+* XtIsManaged
+* XtDestroyWidget
+* XtDisplay
+* XtScreen
+* XtWindow
+
+## Xm - Motif
+Wrapper structs for:
+* XmString
 
 Xm Functions:
 * XmStringCreateLtoR
 * XmStringFree
 
+## Misc. and helpers
 Xt Args handling helpers:
 * AppendArgList
 * XtArgValFromInt
