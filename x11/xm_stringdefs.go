@@ -963,3 +963,5 @@ var XmNx = C.GoString(C.XtNx)
 var XmNy = C.GoString(C.XtNy)
 
 //var XmNanimate = C.GoString(C."animate")
+
+var XmSTRING_DEFAULT_CHARSET = XmStringCharset{C.GoString(C.XmSTRING_DEFAULT_CHARSET)}

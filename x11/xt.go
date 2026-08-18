@@ -315,7 +315,7 @@ func XtAppMainLoop(ctx *XtAppContext) {
 
 func XtArgValFromXmString(xmstr XmString) uintptr {
 	// Konvertiert den C-Pointer (*C.char / XmString) in eine Go-Ganzzahl (uintptr)
-	return uintptr(unsafe.Pointer(xmstr.XmString))
+	return uintptr(unsafe.Pointer(xmstr.s))
 }
 
 // XtArgValFromInt converts a Go int into an XtArgVal wrapper.

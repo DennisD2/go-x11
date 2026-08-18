@@ -1,12 +1,18 @@
 package main
 
 import (
+	"fmt"
 	"go-x11/x11"
 	"os"
 )
 
 func main() {
 	x11.WrapperInfo()
+
+	argv := os.Args[1:]
+	for i, arg := range argv {
+		fmt.Printf("Arg %d: %s\n", i+1, arg)
+	}
 
 	var appContext x11.XtAppContext
 
@@ -25,7 +31,12 @@ func main() {
 	)
 
 	/* Convert some string to the form expected by Motif */
-	xmStr := x11.XmStringCreateLtoR("please click me!")
+	var xmStr x11.XmString
+	if len(os.Args) > 1 {
+		xmStr = x11.Xs_concat_words(os.Args[1:])
+	} else {
+		xmStr = x11.XmStringCreateLtoR("please click me!", x11.XmSTRING_DEFAULT_CHARSET)
+	}
 
 	/* define some args */
 	args := x11.AppendArgList(nil, x11.XmNlabelString, x11.XtArgValFromXmString(xmStr))
