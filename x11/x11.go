@@ -52,7 +52,7 @@ import (
 #include "Xm/Notebook.h"
 #include "Xm/PanedW.h"
 #include "Xm/Primitive.h"
-//#include "Xm/Print.h"
+//#include "Xm/Print.h" xprint extension is required, no packages there today for it
 #include "Xm/ProtocolsP.h"
 #include "Xm/PushB.h"
 #include "Xm/PushBG.h"
