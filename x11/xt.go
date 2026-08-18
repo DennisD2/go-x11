@@ -11,6 +11,7 @@ import (
 
 // Xt includes
 #include <X11/Intrinsic.h>
+#include <X11/Composite.h>
 
 #include "cheader.h"
 #include "wrapperInfo.h"
@@ -24,6 +25,7 @@ import "C"
 // Wrapper types
 type XtAppContext struct{ ctx C.XtAppContext }
 type Widget struct{ w C.Widget }
+type WidgetList []*Widget
 type WidgetClass struct{ c C.WidgetClass }
 
 // XtArgVal wraps C.XtArgVal (generic argument value)
@@ -48,7 +50,7 @@ type Arg struct {
 // ArgList Go structure
 type ArgList struct {
 	Slice []Arg
-	Size  int // Ermöglicht den Aufruf 'args.Size' in main
+	Size  int
 }
 
 // ============================================================================
@@ -359,6 +361,31 @@ func AppendArgList(list *ArgList, name string, value uintptr) *ArgList {
 	return list
 }
 
+func XtSetValues(w Widget, args *ArgList) {
+	var cArgsList unsafe.Pointer
+	var numArgs C.Cardinal = 0
+
+	// convert args
+	if args != nil && len(args.Slice) > 0 {
+		numArgs = C.Cardinal(len(args.Slice))
+		cArgsSlice := C.malloc(C.size_t(len(args.Slice)) * C.sizeof_Arg)
+		defer C.free(cArgsSlice)
+
+		// casting to C array
+		cArgsArray := (*[1 << 20]C.Arg)(cArgsSlice)[:len(args.Slice):len(args.Slice)]
+		for i, arg := range args.Slice {
+			cArgsArray[i].name = C.CString(arg.Name)
+			cArgsArray[i].value = C.XtArgVal(arg.Value)
+
+			//  free these strings
+			defer C.free(unsafe.Pointer(cArgsArray[i].name))
+		}
+		cArgsList = cArgsSlice
+	}
+
+	C.call_XtSetValues(w.w, cArgsList, numArgs)
+}
+
 // ============================================================================
 // Xt callback code
 // ============================================================================
@@ -400,4 +427,20 @@ func XtAddCallback(widget Widget, callbackName string, goFunction func()) {
 
 	// call Xt function via wrapper
 	C.call_XtAddCallback(widget.w, cName, C.uintptr_t(id))
+}
+
+func XtManageChildren(widgetList WidgetList) {
+	if len(widgetList) == 0 {
+		return
+	}
+
+	cArray := make([]C.Widget, len(widgetList))
+	for i, widget := range widgetList {
+		cArray[i] = widget.w
+	}
+
+	cPtr := (**C.Widget)(unsafe.Pointer(&cArray[0]))
+
+	// call Xt function via wrapper
+	C.call_XtManageChildren(cPtr, C.int(len(widgetList)))
 }

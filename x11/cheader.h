@@ -39,3 +39,7 @@ extern void set_option_rec(void *options_base, int index, char *opt, char *spec,
 extern void goCallbackDispatcher(Widget w, XtPointer client_data, XtPointer call_data);
 
 extern void call_XtAddCallback(Widget w, char *name, uintptr_t go_func_id) ;
+
+extern void call_XtManageChildren(Widget **widgets, int num_widgets);
+
+extern void call_XtSetValues( Widget w, void *args, Cardinal n);

@@ -55,6 +55,8 @@ Xt Functions:
 * XtDisplay
 * XtScreen
 * XtWindow
+* XtSetValues
+* XtManageChildren
 
 ## Xm - Motif
 Wrapper structs for:

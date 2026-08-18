@@ -67,3 +67,11 @@ extern void goCallbackDispatcher(Widget w, XtPointer client_data, XtPointer call
 void call_XtAddCallback(Widget w, char *name, uintptr_t go_func_id) {
     XtAddCallback(w, name, (XtCallbackProc)goCallbackDispatcher, (XtPointer)go_func_id);
 }
+
+void call_XtManageChildren(Widget **widgets, int num_widgets) {
+    XtManageChildren((WidgetList)widgets, (Cardinal)num_widgets);
+}
+
+void call_XtSetValues( Widget w, void *args, Cardinal n) {
+    XtSetValues(w, args, (Cardinal)n );
+}
