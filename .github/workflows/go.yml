@@ -24,7 +24,7 @@ jobs:
           set -e
           sudo apt-get update
           # Install development libraries required for X11/Motif linking
-          sudo apt-get install -y --no-install-recommends build-essential libx11-dev libxext-dev libxt-dev libmotif-dev
+          sudo apt-get install -y --no-install-recommends build-essential libx11-dev libxp-dev libxt-dev libmotif-dev
 
       - name: Cache Go build
         uses: actions/cache@v6
