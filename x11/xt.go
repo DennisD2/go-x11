@@ -21,15 +21,6 @@ import (
 import "C"
 
 // ============================================================================
-// X definitions
-// ============================================================================
-// Wrapper types
-type Display struct{ d *C.Display }
-type Screen struct{ s *C.Screen }
-type Window struct{ w C.Window }
-type XEvent struct{ e C.XEvent }
-
-// ============================================================================
 // Xt definitions
 // ============================================================================
 // Wrapper types
@@ -60,15 +51,6 @@ type Arg struct {
 type ArgList struct {
 	Slice []Arg
 	Size  int // Ermöglicht den Aufruf 'args.Size' in main
-}
-
-// ============================================================================
-// Xm definitions
-// ============================================================================
-
-// XmString wraps C.XmString (Motif compound string)
-type XmString struct {
-	XmString C.XmString
 }
 
 // ============================================================================
@@ -281,7 +263,7 @@ func XtCreateWidget(name string, widgetClass WidgetClass, parent Widget, args *A
 	return Widget{w: widget}
 }
 
-func ManageChild(w Widget) {
+func XtManageChild(w Widget) {
 	C.XtManageChild(w.w)
 }
 
@@ -382,8 +364,6 @@ func AppendArgList(list *ArgList, name string, value uintptr) *ArgList {
 // ============================================================================
 // Xt callback code
 // ============================================================================
-// string defines
-var XmNactivateCallback = C.GoString(C.XmNactivateCallback)
 
 var (
 	callbackRegistry = make(map[uintptr]func())
@@ -422,21 +402,4 @@ func XtAddCallback(widget Widget, callbackName string, goFunction func()) {
 
 	// call Xt function via wrapper
 	C.call_XtAddCallback(widget.w, cName, C.uintptr_t(id))
-}
-
-// ============================================================================
-// Xm Functions - Motif Toolkit
-// ============================================================================
-
-// XmStringCreateLtoR creates a Motif compound string from left-to-right text
-func XmStringCreateLtoR(text string) XmString {
-	c_text := C.CString(text)
-	defer C.free(unsafe.Pointer(c_text))
-	xmstr := C.XmStringCreateLtoR(c_text, C.XmFONTLIST_DEFAULT_TAG)
-	return XmString{XmString: xmstr}
-}
-
-// XmStringFree frees an XmString
-func XmStringFree(s XmString) {
-	C.XmStringFree(s.XmString)
 }
