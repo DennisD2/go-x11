@@ -639,7 +639,7 @@ func XtDestroyWidget(w Widget) {
 	C.XtDestroyWidget(w.w)
 }
 
-// not sure thatbthis works as expected - test
+// not sure that this works as expected - test
 func XtDisplay(w Widget) *Display {
 	cd := C.XtDisplay(w.w)
 	return &Display{d: cd}
