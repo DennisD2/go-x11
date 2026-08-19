@@ -6,6 +6,10 @@ import (
 	"os"
 )
 
+func quit() {
+	println("Button was selected! Pure Go code + X11 did this!")
+}
+
 func main() {
 	x11.WrapperInfo()
 
@@ -54,9 +58,7 @@ func main() {
 	x11.XmStringFree(xmStr) /* Free the compound string */
 
 	/* add a callback */
-	x11.XtAddCallback(msg, x11.XmNactivateCallback, func() {
-		println("Button was selected! Pure Go code + X11 did this!")
-	})
+	x11.XtAddCallback(msg, x11.XmNactivateCallback, quit)
 
 	x11.XtRealizeWidget(shell)
 	x11.XtAppMainLoop(&appContext)
