@@ -5,6 +5,10 @@ import (
 	"os"
 )
 
+func quitAction() {
+	println("Button was selected! Pure Go code + X11 did this!")
+}
+
 func main() {
 	x11.WrapperInfo()
 
@@ -29,16 +33,22 @@ func main() {
 		initArgs,
 	)
 
-	/* Convert string to the form expected by Motif */
+	/* Convert some string to the form expected by Motif */
 	xmStr := x11.XmStringCreateLtoR(argv[0], x11.XmFONTLIST_DEFAULT_TAG)
 
 	/* define some args */
 	args := x11.AppendArgList(nil, x11.XmNlabelString, x11.XtArgValFromXmString(xmStr))
+	args = x11.AppendArgList(args, x11.XtNwidth, 400)
+	args = x11.AppendArgList(args, x11.XtNheight, 200)
 	/* Create a Motif widget to display the string */
-	widgetClass := x11.LabelWidgetClass() // or x11.LabelWidgetClass()
-	x11.XtCreateManagedWidget("message", widgetClass, shell, args)
+	widgetClass := x11.PushButtonWidgetClass() // or x11.LabelWidgetClass()
+	msg := x11.XtCreateManagedWidget("message", widgetClass, shell, args)
+	_ = msg
 
 	x11.XmStringFree(xmStr) /* Free the compound string */
+
+	/* add a callback */
+	x11.XtAddCallback(msg, x11.XmNactivateCallback, quitAction)
 
 	x11.XtRealizeWidget(shell)
 	x11.XtAppMainLoop(&appContext)
