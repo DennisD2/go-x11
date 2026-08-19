@@ -16,6 +16,16 @@ import (
 #include "cheader.h"
 #include "wrapperInfo.h"
 
+// Diese Hilfsfunktion befüllt die C-Struktur direkt in C
+static void set_c_action_entry(XtActionsRec *table, int index, const char *name, XtActionProc proc) {
+    table[index].string = (String)name;
+    table[index].proc = proc;
+}
+
+// Deklaration der globalen Go-Brücke
+extern void goActionBridge(Widget w, XEvent* event, String* params, Cardinal* num_params);
+
+
 */
 import "C"
 
@@ -432,6 +442,92 @@ func XtAddCallback(widget Widget, callbackName string, goFunction func()) {
 // ============================================================================
 // Xt actions code
 // ============================================================================
+
+type XtActionsRec struct {
+	ActionString string
+	Action       func(w Widget, event XEvent, params []string)
+}
+
+type XtTranslations struct{ t C.XtTranslations }
+
+// Globale Registry, damit die Brücke weiß, welche Go-Funktion zu welchem Namen gehört
+var globalActionMap = make(map[string]func(w Widget, event XEvent, params []string))
+
+//export goActionBridge
+func goActionBridge(w C.Widget, event *C.XEvent, params *C.String, num_params *C.Cardinal) {
+	// 1. Parameter aus C in ein Go-String-Slice umwandeln
+	goParams := []string{}
+	if num_params != nil && *num_params > 0 {
+		slice := (*[1 << 20]C.String)(unsafe.Pointer(params))[:*num_params:*num_params]
+		for _, cStr := range slice {
+			goParams = append(goParams, C.GoString(cStr))
+		}
+	}
+
+	// 2. Deine Go-Typen-Wrapper erstellen (passe diese an deine echten Strukturen an)
+	goWidget := Widget{w: w}  // Falls Widget ein kosmetischer Typ um uintptr/C.Widget ist
+	goEvent := XEvent{*event} // Falls XEvent ein Typ um unsafe.Pointer/C.XEvent ist
+
+	// 3. Ausführen der registrierten Funktion mit allen Parametern
+	// (Hier beispielhaft für "quit" – für dynamische Zuordnungen siehe vorherige Schritte)
+	// TODO IS NOT GENERIC !!!
+	if goFunc, exists := globalActionMap["quit"]; exists && goFunc != nil {
+		goFunc(goWidget, goEvent, goParams)
+	}
+}
+
+/*func XtAppAddActions(appContext XtAppContext, actionsTable []XtActionsRec) {
+	var numActions = C.Cardinal(len(actionsTable))
+	C.XtAppAddActions(appContext.ctx, cActionsTable, numActions)
+}*/
+
+func XtAppAddActions(appContext XtAppContext, actionsTable []XtActionsRec) {
+	numActions := len(actionsTable)
+	if numActions == 0 {
+		return
+	}
+
+	// 1. Erzeuge ein echtes C-Array im Speicher, das groß genug ist
+	cActionsTable := make([]C.XtActionsRec, numActions)
+
+	// 2. Befülle das C-Array mit den Daten aus dem Go-Slice
+	for i, goAction := range actionsTable {
+		// Registriere die Go-Funktion in unserer Map unter ihrem Namen
+		globalActionMap[goAction.ActionString] = goAction.Action
+
+		// Erzeuge einen C-String für den Action-Namen
+		cName := C.CString(goAction.ActionString)
+		// Hinweis: Kein defer C.free(unsafe.Pointer(cName)), da Xt diesen String im Speicher behält!
+
+		// Befülle den C-Eintrag über die C-Hilfsfunktion
+		C.set_c_action_entry(
+			&cActionsTable[0], // Zeiger auf den Anfang des C-Arrays
+			C.int(i),
+			cName,
+			C.XtActionProc(unsafe.Pointer(C.goActionBridge)), // Alle zeigen auf dieselbe Brücke
+		)
+	}
+
+	// 3. Übergabe an das originale X-Toolkit (Jetzt ist cActionsTable definiert!)
+	C.XtAppAddActions(
+		appContext.ctx,
+		&cActionsTable[0], // Zeiger auf das erste Element für C-Kompatibilität
+		C.Cardinal(numActions),
+	)
+}
+
+func XtParseTranslationTable(table []string) XtTranslations {
+	goStr := ""
+	for t := range table {
+		goStr += table[t]
+	}
+	cTableString := C.CString(goStr)
+	return XtTranslations{t: C.XtParseTranslationTable(cTableString)}
+}
+
+func XtAugmentTranslations(w Widget, translations XtTranslations) {
+	C.XtAugmentTranslations(w.w, translations.t)
+}
 
 // ============================================================================
 // functions,functions,functions
