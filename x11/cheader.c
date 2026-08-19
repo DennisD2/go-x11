@@ -75,3 +75,42 @@ void call_XtManageChildren(Widget **widgets, int num_widgets) {
 void call_XtSetValues( Widget w, void *args, Cardinal n) {
     XtSetValues(w, args, (Cardinal)n );
 }
+
+// action handling
+
+// Declaration of global C->Go bridge for actions
+extern void goActionBridgeWithId(Widget w, XEvent* event, String* params, Cardinal* num_params, int actionId);
+
+// Macro to generate a function, usable by C C-side Action handler. Function name is also generated and contains ID
+#define ACTION_BRIDGE(id) \
+    static void c_action_bridge_##id(Widget w, XEvent* ev, String* p, Cardinal* n) { \
+        goActionBridgeWithId(w, ev, p, n, id); \
+    }
+
+// A pool of bridge functions callable by C. These will call the go entry function with their ID
+ACTION_BRIDGE(0) ACTION_BRIDGE(1) ACTION_BRIDGE(2) ACTION_BRIDGE(3) ACTION_BRIDGE(4)
+ACTION_BRIDGE(5) ACTION_BRIDGE(6) ACTION_BRIDGE(7) ACTION_BRIDGE(8) ACTION_BRIDGE(9)
+
+// returns Go function by ID
+XtActionProc get_bridge_ptr(int id) {
+    switch(id) {
+        case 0: return c_action_bridge_0;
+        case 1: return c_action_bridge_1;
+        case 2: return c_action_bridge_2;
+        case 3: return c_action_bridge_3;
+        case 4: return c_action_bridge_4;
+        case 5: return c_action_bridge_5;
+        case 6: return c_action_bridge_6;
+        case 7: return c_action_bridge_7;
+        case 8: return c_action_bridge_8;
+        case 9: return c_action_bridge_9;
+        default: return NULL;
+    }
+}
+
+// Code for XtActionProc handling
+void set_c_action_entry(XtActionsRec *table, int index, const char *name, XtActionProc proc) {
+    table[index].string = (String)name;
+    table[index].proc = proc;
+}
+

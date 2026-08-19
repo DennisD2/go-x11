@@ -43,3 +43,7 @@ extern void call_XtAddCallback(Widget w, char *name, uintptr_t go_func_id) ;
 extern void call_XtManageChildren(Widget **widgets, int num_widgets);
 
 extern void call_XtSetValues( Widget w, void *args, Cardinal n);
+
+extern XtActionProc get_bridge_ptr(int id);
+
+void set_c_action_entry(XtActionsRec *table, int index, const char *name, XtActionProc proc);
