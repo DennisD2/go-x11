@@ -53,6 +53,13 @@ type ArgList struct {
 	Size  int
 }
 
+type XtActionsRec struct {
+	ActionString string
+	Action       func(w Widget, event XEvent, params []string)
+}
+
+type XtTranslations struct{ t C.XtTranslations }
+
 // ============================================================================
 // Wrapper own definitions
 // ============================================================================
@@ -432,13 +439,6 @@ func XtAddCallback(widget Widget, callbackName string, goFunction func()) {
 // ============================================================================
 // Xt actions code
 // ============================================================================
-
-type XtActionsRec struct {
-	ActionString string
-	Action       func(w Widget, event XEvent, params []string)
-}
-
-type XtTranslations struct{ t C.XtTranslations }
 
 // registry maps an ID to a go function
 var (

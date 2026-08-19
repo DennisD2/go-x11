@@ -107,11 +107,14 @@ Wrapper structs for:
 * Widget
 * WidgetClass
 * XtArgVal
+* XtTranslations
 
 Go structs for:
 * OptionDescRec
 * Arg
 * ArgList
+* XtActionsRec
+
 
 Xt Functions:
 * XtInitialize
@@ -132,6 +135,9 @@ Xt Functions:
 * XtWindow
 * XtSetValues
 * XtManageChildren
+* XtAppAddActions
+* XtParseTranslationTable
+* XtAugmentTranslations
 
 ## From Xm (Motif)
 Wrapper structs for:
