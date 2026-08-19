@@ -429,6 +429,14 @@ func XtAddCallback(widget Widget, callbackName string, goFunction func()) {
 	C.call_XtAddCallback(widget.w, cName, C.uintptr_t(id))
 }
 
+// ============================================================================
+// Xt actions code
+// ============================================================================
+
+// ============================================================================
+// functions,functions,functions
+// ============================================================================
+
 func XtManageChildren(widgetList WidgetList) {
 	if len(widgetList) == 0 {
 		return
