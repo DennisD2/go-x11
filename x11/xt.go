@@ -1,6 +1,7 @@
 package x11
 
 import (
+	"runtime/cgo"
 	"sync"
 	"unsafe"
 )
@@ -515,6 +516,61 @@ func XtParseTranslationTable(table []string) XtTranslations {
 
 func XtAugmentTranslations(w Widget, translations XtTranslations) {
 	C.XtAugmentTranslations(w.w, translations.t)
+}
+
+// ============================================================================
+// XtEvent handler code
+// ============================================================================
+type XtPointer struct {
+	p unsafe.Pointer
+}
+
+type EventMask C.EventMask
+
+type GoXtEventHandler func(w Widget, event XEvent)
+
+//export goEventHandlerBridge
+func goEventHandlerBridge(w C.Widget, client_data C.XtPointer, event *C.XEvent, continue_to_dispatch *C.Boolean) {
+	if client_data == nil {
+		return
+	}
+
+	// 1. Wandle das client_data zurück in das Go cgo.Handle um
+	handlePtr := (*cgo.Handle)(unsafe.Pointer(client_data))
+
+	// 2. Extrahiere die hinterlegte Go-Funktion
+	goFunc, ok := handlePtr.Value().(GoXtEventHandler)
+	if !ok || goFunc == nil {
+		return
+	}
+
+	// 3. Verpacke die C-Typen in deine Framework-Typen
+	goWidget := Widget{w: w}
+	goEvent := XEvent{e: *event}
+
+	// 4. Rufe den puren Go-Code auf!
+	goFunc(goWidget, goEvent)
+}
+
+func XtAddEventHandler(w Widget, eventMask EventMask, nonMaskable bool, proc GoXtEventHandler) {
+	// 1. Erstelle das cgo.Handle für die Go-Logik
+	handle := cgo.NewHandle(proc)
+	cClientData := C.XtPointer(unsafe.Pointer(&handle))
+
+	// 2. Boolean konvertieren
+	var cNonMaskable C.Boolean = C.False
+	if nonMaskable {
+		cNonMaskable = C.True
+	}
+
+	// 3. Aufruf der C-Hilfsfunktion mit EXAKT 5 Argumenten
+	C.call_XtAddEventHandler(
+		C.Widget(w.w),
+		C.EventMask(eventMask),
+		cNonMaskable,
+		C.XtEventHandler(C.goEventHandlerBridge), // KORREKTUR: Hier übergeben wir die Brücke über den C-Namespace
+		cClientData,
+	)
 }
 
 // ============================================================================

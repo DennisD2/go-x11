@@ -114,3 +114,10 @@ void set_c_action_entry(XtActionsRec *table, int index, const char *name, XtActi
     table[index].proc = proc;
 }
 
+
+// Code for Xt XEventHandler
+
+void call_XtAddEventHandler(Widget w, EventMask mask, Boolean non_maskable, XtEventHandler proc,
+    XtPointer client_data) {
+        XtAddEventHandler(w, mask, non_maskable, proc, client_data);
+}

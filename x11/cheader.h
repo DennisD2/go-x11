@@ -45,6 +45,16 @@ extern XtActionProc get_bridge_ptr(int id);
 
 void set_c_action_entry(XtActionsRec *table, int index, const char *name, XtActionProc proc);
 
+// event handling
+// Declaration of global C->Go bridge for actions
+extern void goEventHandlerBridge(Widget w, XtPointer client_data, XEvent* event, Boolean* continue_to_dispatch);
+
+extern void call_XtAddEventHandler(Widget w, EventMask mask, Boolean non_maskable,
+    XtEventHandler proc, XtPointer client_data);
+
+extern void call_XtAddEventHandler(Widget w, EventMask mask, Boolean non_maskable, XtEventHandler proc,
+    XtPointer client_data);
+
 // Other functions
 extern void call_XtManageChildren(Widget **widgets, int num_widgets);
 
