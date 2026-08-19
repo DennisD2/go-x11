@@ -8,11 +8,11 @@ import (
 func main() {
 	x11.WrapperInfo()
 
+	argv := os.Args[1:]
 	if len(argv) == 0 {
 		println("usage: ch02-memo message-string\n")
 		os.Exit(1)
 	}
-	argv := os.Args[1:]
 
 	var appContext x11.XtAppContext
 
