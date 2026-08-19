@@ -5,9 +5,17 @@ import (
 	"os"
 )
 
-func quitAction() {
-	println("Button was selected! Pure Go code + X11 did this!")
+func quitAction(w x11.Widget, event x11.XEvent, params []string) {
+	println("quitAcion, q was pressed")
+	os.Exit(0)
 }
+
+var actionsTable = []x11.XtActionsRec{
+	{"byex", quitAction},
+}
+
+/* Bind the action "bye()" to typing the key "Q" */
+var defaultTranslations []string = []string{"<Key>Q:  bye()"}
 
 func main() {
 	x11.WrapperInfo()
@@ -43,12 +51,23 @@ func main() {
 	/* Create a Motif widget to display the string */
 	widgetClass := x11.PushButtonWidgetClass() // or x11.LabelWidgetClass()
 	msg := x11.XtCreateManagedWidget("message", widgetClass, shell, args)
-	_ = msg
 
 	x11.XmStringFree(xmStr) /* Free the compound string */
 
+	/* Register the action functions */
+	x11.XtAppAddActions(appContext, actionsTable)
+
+	/* Compile the translation table */
+	transTable := x11.XtParseTranslationTable(defaultTranslations)
+
+	/*
+	 * Merge the new translations with any existing
+	 * translations for the label widget.
+	 */
+	x11.XtAugmentTranslations(msg, transTable)
+
 	/* add a callback */
-	x11.XtAddCallback(msg, x11.XmNactivateCallback, quitAction)
+	//x11.XtAddCallback(msg, x11.XmNactivateCallback, quitAction)
 
 	x11.XtRealizeWidget(shell)
 	x11.XtAppMainLoop(&appContext)
