@@ -464,14 +464,13 @@ func goActionBridge(w C.Widget, event *C.XEvent, params *C.String, num_params *C
 		}
 	}
 
-	// 2. Deine Go-Typen-Wrapper erstellen (passe diese an deine echten Strukturen an)
-	goWidget := Widget{w: w}  // Falls Widget ein kosmetischer Typ um uintptr/C.Widget ist
-	goEvent := XEvent{*event} // Falls XEvent ein Typ um unsafe.Pointer/C.XEvent ist
+	goWidget := Widget{w: w}
+	goEvent := XEvent{*event}
 
 	// 3. Ausführen der registrierten Funktion mit allen Parametern
 	// (Hier beispielhaft für "quit" – für dynamische Zuordnungen siehe vorherige Schritte)
 	// TODO IS NOT GENERIC !!!
-	if goFunc, exists := globalActionMap["quit"]; exists && goFunc != nil {
+	if goFunc, exists := globalActionMap["bye"]; exists && goFunc != nil {
 		goFunc(goWidget, goEvent, goParams)
 	}
 }

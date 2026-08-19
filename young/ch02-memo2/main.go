@@ -11,7 +11,7 @@ func quitAction(w x11.Widget, event x11.XEvent, params []string) {
 }
 
 var actionsTable = []x11.XtActionsRec{
-	{"byex", quitAction},
+	{"bye", quitAction},
 }
 
 /* Bind the action "bye()" to typing the key "Q" */
