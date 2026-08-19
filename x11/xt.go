@@ -475,11 +475,6 @@ func goActionBridge(w C.Widget, event *C.XEvent, params *C.String, num_params *C
 	}
 }
 
-/*func XtAppAddActions(appContext XtAppContext, actionsTable []XtActionsRec) {
-	var numActions = C.Cardinal(len(actionsTable))
-	C.XtAppAddActions(appContext.ctx, cActionsTable, numActions)
-}*/
-
 func XtAppAddActions(appContext XtAppContext, actionsTable []XtActionsRec) {
 	numActions := len(actionsTable)
 	if numActions == 0 {
