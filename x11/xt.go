@@ -16,16 +16,41 @@ import (
 #include "cheader.h"
 #include "wrapperInfo.h"
 
-// Diese Hilfsfunktion befüllt die C-Struktur direkt in C
+// Code for XtActionProc handling
 static void set_c_action_entry(XtActionsRec *table, int index, const char *name, XtActionProc proc) {
     table[index].string = (String)name;
     table[index].proc = proc;
 }
 
-// Deklaration der globalen Go-Brücke
-extern void goActionBridge(Widget w, XEvent* event, String* params, Cardinal* num_params);
+// Declaration of global C->Go bridge for actions
+extern void goActionBridgeWithId(Widget w, XEvent* event, String* params, Cardinal* num_params, int actionId);
 
+// Macro to generate a function, usable by C C-side Action handler. Function name is also generated and contains ID
+#define ACTION_BRIDGE(id) \
+    static void c_action_bridge_##id(Widget w, XEvent* ev, String* p, Cardinal* n) { \
+        goActionBridgeWithId(w, ev, p, n, id); \
+    }
 
+// A pool of bridge functions callable by C. These will call the go entry function with their ID
+ACTION_BRIDGE(0) ACTION_BRIDGE(1) ACTION_BRIDGE(2) ACTION_BRIDGE(3) ACTION_BRIDGE(4)
+ACTION_BRIDGE(5) ACTION_BRIDGE(6) ACTION_BRIDGE(7) ACTION_BRIDGE(8) ACTION_BRIDGE(9)
+
+// returns Go function by ID
+static XtActionProc get_bridge_ptr(int id) {
+    switch(id) {
+        case 0: return c_action_bridge_0;
+        case 1: return c_action_bridge_1;
+        case 2: return c_action_bridge_2;
+        case 3: return c_action_bridge_3;
+        case 4: return c_action_bridge_4;
+        case 5: return c_action_bridge_5;
+        case 6: return c_action_bridge_6;
+        case 7: return c_action_bridge_7;
+        case 8: return c_action_bridge_8;
+        case 9: return c_action_bridge_9;
+        default: return NULL;
+    }
+}
 */
 import "C"
 
@@ -450,12 +475,25 @@ type XtActionsRec struct {
 
 type XtTranslations struct{ t C.XtTranslations }
 
-// Globale Registry, damit die Brücke weiß, welche Go-Funktion zu welchem Namen gehört
-var globalActionMap = make(map[string]func(w Widget, event XEvent, params []string))
+// registry maps an ID to a go function
+var (
+	actionPool      = make(map[int]func(w Widget, event XEvent, params []string))
+	nextActionID    = 0
+	actionPoolMutex sync.RWMutex
+)
 
-//export goActionBridge
-func goActionBridge(w C.Widget, event *C.XEvent, params *C.String, num_params *C.Cardinal) {
-	// 1. Parameter aus C in ein Go-String-Slice umwandeln
+//export goActionBridgeWithId
+func goActionBridgeWithId(w C.Widget, event *C.XEvent, params *C.String, num_params *C.Cardinal, actionId C.int) {
+	// 1Try to get go function for actionId
+	actionPoolMutex.RLock()
+	goFunc, exists := actionPool[int(actionId)]
+	actionPoolMutex.RUnlock()
+
+	if !exists || goFunc == nil {
+		return
+	}
+
+	// Convert C parameters to Go types
 	goParams := []string{}
 	if num_params != nil && *num_params > 0 {
 		slice := (*[1 << 20]C.String)(unsafe.Pointer(params))[:*num_params:*num_params]
@@ -463,16 +501,11 @@ func goActionBridge(w C.Widget, event *C.XEvent, params *C.String, num_params *C
 			goParams = append(goParams, C.GoString(cStr))
 		}
 	}
-
 	goWidget := Widget{w: w}
-	goEvent := XEvent{*event}
+	goEvent := XEvent{e: *event}
 
-	// 3. Ausführen der registrierten Funktion mit allen Parametern
-	// (Hier beispielhaft für "quit" – für dynamische Zuordnungen siehe vorherige Schritte)
-	// TODO IS NOT GENERIC !!!
-	if goFunc, exists := globalActionMap["bye"]; exists && goFunc != nil {
-		goFunc(goWidget, goEvent, goParams)
-	}
+	// call the go function
+	goFunc(goWidget, goEvent, goParams)
 }
 
 func XtAppAddActions(appContext XtAppContext, actionsTable []XtActionsRec) {
@@ -481,39 +514,35 @@ func XtAppAddActions(appContext XtAppContext, actionsTable []XtActionsRec) {
 		return
 	}
 
-	// 1. Erzeuge ein echtes C-Array im Speicher, das groß genug ist
 	cActionsTable := make([]C.XtActionsRec, numActions)
 
-	// 2. Befülle das C-Array mit den Daten aus dem Go-Slice
+	actionPoolMutex.Lock()
 	for i, goAction := range actionsTable {
-		// Registriere die Go-Funktion in unserer Map unter ihrem Namen
-		globalActionMap[goAction.ActionString] = goAction.Action
+		// generate new ID for mapping
+		id := nextActionID
+		nextActionID++
 
-		// Erzeuge einen C-String für den Action-Namen
+		// save the action functio (a go function) with its ID
+		actionPool[id] = goAction.Action
+
 		cName := C.CString(goAction.ActionString)
-		// Hinweis: Kein defer C.free(unsafe.Pointer(cName)), da Xt diesen String im Speicher behält!
 
-		// Befülle den C-Eintrag über die C-Hilfsfunktion
-		C.set_c_action_entry(
-			&cActionsTable[0], // Zeiger auf den Anfang des C-Arrays
-			C.int(i),
-			cName,
-			C.XtActionProc(unsafe.Pointer(C.goActionBridge)), // Alle zeigen auf dieselbe Brücke
-		)
+		// get one of pool-contained C functions, mapped to this ID
+		cBridgeProc := C.get_bridge_ptr(C.int(id))
+
+		// set all values in C ActionsTable structure
+		C.set_c_action_entry(&cActionsTable[0], C.int(i), cName, cBridgeProc)
 	}
-
-	// 3. Übergabe an das originale X-Toolkit (Jetzt ist cActionsTable definiert!)
-	C.XtAppAddActions(
-		appContext.ctx,
-		&cActionsTable[0], // Zeiger auf das erste Element für C-Kompatibilität
-		C.Cardinal(numActions),
-	)
+	actionPoolMutex.Unlock()
+	// with valid C values, call C function
+	C.XtAppAddActions(appContext.ctx, &cActionsTable[0], C.Cardinal(numActions))
 }
 
 func XtParseTranslationTable(table []string) XtTranslations {
 	goStr := ""
 	for t := range table {
 		goStr += table[t]
+		goStr += "\n"
 	}
 	cTableString := C.CString(goStr)
 	return XtTranslations{t: C.XtParseTranslationTable(cTableString)}

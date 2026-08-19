@@ -10,12 +10,17 @@ func quitAction(w x11.Widget, event x11.XEvent, params []string) {
 	os.Exit(0)
 }
 
+func writeAction(w x11.Widget, event x11.XEvent, params []string) {
+	println("writeAction, w was pressed")
+}
+
 var actionsTable = []x11.XtActionsRec{
 	{"bye", quitAction},
+	{"write", writeAction},
 }
 
 /* Bind the action "bye()" to typing the key "Q" */
-var defaultTranslations []string = []string{"<Key>Q:  bye()"}
+var defaultTranslations []string = []string{"<Key>Q:  bye()", "<Key>W:  write()"}
 
 func main() {
 	x11.WrapperInfo()
