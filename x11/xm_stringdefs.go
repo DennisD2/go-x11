@@ -964,4 +964,5 @@ var XmNy = C.GoString(C.XtNy)
 
 //var XmNanimate = C.GoString(C."animate")
 
+var XmFONTLIST_DEFAULT_TAG = XmStringCharset{C.GoString(C.XmFONTLIST_DEFAULT_TAG)}
 var XmSTRING_DEFAULT_CHARSET = XmStringCharset{C.GoString(C.XmSTRING_DEFAULT_CHARSET)}
