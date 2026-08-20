@@ -186,5 +186,8 @@ This creates a directory _obj. And adds all generated glue code from CGO.
 Very interesting is e.g. _obj/_cgo_gotypes.go for all in-betrween types/structs/casts.
 
 ## More information
+* CGo - https://blog.marlin.org/cgo-referencing-c-library-in-go
+* "unsafe" et al - https://leapcell.medium.com/gos-unsafe-unlocking-performance-hacks-with-a-risk-16d1d8dd9afb
+* unsafe package - https://pkg.go.dev/unsafe@go1.26.5
 * Good spicker, german - https://opensource.archium.org/index.php/Der_Golang-Spicker
 * unsafe package - https://leapcell.medium.com/gos-unsafe-unlocking-performance-hacks-with-a-risk-16d1d8dd9afb
