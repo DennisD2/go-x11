@@ -73,6 +73,8 @@ func main() {
 ## Build it
 ```shell
 go build .
+# or build with all demo apps
+go build ./...
 ```
 
 ## Run it
@@ -86,11 +88,11 @@ go run . abc def ghi
 ## Tests
 Execute tests:
 ```shell
-go test -v ./..."
+go test -v ./...
 ```
 
 ## What do we have so far
-X11 together with Motif offeres are large amount of objects and functions. I have started moving to go-x11 API
+X11 together with Motif offers are large amount of objects and functions. I have started moving to go-x11 API
 with a few, needed in almost every application. Other will follow.
 
 ### From Xlib
