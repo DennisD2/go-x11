@@ -108,12 +108,15 @@ Wrapper structs for:
 * WidgetClass
 * XtArgVal
 * XtTranslations
+* XtPointer
+* EventMask
 
 Go structs for:
 * OptionDescRec
 * Arg
 * ArgList
 * XtActionsRec
+* GoXtEventHandler (rename this)
 
 
 Xt Functions:
@@ -138,6 +141,7 @@ Xt Functions:
 * XtAppAddActions
 * XtParseTranslationTable
 * XtAugmentTranslations
+* XtAddEventHandler
 
 ## From Xm (Motif)
 Wrapper structs for:
@@ -151,6 +155,8 @@ Xm Functions:
 * XmStringConcat
 
 ## Misc. and helpers
+* CAddr
+
 Xt Args handling helpers:
 * AppendArgList
 * XtArgValFromInt

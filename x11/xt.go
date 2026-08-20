@@ -64,6 +64,16 @@ type XtActionsRec struct {
 
 type XtTranslations struct{ t C.XtTranslations }
 
+type XtPointer struct {
+	p unsafe.Pointer
+}
+
+type EventMask struct {
+	m C.EventMask
+}
+
+type GoXtEventHandler func(w Widget, clientData CAddr, event *XEvent)
+
 // ============================================================================
 // Wrapper own definitions
 // ============================================================================
@@ -524,15 +534,6 @@ func XtAugmentTranslations(w Widget, translations XtTranslations) {
 // ============================================================================
 // XtEvent handler code
 // ============================================================================
-type XtPointer struct {
-	p unsafe.Pointer
-}
-
-type EventMask struct {
-	m C.EventMask
-}
-
-type GoXtEventHandler func(w Widget, clientData CAddr, event *XEvent)
 
 //export goEventHandlerBridge
 func goEventHandlerBridge(w C.Widget, client_data C.XtPointer, event *C.XEvent, continue_to_dispatch *C.Boolean) {
