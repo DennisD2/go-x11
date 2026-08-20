@@ -9,6 +9,7 @@ import (
 /*
 #include <stdint.h>
 #include <stdlib.h>
+#include <sys/types.h>
 
 // Xt includes
 #include <X11/Intrinsic.h>
@@ -33,6 +34,8 @@ type WidgetClass struct{ c C.WidgetClass }
 type XtArgVal struct {
 	ArgVal C.XtArgVal
 }
+
+type CAddr unsafe.Pointer
 
 // OptionDescRec Go structure
 type OptionDescRec struct {
@@ -525,9 +528,11 @@ type XtPointer struct {
 	p unsafe.Pointer
 }
 
-type EventMask C.EventMask
+type EventMask struct {
+	m C.EventMask
+}
 
-type GoXtEventHandler func(w Widget, event XEvent)
+type GoXtEventHandler func(w Widget, clientData CAddr, event *XEvent)
 
 //export goEventHandlerBridge
 func goEventHandlerBridge(w C.Widget, client_data C.XtPointer, event *C.XEvent, continue_to_dispatch *C.Boolean) {
@@ -547,12 +552,13 @@ func goEventHandlerBridge(w C.Widget, client_data C.XtPointer, event *C.XEvent, 
 	// 3. Verpacke die C-Typen in deine Framework-Typen
 	goWidget := Widget{w: w}
 	goEvent := XEvent{e: *event}
+	goCAddr := CAddr(client_data)
 
 	// 4. Rufe den puren Go-Code auf!
-	goFunc(goWidget, goEvent)
+	goFunc(goWidget, goCAddr, &goEvent)
 }
 
-func XtAddEventHandler(w Widget, eventMask EventMask, nonMaskable bool, proc GoXtEventHandler) {
+func XtAddEventHandler(w Widget, eventMask EventMask, nonMaskable bool, proc GoXtEventHandler, clientData CAddr) {
 	// 1. Erstelle das cgo.Handle für die Go-Logik
 	handle := cgo.NewHandle(proc)
 	cClientData := C.XtPointer(unsafe.Pointer(&handle))
@@ -566,7 +572,7 @@ func XtAddEventHandler(w Widget, eventMask EventMask, nonMaskable bool, proc GoX
 	// 3. Aufruf der C-Hilfsfunktion mit EXAKT 5 Argumenten
 	C.call_XtAddEventHandler(
 		C.Widget(w.w),
-		C.EventMask(eventMask),
+		C.EventMask(eventMask.m),
 		cNonMaskable,
 		C.XtEventHandler(C.goEventHandlerBridge), // KORREKTUR: Hier übergeben wir die Brücke über den C-Namespace
 		cClientData,

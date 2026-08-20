@@ -160,6 +160,12 @@ Xt Args handling helpers:
 ## From libXS (See Young's Book)
 * Xs_concat_words
 
+## Open issues
+* XtAddEventHandler(w Widget, eventMask EventMask, nonMaskable bool, proc GoXtEventHandler, clientData CAddr) is
+  not using or handling clientData. Needs to be fixed.
+* API deviates slightly from X11. Check this, use tests. Not done yet.
+
+
 ## Internals
 
 Uses CGO to access C code.

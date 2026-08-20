@@ -20,3 +20,5 @@ type Display struct{ d *C.Display }
 type Screen struct{ s *C.Screen }
 type Window struct{ w C.Window }
 type XEvent struct{ e C.XEvent }
+
+var ButtonPressMask = EventMask{C.ButtonPressMask}
