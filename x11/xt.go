@@ -68,10 +68,6 @@ type XtPointer struct {
 	p unsafe.Pointer
 }
 
-type EventMask struct {
-	m C.EventMask
-}
-
 type GoXtEventHandler func(w Widget, clientData CAddr, event *XEvent)
 
 // ============================================================================
@@ -560,24 +556,43 @@ func goEventHandlerBridge(w C.Widget, client_data C.XtPointer, event *C.XEvent, 
 }
 
 func XtAddEventHandler(w Widget, eventMask EventMask, nonMaskable bool, proc GoXtEventHandler, clientData CAddr) {
-	// 1. Erstelle das cgo.Handle für die Go-Logik
+	// 1. Create handle
 	handle := cgo.NewHandle(proc)
 	cClientData := C.XtPointer(unsafe.Pointer(&handle))
 
-	// 2. Boolean konvertieren
+	// convert params
 	var cNonMaskable C.Boolean = C.False
 	if nonMaskable {
 		cNonMaskable = C.True
 	}
 
-	// 3. Aufruf der C-Hilfsfunktion mit EXAKT 5 Argumenten
 	C.call_XtAddEventHandler(
 		C.Widget(w.w),
-		C.EventMask(eventMask.m),
+		C.EventMask(eventMask),
 		cNonMaskable,
 		C.XtEventHandler(C.goEventHandlerBridge), // KORREKTUR: Hier übergeben wir die Brücke über den C-Namespace
 		cClientData,
 	)
+}
+
+func ConvertAnyEvent(ev *XEvent) XAnyEvent {
+	cEvent := unsafe.Pointer(&(ev.e))
+	return *(*XAnyEvent)(unsafe.Pointer(cEvent))
+}
+
+func ConvertButtonEvent(ev *XEvent) XButtonEvent {
+	cEvent := unsafe.Pointer(&(ev.e))
+	return *(*XButtonEvent)(unsafe.Pointer(cEvent))
+}
+
+func ConvertKeyEvent(ev *XEvent) XKeyEvent {
+	cEvent := unsafe.Pointer(&(ev.e))
+	return *(*XKeyEvent)(unsafe.Pointer(cEvent))
+}
+
+func ConvertMotionNotifyEvent(ev *XEvent) XMotionEvent {
+	cEvent := unsafe.Pointer(&(ev.e))
+	return *(*XMotionEvent)(unsafe.Pointer(cEvent))
 }
 
 // ============================================================================
