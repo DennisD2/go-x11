@@ -8,23 +8,22 @@ import (
 	"unsafe"
 )
 
-func yesCallback() {
+func yesCallback(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	println("YES Button\n")
-
-	//cmd := C.GoString(clientData)
-	cmd := "FAKE ls -l"
-	if len(cmd) > 0 {
+	cmd := C.GoString((*C.char)(clientData.P))
+	fmt.Print("Command: %v\n", cmd)
+	/*if len(cmd) > 0 {
 		//syscall.Exec()
 		fmt.Printf("system(%v)\n", cmd)
 	} else {
 		fmt.Printf("cmd is empty string")
-	}
-	os.Exit(0)
+	}*/
+	//os.Exit(0)
 }
 
-func noCallback() {
+func noCallback(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	println("NO Button\n")
-	os.Exit(0)
+	//os.Exit(0)
 }
 
 func main() {
@@ -88,8 +87,8 @@ func main() {
 	no := x11.XtCreateManagedWidget("no", x11.PushButtonWidgetClass(), bb, args)
 
 	/* add callbacks */
-	x11.XtAddCallback(yes, x11.XmNactivateCallback, yesCallback)
-	x11.XtAddCallback(no, x11.XmNactivateCallback, noCallback)
+	x11.XtAddCallback(yes, x11.XmNactivateCallback, yesCallback, x11.XtPointer{P: unsafe.Pointer(&(argv[1]))})
+	x11.XtAddCallback(no, x11.XmNactivateCallback, noCallback, x11.XtPointer{})
 
 	x11.XtRealizeWidget(shell)
 	x11.XtAppMainLoop(&appContext)

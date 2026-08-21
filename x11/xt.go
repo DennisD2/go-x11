@@ -65,7 +65,7 @@ type XtActionsRec struct {
 type XtTranslations struct{ t C.XtTranslations }
 
 type XtPointer struct {
-	p unsafe.Pointer
+	P unsafe.Pointer
 }
 
 type GoXtEventHandler func(w Widget, clientData CAddr, event *XEvent)
@@ -454,9 +454,14 @@ func XtGetValues(w Widget, args *ArgList) {
 // ============================================================================
 // Xt callback code
 // ============================================================================
+type CallbackInfo struct {
+	Func       func(w Widget, clientData XtPointer, callData XtPointer)
+	Widget     Widget
+	ClientData XtPointer
+}
 
 var (
-	callbackRegistry = make(map[uintptr]func())
+	callbackRegistry = make(map[uintptr]CallbackInfo)
 	callbackMutex    sync.Mutex
 	nextCallbackID   uintptr = 1
 )
@@ -469,24 +474,31 @@ func goCallbackDispatcher(w C.Widget, client_data C.XtPointer, call_data C.XtPoi
 	callbackID := uintptr(client_data)
 
 	callbackMutex.Lock()
-	goFunc, exists := callbackRegistry[callbackID]
+	info, exists := callbackRegistry[callbackID]
 	callbackMutex.Unlock()
 
-	if exists && goFunc != nil {
-		// execute go function which serves as callback
-		goFunc()
+	// Das aktuelle, dynamische call_data von C in den Go-Typ verpacken
+	currentCallData := XtPointer{P: unsafe.Pointer(call_data)}
+
+	if exists {
+		info.Func(info.Widget, info.ClientData, currentCallData)
 	}
 }
 
 // XtAddCallback registers a Go-Funktion for a Widget-Event
-func XtAddCallback(widget Widget, callbackName string, goFunction func()) {
+func XtAddCallback(widget Widget, callbackName string,
+	goFunction func(w Widget, clientData1 XtPointer, callData XtPointer), clientData XtPointer) {
 	cName := C.CString(callbackName)
 	defer C.free(unsafe.Pointer(cName))
 
 	// register Go-Funktion and create ID
 	callbackMutex.Lock()
 	id := nextCallbackID
-	callbackRegistry[id] = goFunction
+	callbackRegistry[id] = CallbackInfo{
+		Func:       goFunction,
+		Widget:     widget,
+		ClientData: clientData,
+	}
 	nextCallbackID++
 	callbackMutex.Unlock()
 
