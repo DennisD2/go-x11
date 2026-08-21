@@ -139,6 +139,7 @@ Xt Functions:
 * XtScreen
 * XtWindow
 * XtSetValues
+* XtGetValues
 * XtManageChildren
 * XtAppAddActions
 * XtParseTranslationTable

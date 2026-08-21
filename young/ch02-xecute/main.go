@@ -10,11 +10,9 @@ import (
 )
 
 func yesCallback(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
-	println("YES Button\n")
 	cmd := C.GoString((*C.char)(clientData.P))
 	fmt.Printf("Command: %v\n", cmd)
 	if len(cmd) > 0 {
-		//syscall.Exec()
 		fmt.Printf("system(%v)\n", cmd)
 		cmd := exec.Command("sh", "-c", cmd)
 		cmd.Stdout = os.Stdout
@@ -76,14 +74,12 @@ func main() {
 	x11.XmStringFree(xmStr) /* Free the compound string */
 
 	var height uint16
-	// 2. Ermitteln Sie die Adresse der Variable als unsafe.Pointer
+	// get pointer to var
 	ptrToHeight := unsafe.Pointer(&height)
-	// 3. Konvertieren Sie diesen Pointer in ein uintptr für Ihre Struktur
+	//convert to uintptr to put it into ArgList
 	valueAsUintptr := uintptr(ptrToHeight)
-	// 4. Argumentenliste befüllen
 	inargs := x11.AppendArgList(nil, x11.XmNheight, valueAsUintptr)
 	x11.XtGetValues(msg, inargs)
-
 	fmt.Printf("height: %d\n", height)
 
 	args = x11.AppendArgList(nil, x11.XmNx, 0)
@@ -95,6 +91,7 @@ func main() {
 	no := x11.XtCreateManagedWidget("no", x11.PushButtonWidgetClass(), bb, args)
 
 	// we cannot use the go element from slice; we have to create a real C String address
+	// if it would be a go element, it could be setroyed by GC before we use it
 	cCmdString := C.CString(argv[1])
 	clientDataArg := x11.XtPointer{P: unsafe.Pointer(cCmdString)}
 
