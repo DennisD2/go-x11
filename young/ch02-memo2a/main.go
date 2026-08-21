@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func quit() {
+func quit(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	println("Button was selected! Pure Go code + X11 did this!")
 }
 
@@ -58,7 +58,7 @@ func main() {
 	x11.XmStringFree(xmStr) /* Free the compound string */
 
 	/* add a callback */
-	x11.XtAddCallback(msg, x11.XmNactivateCallback, quit)
+	x11.XtAddCallback(msg, x11.XmNactivateCallback, quit, x11.XtPointer{})
 
 	x11.XtRealizeWidget(shell)
 	x11.XtAppMainLoop(&appContext)

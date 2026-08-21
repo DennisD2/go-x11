@@ -71,9 +71,6 @@ func main() {
 	 */
 	x11.XtAugmentTranslations(msg, transTable)
 
-	/* add a callback */
-	//x11.XtAddCallback(msg, x11.XmNactivateCallback, quitAction)
-
 	x11.XtRealizeWidget(shell)
 	x11.XtAppMainLoop(&appContext)
 }
