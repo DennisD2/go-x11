@@ -5,19 +5,27 @@ import (
 	"fmt"
 	"go-x11/x11"
 	"os"
+	"os/exec"
 	"unsafe"
 )
 
 func yesCallback(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	println("YES Button\n")
 	cmd := C.GoString((*C.char)(clientData.P))
-	fmt.Print("Command: %v\n", cmd)
-	/*if len(cmd) > 0 {
+	fmt.Printf("Command: %v\n", cmd)
+	if len(cmd) > 0 {
 		//syscall.Exec()
 		fmt.Printf("system(%v)\n", cmd)
+		cmd := exec.Command("sh", "-c", cmd)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		err := cmd.Run()
+		if err != nil {
+			fmt.Printf("Error: %v\n", err)
+		}
 	} else {
 		fmt.Printf("cmd is empty string")
-	}*/
+	}
 	//os.Exit(0)
 }
 
@@ -86,8 +94,12 @@ func main() {
 	args = x11.AppendArgList(args, x11.XmNy, uintptr(height+20))
 	no := x11.XtCreateManagedWidget("no", x11.PushButtonWidgetClass(), bb, args)
 
+	// we cannot use the go element from slice; we have to create a real C String address
+	cCmdString := C.CString(argv[1])
+	clientDataArg := x11.XtPointer{P: unsafe.Pointer(cCmdString)}
+
 	/* add callbacks */
-	x11.XtAddCallback(yes, x11.XmNactivateCallback, yesCallback, x11.XtPointer{P: unsafe.Pointer(&(argv[1]))})
+	x11.XtAddCallback(yes, x11.XmNactivateCallback, yesCallback, clientDataArg)
 	x11.XtAddCallback(no, x11.XmNactivateCallback, noCallback, x11.XtPointer{})
 
 	x11.XtRealizeWidget(shell)
