@@ -118,7 +118,8 @@ Go structs for:
 * Arg
 * ArgList
 * XtActionsRec
-* GoXtEventHandler (rename this)
+* XtEventHandler
+* WidgetList
 
 
 Xt Functions:
@@ -164,15 +165,22 @@ Xt Args handling helpers:
 * AppendArgList
 * XtArgValFromInt
 * XtArgValFromString
+* XtArgValFromXmString
 * XtArgValFreeString
+* ConvertAnyEvent
+* ConvertButtonEvent
+* ConvertKeyEvent
+* ConvertMotionNotifyEvent
 
 ## From libXS (See Young's Book)
 * Xs_concat_words
 
 ## Open issues
+* API deviates slightly from X11. Check this, use tests. Not done yet.
+
+## Fixed issues
 * XtAddEventHandler(w Widget, eventMask EventMask, nonMaskable bool, proc GoXtEventHandler, clientData CAddr) is
   not using or handling clientData. Needs to be fixed.
-* API deviates slightly from X11. Check this, use tests. Not done yet.
 
 
 ## Internals

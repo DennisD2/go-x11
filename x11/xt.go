@@ -68,7 +68,7 @@ type XtPointer struct {
 	P unsafe.Pointer
 }
 
-type GoXtEventHandler func(w Widget, clientData CAddr, event *XEvent)
+type XtEventHandler func(w Widget, clientData CAddr, event *XEvent)
 
 // ============================================================================
 // Wrapper own definitions
@@ -408,12 +408,10 @@ func XtGetValues(w Widget, args *ArgList) {
 		return
 	}
 
-	// 1. C-Array für die Argumente allokieren
-	// XtGetValues modifiziert nicht die Struktur-Array-Adressen selbst,
-	// sondern schreibt an die Adressen, die in .value hinterlegt sind.
+	// allocate C array where X will put requested data
 	cArgs := make([]C.Arg, args.Size)
 
-	// Go-Strings, die für C temporär allokiert werden, müssen danach freigegeben werden
+	// free later allocated Go strings
 	allocatedStrings := make([]*C.char, args.Size)
 	defer func() {
 		for _, cStr := range allocatedStrings {
@@ -423,7 +421,7 @@ func XtGetValues(w Widget, args *ArgList) {
 		}
 	}()
 
-	// 2. Go-Struktur in C-Struktur konvertieren
+	// 2convert go -> c
 	for i := 0; i < args.Size; i++ {
 		cStr := C.CString(args.Slice[i].Name)
 		allocatedStrings[i] = cStr
@@ -433,19 +431,14 @@ func XtGetValues(w Widget, args *ArgList) {
 		cArgs[i].value = C.XtArgVal(args.Slice[i].Value)
 	}
 
-	// 3. C-Funktion aufrufen
-	// Wir übergeben den Pointer auf das erste Element des C-Arrays
+	// call c function
 	C.XtGetValues(
 		w.w,
 		(*C.Arg)(unsafe.Pointer(&cArgs[0])),
 		C.Cardinal(args.Size),
 	)
 
-	// Hinweis: Da C direkt in die im `uintptr` (Value) hinterlegten Adressen
-	// schreibt, sind die Daten im Go-Speicher (bzw. C-Speicher, je nachdem worauf
-	// der uintptr zeigt) nun bereits aktualisiert.
-	// Falls C die value-Felder selbst im Array modifiziert hat (selten bei XtGetValues),
-	// übertragen wir diese zur Sicherheit zurück in die Go-Struktur:
+	// copy back values into Go arry
 	for i := 0; i < args.Size; i++ {
 		args.Slice[i].Value = uintptr(cArgs[i].value)
 	}
@@ -601,7 +594,7 @@ func goEventHandlerBridge(w C.Widget, client_data C.XtPointer, event *C.XEvent, 
 	handlePtr := (*cgo.Handle)(unsafe.Pointer(client_data))
 
 	// 2. Extrahiere die hinterlegte Go-Funktion
-	goFunc, ok := handlePtr.Value().(GoXtEventHandler)
+	goFunc, ok := handlePtr.Value().(XtEventHandler)
 	if !ok || goFunc == nil {
 		return
 	}
@@ -615,7 +608,7 @@ func goEventHandlerBridge(w C.Widget, client_data C.XtPointer, event *C.XEvent, 
 	goFunc(goWidget, goCAddr, &goEvent)
 }
 
-func XtAddEventHandler(w Widget, eventMask EventMask, nonMaskable bool, proc GoXtEventHandler, clientData CAddr) {
+func XtAddEventHandler(w Widget, eventMask EventMask, nonMaskable bool, proc XtEventHandler, clientData CAddr) {
 	// 1. Create handle
 	handle := cgo.NewHandle(proc)
 	cClientData := C.XtPointer(unsafe.Pointer(&handle))
