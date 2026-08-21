@@ -403,6 +403,54 @@ func XtSetValues(w Widget, args *ArgList) {
 	C.call_XtSetValues(w.w, cArgsList, numArgs)
 }
 
+func XtGetValues(w Widget, args *ArgList) {
+	if args == nil || args.Size <= 0 || len(args.Slice) == 0 {
+		return
+	}
+
+	// 1. C-Array für die Argumente allokieren
+	// XtGetValues modifiziert nicht die Struktur-Array-Adressen selbst,
+	// sondern schreibt an die Adressen, die in .value hinterlegt sind.
+	cArgs := make([]C.Arg, args.Size)
+
+	// Go-Strings, die für C temporär allokiert werden, müssen danach freigegeben werden
+	allocatedStrings := make([]*C.char, args.Size)
+	defer func() {
+		for _, cStr := range allocatedStrings {
+			if cStr != nil {
+				C.free(unsafe.Pointer(cStr))
+			}
+		}
+	}()
+
+	// 2. Go-Struktur in C-Struktur konvertieren
+	for i := 0; i < args.Size; i++ {
+		cStr := C.CString(args.Slice[i].Name)
+		allocatedStrings[i] = cStr
+
+		cArgs[i].name = cStr
+		// Das Feld .value im C-Arg erwartet ein XtArgVal (oft synonym zu long/uintptr)
+		cArgs[i].value = C.XtArgVal(args.Slice[i].Value)
+	}
+
+	// 3. C-Funktion aufrufen
+	// Wir übergeben den Pointer auf das erste Element des C-Arrays
+	C.XtGetValues(
+		w.w,
+		(*C.Arg)(unsafe.Pointer(&cArgs[0])),
+		C.Cardinal(args.Size),
+	)
+
+	// Hinweis: Da C direkt in die im `uintptr` (Value) hinterlegten Adressen
+	// schreibt, sind die Daten im Go-Speicher (bzw. C-Speicher, je nachdem worauf
+	// der uintptr zeigt) nun bereits aktualisiert.
+	// Falls C die value-Felder selbst im Array modifiziert hat (selten bei XtGetValues),
+	// übertragen wir diese zur Sicherheit zurück in die Go-Struktur:
+	for i := 0; i < args.Size; i++ {
+		args.Slice[i].Value = uintptr(cArgs[i].value)
+	}
+}
+
 // ============================================================================
 // Xt callback code
 // ============================================================================
