@@ -11,14 +11,15 @@ package x11
 #include <X11/Xlib.h>
 */
 import "C"
+import "unsafe"
 
 // ============================================================================
 // X definitions
 // ============================================================================
 // Wrapper types
 type Display struct{ d *C.Display }
-type Screen struct{ s *C.Screen }
-type Window struct{ w C.Window }
+type Screen unsafe.Pointer
+type Window unsafe.Pointer
 type XEvent struct{ e C.XEvent }
 
 type EventMask int64

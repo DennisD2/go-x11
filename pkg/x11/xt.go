@@ -314,13 +314,13 @@ func XtDisplay(w Widget) *Display {
 
 func XtScreen(w Widget) *Screen {
 	cs := C.XtScreen(C.Widget(w))
-	return &Screen{s: cs}
+	return (*Screen)(unsafe.Pointer(cs))
 }
 
 // returns object, not reference
 func XtWindow(w Widget) Window {
 	cw := C.XtWindow(C.Widget(w))
-	return Window{w: cw}
+	return Window(unsafe.Pointer(&cw))
 }
 
 // AppMainLoop enters the Xt event loop
