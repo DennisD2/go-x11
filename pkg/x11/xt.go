@@ -26,8 +26,8 @@ import "C"
 // ============================================================================
 // Wrapper types
 type XtAppContext struct{ ctx C.XtAppContext }
-type Widget struct{ w C.Widget }
-type WidgetList []*Widget
+type Widget unsafe.Pointer
+type WidgetList []Widget
 type WidgetClass struct{ c C.WidgetClass }
 
 // XtArgVal wraps C.XtArgVal (generic argument value)
@@ -64,9 +64,7 @@ type XtActionsRec struct {
 
 type XtTranslations struct{ t C.XtTranslations }
 
-type XtPointer struct {
-	P unsafe.Pointer
-}
+type XtPointer unsafe.Pointer
 
 type XtEventHandler func(w Widget, clientData CAddr, event *XEvent)
 
@@ -149,7 +147,7 @@ func XtInitialize(
 		cArgvPtr,
 	)
 
-	return Widget{w: cWidget}
+	return Widget(cWidget)
 }
 
 func XtAppInitialize(
@@ -241,7 +239,7 @@ func XtAppInitialize(
 		numArgs,
 	)
 
-	return Widget{w: cWidget}
+	return Widget(cWidget)
 }
 
 func XtCreateWidget(name string, widgetClass WidgetClass, parent Widget, args *ArgList) Widget {
@@ -272,56 +270,56 @@ func XtCreateWidget(name string, widgetClass WidgetClass, parent Widget, args *A
 	widget := C.call_XtCreateManagedWidget(
 		cName,
 		widgetClass.c,
-		parent.w,
+		C.Widget(parent),
 		cArgsList,
 		numArgs,
 	)
 
-	return Widget{w: widget}
+	return Widget(widget)
 }
 
 func XtManageChild(w Widget) {
-	C.XtManageChild(w.w)
+	C.XtManageChild(C.Widget(w))
 }
 
 // CreateManagedWidget creates a managed Xt widget
 func XtCreateManagedWidget(name string, widgetClass WidgetClass, parent Widget, args *ArgList) Widget {
 	w := XtCreateWidget(name, widgetClass, parent, args)
-	C.XtManageChild(w.w)
+	C.XtManageChild(C.Widget(w))
 	return w
 }
 
 // RealizeWidget makes a widget visible
 func XtRealizeWidget(w Widget) {
-	C.XtRealizeWidget(w.w)
+	C.XtRealizeWidget(C.Widget(w))
 }
 
 func XtIsRealized(w Widget) bool {
-	return C.XtIsRealized(w.w) == C.TRUE
+	return C.XtIsRealized(C.Widget(w)) == C.TRUE
 }
 
 func XtIsManaged(w Widget) bool {
-	return C.XtIsManaged(w.w) == C.TRUE
+	return C.XtIsManaged(C.Widget(w)) == C.TRUE
 }
 
 func XtDestroyWidget(w Widget) {
-	C.XtDestroyWidget(w.w)
+	C.XtDestroyWidget(C.Widget(w))
 }
 
 // not sure that this works as expected - test
 func XtDisplay(w Widget) *Display {
-	cd := C.XtDisplay(w.w)
+	cd := C.XtDisplay(C.Widget(w))
 	return &Display{d: cd}
 }
 
 func XtScreen(w Widget) *Screen {
-	cs := C.XtScreen(w.w)
+	cs := C.XtScreen(C.Widget(w))
 	return &Screen{s: cs}
 }
 
 // returns object, not reference
 func XtWindow(w Widget) Window {
-	cw := C.XtWindow(w.w)
+	cw := C.XtWindow(C.Widget(w))
 	return Window{w: cw}
 }
 
@@ -400,7 +398,7 @@ func XtSetValues(w Widget, args *ArgList) {
 		cArgsList = cArgsSlice
 	}
 
-	C.call_XtSetValues(w.w, cArgsList, numArgs)
+	C.call_XtSetValues(C.Widget(w), cArgsList, numArgs)
 }
 
 func XtGetValues(w Widget, args *ArgList) {
@@ -433,7 +431,7 @@ func XtGetValues(w Widget, args *ArgList) {
 
 	// call c function
 	C.XtGetValues(
-		w.w,
+		C.Widget(w),
 		(*C.Arg)(unsafe.Pointer(&cArgs[0])),
 		C.Cardinal(args.Size),
 	)
@@ -471,7 +469,7 @@ func goCallbackDispatcher(w C.Widget, client_data C.XtPointer, call_data C.XtPoi
 	callbackMutex.Unlock()
 
 	// Das aktuelle, dynamische call_data von C in den Go-Typ verpacken
-	currentCallData := XtPointer{P: unsafe.Pointer(call_data)}
+	currentCallData := XtPointer(unsafe.Pointer(call_data))
 
 	if exists {
 		info.Func(info.Widget, info.ClientData, currentCallData)
@@ -496,7 +494,7 @@ func XtAddCallback(widget Widget, callbackName string,
 	callbackMutex.Unlock()
 
 	// call Xt function via wrapper
-	C.call_XtAddCallback(widget.w, cName, C.uintptr_t(id))
+	C.call_XtAddCallback(C.Widget(widget), cName, C.uintptr_t(id))
 }
 
 // ============================================================================
@@ -529,7 +527,7 @@ func goActionBridgeWithId(w C.Widget, event *C.XEvent, params *C.String, num_par
 			goParams = append(goParams, C.GoString(cStr))
 		}
 	}
-	goWidget := Widget{w: w}
+	goWidget := Widget(w)
 	goEvent := XEvent{e: *event}
 
 	// call the go function
@@ -577,7 +575,7 @@ func XtParseTranslationTable(table []string) XtTranslations {
 }
 
 func XtAugmentTranslations(w Widget, translations XtTranslations) {
-	C.XtAugmentTranslations(w.w, translations.t)
+	C.XtAugmentTranslations(C.Widget(w), translations.t)
 }
 
 // ============================================================================
@@ -600,7 +598,7 @@ func goEventHandlerBridge(w C.Widget, client_data C.XtPointer, event *C.XEvent, 
 	}
 
 	// 3. Verpacke die C-Typen in deine Framework-Typen
-	goWidget := Widget{w: w}
+	goWidget := Widget(w)
 	goEvent := XEvent{e: *event}
 	goCAddr := CAddr(client_data)
 
@@ -620,7 +618,7 @@ func XtAddEventHandler(w Widget, eventMask EventMask, nonMaskable bool, proc XtE
 	}
 
 	C.call_XtAddEventHandler(
-		C.Widget(w.w),
+		C.Widget(w),
 		C.EventMask(eventMask),
 		cNonMaskable,
 		C.XtEventHandler(C.goEventHandlerBridge), // KORREKTUR: Hier übergeben wir die Brücke über den C-Namespace
@@ -659,7 +657,7 @@ func XtManageChildren(widgetList WidgetList) {
 
 	cArray := make([]C.Widget, len(widgetList))
 	for i, widget := range widgetList {
-		cArray[i] = widget.w
+		cArray[i] = C.Widget(widget)
 	}
 
 	cPtr := (**C.Widget)(unsafe.Pointer(&cArray[0]))

@@ -10,7 +10,7 @@ import (
 )
 
 func yesCallback(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
-	cmd := C.GoString((*C.char)(clientData.P))
+	cmd := C.GoString((*C.char)(clientData))
 	fmt.Printf("Command: %v\n", cmd)
 	if len(cmd) > 0 {
 		fmt.Printf("system(%v)\n", cmd)
@@ -93,13 +93,13 @@ func main() {
 	// we cannot use the go element from slice; we have to create a real C String address
 	// if it would be a go element, it could be destroyed by GC before we use it
 	cCmdString := C.CString(argv[1])
-	clientDataArg := x11.XtPointer{P: unsafe.Pointer(cCmdString)}
+	clientDataArg := x11.XtPointer(unsafe.Pointer(cCmdString))
 
 	//clientDataArg = GoStringToDurableXtPointer(argv[1])
 
 	/* add callbacks */
 	x11.XtAddCallback(yes, x11.XmNactivateCallback, yesCallback, clientDataArg)
-	x11.XtAddCallback(no, x11.XmNactivateCallback, noCallback, x11.XtPointer{})
+	x11.XtAddCallback(no, x11.XmNactivateCallback, noCallback, x11.XtPointer(nil))
 
 	x11.XtRealizeWidget(shell)
 	x11.XtAppMainLoop(&appContext)
