@@ -91,7 +91,7 @@ func main() {
 	no := x11.XtCreateManagedWidget("no", x11.PushButtonWidgetClass(), bb, args)
 
 	// we cannot use the go element from slice; we have to create a real C String address
-	// if it would be a go element, it could be setroyed by GC before we use it
+	// if it would be a go element, it could be destroyed by GC before we use it
 	cCmdString := C.CString(argv[1])
 	clientDataArg := x11.XtPointer{P: unsafe.Pointer(cCmdString)}
 
