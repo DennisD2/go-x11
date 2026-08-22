@@ -14,9 +14,7 @@ import "unsafe"
 // ============================================================================
 
 // XmString wraps C.XmString (Motif compound string)
-type XmString struct {
-	s C.XmString
-}
+type XmString unsafe.Pointer
 
 type XmStringCharset struct {
 	charSet string
@@ -32,7 +30,7 @@ func XmStringCreate(text string, charset XmStringCharset) XmString {
 	c_charSet := C.CString(charset.charSet)
 	defer C.free(unsafe.Pointer(c_text))
 	xmstr := C.XmStringCreate(c_text, c_charSet)
-	return XmString{s: xmstr}
+	return XmString(unsafe.Pointer(xmstr))
 }
 
 // XmStringCreateLtoR creates a Motif compound string from left-to-right text
@@ -41,14 +39,16 @@ func XmStringCreateLtoR(text string, charset XmStringCharset) XmString {
 	c_charSet := C.CString(charset.charSet)
 	defer C.free(unsafe.Pointer(c_text))
 	xmstr := C.XmStringCreateLtoR(c_text, c_charSet)
-	return XmString{s: xmstr}
+	return XmString(unsafe.Pointer(xmstr))
 }
 
 // XmStringFree frees an XmString
 func XmStringFree(s XmString) {
-	C.XmStringFree(s.s)
+	C.XmStringFree(C.XmString(unsafe.Pointer(s)))
 }
 
 func XmStringConcat(a XmString, b XmString) XmString {
-	return XmString{C.XmStringConcat(a.s, b.s)}
+	goa := C.XmString(unsafe.Pointer(a))
+	gob := C.XmString(unsafe.Pointer(b))
+	return XmString(C.XmStringConcat(goa, gob))
 }
