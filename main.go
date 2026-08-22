@@ -54,6 +54,8 @@ func main() {
 		println("Button was selected! Pure Go code + X11 did this!")
 	}, x11.XtPointer(nil))
 
+	//x11.XtAppCreateShell("shell", "Shell", x11.PushButtonWidgetClass(), x11.XtDisplay(msg), nil)
+
 	x11.XtRealizeWidget(shell)
 	x11.XtAppMainLoop(appContext)
 }

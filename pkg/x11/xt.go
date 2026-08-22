@@ -667,7 +667,7 @@ func XtOpenDisplay(ctx XtAppContext, display_string string, application_name str
 	application_class string, options []OptionDescRec, num_options, argc *int, argv []string) Display {
 	var d Display
 	// TODO
-	println("XtOpenDisplay() to be implemented")
+	XtWarning("XtOpenDisplay() to be implemented")
 	return d
 }
 
@@ -679,6 +679,10 @@ func XtAppCreateShell(application_name string, application_class string, widgetC
 	display *Display, args *ArgList) Widget {
 	var w Widget
 	// TODO
-	println("XtAppCreateShell() to be implemented")
+	XtWarning("XtAppCreateShell() to be implemented")
 	return w
+}
+
+func XtWarning(message string) {
+	C.XtWarning(C.CString(message))
 }
