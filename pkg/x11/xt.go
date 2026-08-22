@@ -309,7 +309,7 @@ func XtDestroyWidget(w Widget) {
 // not sure that this works as expected - test
 func XtDisplay(w Widget) *Display {
 	cd := C.XtDisplay(C.Widget(w))
-	return &Display{d: cd}
+	return (*Display)(unsafe.Pointer(cd))
 }
 
 func XtScreen(w Widget) *Screen {

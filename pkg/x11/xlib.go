@@ -17,7 +17,7 @@ import "unsafe"
 // X definitions
 // ============================================================================
 // Wrapper types
-type Display struct{ d *C.Display }
+type Display unsafe.Pointer
 type Screen unsafe.Pointer
 type Window unsafe.Pointer
 type XEvent struct{ e C.XEvent }
