@@ -7,7 +7,7 @@ import "testing"
 func TestXmStringCreateLtoR(t *testing.T) {
 	text := "hello world"
 	xs := XmStringCreateLtoR(text, XmSTRING_DEFAULT_CHARSET)
-	if xs.s == nil {
+	if xs == nil {
 		t.Fatalf("XmStringCreateLtoR returned nil for %q", text)
 	}
 
