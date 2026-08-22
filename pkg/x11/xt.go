@@ -32,6 +32,7 @@ type WidgetClass unsafe.Pointer
 type XtArgVal unsafe.Pointer //  Xt generic argument value
 type CAddr unsafe.Pointer
 type XtPointer unsafe.Pointer
+type XtTranslations unsafe.Pointer
 
 // OptionDescRec Go structure
 type OptionDescRec struct {
@@ -57,8 +58,6 @@ type XtActionsRec struct {
 	ActionString string
 	Action       func(w Widget, event *XEvent, params []string)
 }
-
-type XtTranslations struct{ t C.XtTranslations }
 
 type XtEventHandler func(w Widget, clientData CAddr, event *XEvent)
 
@@ -561,11 +560,11 @@ func XtParseTranslationTable(table []string) XtTranslations {
 		goStr += "\n"
 	}
 	cTableString := C.CString(goStr)
-	return XtTranslations{t: C.XtParseTranslationTable(cTableString)}
+	return XtTranslations(C.XtParseTranslationTable(cTableString))
 }
 
 func XtAugmentTranslations(w Widget, translations XtTranslations) {
-	C.XtAugmentTranslations(C.Widget(w), translations.t)
+	C.XtAugmentTranslations(C.Widget(w), C.XtTranslations(translations))
 }
 
 // ============================================================================

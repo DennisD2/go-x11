@@ -21,24 +21,29 @@ displays the button and responds to a callback if button is pressed after enteri
 last line.
 
 ```cgo
+package main
+
 import (
 	"fmt"
-	"go-x11/x11"
+	"go-x11/pkg/x11"
 	"os"
 )
 
 func main() {
-	argv := os.Args[1:]
 	var appContext x11.XtAppContext
+
 	var options []x11.OptionDescRec
 	fallbacks := []string{""}
 	//initArgs := []x11.Arg{{Name: "width", Value: 200}}
 	initArgs := []x11.Arg{}
 
 	shell := x11.XtAppInitialize(
-		&appContext, "GoXtApp",
-		options, os.Args,
-		fallbacks, initArgs,
+		&appContext,
+		"GoXtApp",
+		options,
+		os.Args,
+		fallbacks,
+		initArgs,
 	)
 
 	/* Convert some string to the form expected by Motif */
@@ -46,27 +51,27 @@ func main() {
 	if len(os.Args) > 1 {
 		xmStr = x11.Xs_concat_words(os.Args[1:])
 	} else {
-		xmStr = x11.XmStringCreateLtoR("please click me!", x11.XmSTRING_DEFAULT_CHARSET)
+		xmStr = x11.XmStringCreateLtoR("please click me!", x11.XmFONTLIST_DEFAULT_TAG)
 	}
 
 	/* define some args */
 	args := x11.AppendArgList(nil, x11.XmNlabelString, x11.XtArgValFromXmString(xmStr))
 	args = x11.AppendArgList(args, x11.XtNwidth, 400)
 	args = x11.AppendArgList(args, x11.XtNheight, 200)
-	
 	/* Create a Motif widget to display the string */
 	widgetClass := x11.PushButtonWidgetClass() // or x11.LabelWidgetClass()
-	x11.XtCreateManagedWidget("message", widgetClass, shell, args)
+	msg := x11.XtCreateManagedWidget("message", widgetClass, shell, args)
+	_ = msg
 
 	x11.XmStringFree(xmStr) /* Free the compound string */
 
 	/* add a callback */
-	x11.XtAddCallback(msg, x11.XmNactivateCallback, func() {
+	x11.XtAddCallback(msg, x11.XmNactivateCallback, func(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 		println("Button was selected! Pure Go code + X11 did this!")
-	})
+	}, x11.XtPointer(nil))
 
 	x11.XtRealizeWidget(shell)
-	x11.XtAppMainLoop(&appContext)
+	x11.XtAppMainLoop(appContext)
 }
 ```
 
@@ -96,8 +101,7 @@ X11 together with Motif offers are large amount of objects and functions. I have
 with a few, needed in almost every application. Other will follow.
 
 ### From Xlib
-Wrapper structs for:
-
+Wrappers for:
 * Display
 * Screen
 * Window
@@ -120,7 +124,6 @@ Go structs for:
 * XtActionsRec
 * XtEventHandler
 * WidgetList
-
 
 Xt Functions:
 * XtInitialize
@@ -148,7 +151,7 @@ Xt Functions:
 * XtAddEventHandler
 
 ## From Xm (Motif)
-Wrapper structs for:
+Wrappers for:
 * XmString
 * XmStringCharset
 
@@ -177,6 +180,8 @@ Xt Args handling helpers:
 
 ## Open issues
 * API deviates slightly from X11. Check this, use tests. Not done yet.
+* XtAppAddActions and Action handling is not complete. Action functions
+  cannot take parameters, this should be added.
 
 ## Fixed issues
 * XtAddEventHandler(w Widget, eventMask EventMask, nonMaskable bool, proc GoXtEventHandler, clientData CAddr) is
