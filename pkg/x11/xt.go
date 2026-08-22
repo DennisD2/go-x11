@@ -29,12 +29,7 @@ type XtAppContext unsafe.Pointer
 type Widget unsafe.Pointer
 type WidgetList []Widget
 type WidgetClass struct{ c C.WidgetClass }
-
-// XtArgVal wraps C.XtArgVal (generic argument value)
-type XtArgVal struct {
-	ArgVal C.XtArgVal
-}
-
+type XtArgVal unsafe.Pointer //  Xt generic argument value
 type CAddr unsafe.Pointer
 
 // OptionDescRec Go structure
@@ -344,10 +339,10 @@ func XtArgValFromString(s string) uintptr {
 
 // XtArgValFreeString frees a C string previously created by XtArgValFromString.
 func XtArgValFreeString(v XtArgVal) {
-	if v.ArgVal == 0 {
+	if v == nil {
 		return
 	}
-	C.free(unsafe.Pointer(uintptr(v.ArgVal)))
+	C.free(unsafe.Pointer(uintptr(v)))
 }
 
 // AppendArgList appends a (name, value) pair to an existing ArgList.
