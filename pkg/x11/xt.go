@@ -28,7 +28,7 @@ import "C"
 type XtAppContext unsafe.Pointer
 type Widget unsafe.Pointer
 type WidgetList []Widget
-type WidgetClass struct{ c C.WidgetClass }
+type WidgetClass unsafe.Pointer
 type XtArgVal unsafe.Pointer //  Xt generic argument value
 type CAddr unsafe.Pointer
 type XtPointer unsafe.Pointer
@@ -260,7 +260,7 @@ func XtCreateWidget(name string, widgetClass WidgetClass, parent Widget, args *A
 	// call Xt function via wrapper
 	widget := C.call_XtCreateManagedWidget(
 		cName,
-		widgetClass.c,
+		C.WidgetClass(widgetClass),
 		C.Widget(parent),
 		cArgsList,
 		numArgs,

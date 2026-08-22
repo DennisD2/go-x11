@@ -70,174 +70,227 @@ import "unsafe"
 // WidgetClass defines - need to be functions
 
 func ArrowButtonWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmArrowButtonWidgetClass}
-}
-func ArrowButtonGadgetClass() WidgetClass {
-	return WidgetClass{c: C.xmArrowButtonGadgetClass}
-}
-func BulletinBoardWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmBulletinBoardWidgetClass}
-}
-func CascadeButtonWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmCascadeButtonWidgetClass}
-}
-func CascadeButtonGadgetClass() WidgetClass {
-	return WidgetClass{c: C.xmCascadeButtonGadgetClass}
-}
-func ClipWindowWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmClipWindowWidgetClass}
-}
-func ComboBoxWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmComboBoxWidgetClass}
-}
-func CommandWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmCommandWidgetClass}
-}
-func DesktopClass() WidgetClass {
-	return WidgetClass{c: C.xmDesktopClass}
-}
-func DialogShellWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmDialogShellWidgetClass}
-}
-func DialogShellExtObjectClass() WidgetClass {
-	return WidgetClass{c: C.xmDialogShellExtObjectClass}
-}
-func DragContextClass() WidgetClass {
-	return WidgetClass{c: C.xmDragContextClass}
-}
-func DragIconObjectClass() WidgetClass {
-	return WidgetClass{c: C.xmDragIconObjectClass}
-}
-func DrawingAreaWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmDrawingAreaWidgetClass}
-}
-func DrawnButtonWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmDrawnButtonWidgetClass}
-}
-func DropDownWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmDropDownWidgetClass}
-}
-func DropSiteManagerObjectClass() WidgetClass {
-	return WidgetClass{c: C.xmDropSiteManagerObjectClass}
-}
-func DropTransferObjectClass() WidgetClass {
-	return WidgetClass{c: C.xmDropTransferObjectClass}
-}
-func Ext18ListWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmExt18ListWidgetClass}
-}
-func ExtObjectClass() WidgetClass {
-	return WidgetClass{c: C.xmExtObjectClass}
-}
-func FileSelectionBoxWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmFileSelectionBoxWidgetClass}
-}
-func FormWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmFormWidgetClass}
-}
-func FrameWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmFrameWidgetClass}
-}
-func GadgetClass() WidgetClass {
-	return WidgetClass{c: C.xmGadgetClass}
-}
-func GrabShellWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmGrabShellWidgetClass}
-}
-func LabelWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmLabelWidgetClass}
-}
-func LabelGadgetClass() WidgetClass {
-	return WidgetClass{c: C.xmLabelGadgetClass}
-}
-func ListWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmListWidgetClass}
-}
-func MainWindowWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmMainWindowWidgetClass}
-}
-func ManagerWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmManagerWidgetClass}
-}
-func MenuShellWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmMenuShellWidgetClass}
-}
-func MessageBoxWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmMessageBoxWidgetClass}
-}
-func MultiListWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmMultiListWidgetClass}
-}
-func NotebookWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmNotebookWidgetClass}
-}
-func PanedWindowWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmPanedWindowWidgetClass}
-}
-func PrimitiveWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmPrimitiveWidgetClass}
+	return WidgetClass(unsafe.Pointer(C.xmArrowButtonWidgetClass))
 }
 
-//	func PrintShellWidgetClass() WidgetClass {
-//		return WidgetClass{c: C.xmPrintShellWidgetClass}
-//	}
+func ArrowButtonGadgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmArrowButtonGadgetClass))
+}
+
+func BulletinBoardWidgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmBulletinBoardWidgetClass))
+}
+
+func CascadeButtonWidgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmCascadeButtonWidgetClass))
+}
+
+func CascadeButtonGadgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmCascadeButtonGadgetClass))
+}
+
+func ClipWindowWidgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmClipWindowWidgetClass))
+}
+
+func ComboBoxWidgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmComboBoxWidgetClass))
+}
+
+func CommandWidgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmCommandWidgetClass))
+}
+
+func DesktopClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmDesktopClass))
+}
+
+func DialogShellWidgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmDialogShellWidgetClass))
+}
+
+func DialogShellExtObjectClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmDialogShellExtObjectClass))
+}
+
+func DragContextClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmDragContextClass))
+}
+
+func DragIconObjectClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmDragIconObjectClass))
+}
+
+func DrawingAreaWidgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmDrawingAreaWidgetClass))
+}
+
+func DrawnButtonWidgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmDrawnButtonWidgetClass))
+}
+
+func DropDownWidgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmDropDownWidgetClass))
+}
+
+func DropSiteManagerObjectClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmDropSiteManagerObjectClass))
+}
+
+func DropTransferObjectClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmDropTransferObjectClass))
+}
+
+func Ext18ListWidgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmExt18ListWidgetClass))
+}
+
+func ExtObjectClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmExtObjectClass))
+}
+
+func FileSelectionBoxWidgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmFileSelectionBoxWidgetClass))
+}
+
+func FormWidgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmFormWidgetClass))
+}
+
+func FrameWidgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmFrameWidgetClass))
+}
+
+func GadgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmGadgetClass))
+}
+
+func GrabShellWidgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmGrabShellWidgetClass))
+}
+
+func LabelWidgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmLabelWidgetClass))
+}
+
+func LabelGadgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmLabelGadgetClass))
+}
+
+func ListWidgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmListWidgetClass))
+}
+
+func MainWindowWidgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmMainWindowWidgetClass))
+}
+
+func ManagerWidgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmManagerWidgetClass))
+}
+
+func MenuShellWidgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmMenuShellWidgetClass))
+}
+
+func MessageBoxWidgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmMessageBoxWidgetClass))
+}
+
+func MultiListWidgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmMultiListWidgetClass))
+}
+
+func NotebookWidgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmNotebookWidgetClass))
+}
+
+func PanedWindowWidgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmPanedWindowWidgetClass))
+}
+
+func PrimitiveWidgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.xmPrimitiveWidgetClass))
+}
+
+//func PrintShellWidgetClass() WidgetClass {
+//	return WidgetClass(unsafe.Pointer(C.xmPrintShellWidgetClass))
+//}
 
 func ProtocolObjectClass() WidgetClass {
-	return WidgetClass{c: C.xmProtocolObjectClass}
+	return WidgetClass(unsafe.Pointer(C.xmProtocolObjectClass))
 }
+
 func PushButtonWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmPushButtonWidgetClass}
+	return WidgetClass(unsafe.Pointer(C.xmPushButtonWidgetClass))
 }
+
 func PushButtonGadgetClass() WidgetClass {
-	return WidgetClass{c: C.xmPushButtonGadgetClass}
+	return WidgetClass(unsafe.Pointer(C.xmPushButtonGadgetClass))
 }
+
 func RowColumnWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmRowColumnWidgetClass}
+	return WidgetClass(unsafe.Pointer(C.xmRowColumnWidgetClass))
 }
+
 func SimpleSpinBoxWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmSimpleSpinBoxWidgetClass}
+	return WidgetClass(unsafe.Pointer(C.xmSimpleSpinBoxWidgetClass))
 }
+
 func SashWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmSashWidgetClass}
+	return WidgetClass(unsafe.Pointer(C.xmSashWidgetClass))
 }
+
 func ScaleWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmScaleWidgetClass}
+	return WidgetClass(unsafe.Pointer(C.xmScaleWidgetClass))
 }
+
 func ScrollBarWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmScrollBarWidgetClass}
+	return WidgetClass(unsafe.Pointer(C.xmScrollBarWidgetClass))
 }
+
 func ScrolledWindowWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmScrolledWindowWidgetClass}
+	return WidgetClass(unsafe.Pointer(C.xmScrolledWindowWidgetClass))
 }
+
 func SelectionBoxWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmSelectionBoxWidgetClass}
+	return WidgetClass(unsafe.Pointer(C.xmSelectionBoxWidgetClass))
 }
+
 func SeparatorGadgetClass() WidgetClass {
-	return WidgetClass{c: C.xmSeparatorGadgetClass}
+	return WidgetClass(unsafe.Pointer(C.xmSeparatorGadgetClass))
 }
+
 func SeparatorWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmSeparatorWidgetClass}
+	return WidgetClass(unsafe.Pointer(C.xmSeparatorWidgetClass))
 }
+
 func ShellExtObjectClass() WidgetClass {
-	return WidgetClass{c: C.xmShellExtObjectClass}
+	return WidgetClass(unsafe.Pointer(C.xmShellExtObjectClass))
 }
+
 func SpinBoxWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmSpinBoxWidgetClass}
+	return WidgetClass(unsafe.Pointer(C.xmSpinBoxWidgetClass))
 }
+
 func TearOffButtonWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmTearOffButtonWidgetClass}
+	return WidgetClass(unsafe.Pointer(C.xmTearOffButtonWidgetClass))
 }
+
 func ToggleButtonWidgetClass() WidgetClass {
-	return WidgetClass{c: C.xmToggleButtonWidgetClass}
+	return WidgetClass(unsafe.Pointer(C.xmToggleButtonWidgetClass))
 }
+
 func ToggleButtonGadgetClass() WidgetClass {
-	return WidgetClass{c: C.xmToggleButtonGadgetClass}
+	return WidgetClass(unsafe.Pointer(C.xmToggleButtonGadgetClass))
 }
+
 func vendorShellWidgetClass() WidgetClass {
-	return WidgetClass{c: C.vendorShellWidgetClass}
+	return WidgetClass(unsafe.Pointer(C.vendorShellWidgetClass))
 }
+
 func VendorShellExtObjectClass() WidgetClass {
-	return WidgetClass{c: C.xmVendorShellExtObjectClass}
+	return WidgetClass(unsafe.Pointer(C.xmVendorShellExtObjectClass))
 }
 
 // Defines for Xm widgets
