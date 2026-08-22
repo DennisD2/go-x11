@@ -3,7 +3,7 @@ package main
 import "C"
 import (
 	"fmt"
-	"go-x11/x11"
+	"go-x11/pkg/x11"
 	"os"
 	"os/exec"
 	"unsafe"
@@ -95,10 +95,13 @@ func main() {
 	cCmdString := C.CString(argv[1])
 	clientDataArg := x11.XtPointer{P: unsafe.Pointer(cCmdString)}
 
+	//clientDataArg = GoStringToDurableXtPointer(argv[1])
+
 	/* add callbacks */
 	x11.XtAddCallback(yes, x11.XmNactivateCallback, yesCallback, clientDataArg)
 	x11.XtAddCallback(no, x11.XmNactivateCallback, noCallback, x11.XtPointer{})
 
 	x11.XtRealizeWidget(shell)
 	x11.XtAppMainLoop(&appContext)
+	//x11.
 }

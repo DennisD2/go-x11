@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"go-x11/x11"
+	"go-x11/pkg/x11"
 	"os"
 )
 
