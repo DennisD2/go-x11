@@ -20,7 +20,7 @@ import "unsafe"
 type Display unsafe.Pointer
 type Screen unsafe.Pointer
 type Window unsafe.Pointer
-type XEvent struct{ e C.XEvent }
+type XEvent unsafe.Pointer
 
 type EventMask int64
 

@@ -80,18 +80,15 @@ func WrapperInfo() {
 // ============================================================================
 
 func XtDispatchEvent(e *XEvent) {
-	cep := &(e.e)
-	C.XtDispatchEvent(cep)
+	C.XtDispatchEvent((*C.XEvent)(unsafe.Pointer(e)))
 }
 
 func XtNextEvent(e *XEvent) {
-	cep := &(e.e)
-	C.XtNextEvent(cep)
+	C.XtNextEvent((*C.XEvent)(unsafe.Pointer(e)))
 }
 
 func XtAppNextEvent(appContext XtAppContext, e *XEvent) {
-	cep := &(e.e)
-	C.XtAppNextEvent(appContext.ctx, cep)
+	C.XtAppNextEvent(appContext.ctx, (*C.XEvent)(unsafe.Pointer(e)))
 }
 
 func XtInitialize(
@@ -528,7 +525,7 @@ func goActionBridgeWithId(w C.Widget, event *C.XEvent, params *C.String, num_par
 		}
 	}
 	goWidget := Widget(w)
-	goEvent := XEvent{e: *event}
+	goEvent := XEvent(event)
 
 	// call the go function
 	goFunc(goWidget, goEvent, goParams)
@@ -599,11 +596,11 @@ func goEventHandlerBridge(w C.Widget, client_data C.XtPointer, event *C.XEvent, 
 
 	// 3. Verpacke die C-Typen in deine Framework-Typen
 	goWidget := Widget(w)
-	goEvent := XEvent{e: *event}
+	goEvent := (*XEvent)(unsafe.Pointer(event))
 	goCAddr := CAddr(client_data)
 
 	// 4. Rufe den puren Go-Code auf!
-	goFunc(goWidget, goCAddr, &goEvent)
+	goFunc(goWidget, goCAddr, goEvent)
 }
 
 func XtAddEventHandler(w Widget, eventMask EventMask, nonMaskable bool, proc XtEventHandler, clientData CAddr) {
@@ -621,29 +618,25 @@ func XtAddEventHandler(w Widget, eventMask EventMask, nonMaskable bool, proc XtE
 		C.Widget(w),
 		C.EventMask(eventMask),
 		cNonMaskable,
-		C.XtEventHandler(C.goEventHandlerBridge), // KORREKTUR: Hier übergeben wir die Brücke über den C-Namespace
+		C.XtEventHandler(C.goEventHandlerBridge),
 		cClientData,
 	)
 }
 
 func ConvertAnyEvent(ev *XEvent) XAnyEvent {
-	cEvent := unsafe.Pointer(&(ev.e))
-	return *(*XAnyEvent)(unsafe.Pointer(cEvent))
+	return *(*XAnyEvent)(unsafe.Pointer(ev))
 }
 
 func ConvertButtonEvent(ev *XEvent) XButtonEvent {
-	cEvent := unsafe.Pointer(&(ev.e))
-	return *(*XButtonEvent)(unsafe.Pointer(cEvent))
+	return *(*XButtonEvent)(unsafe.Pointer(ev))
 }
 
 func ConvertKeyEvent(ev *XEvent) XKeyEvent {
-	cEvent := unsafe.Pointer(&(ev.e))
-	return *(*XKeyEvent)(unsafe.Pointer(cEvent))
+	return *(*XKeyEvent)(unsafe.Pointer(ev))
 }
 
 func ConvertMotionNotifyEvent(ev *XEvent) XMotionEvent {
-	cEvent := unsafe.Pointer(&(ev.e))
-	return *(*XMotionEvent)(unsafe.Pointer(cEvent))
+	return *(*XMotionEvent)(unsafe.Pointer(ev))
 }
 
 // ============================================================================
