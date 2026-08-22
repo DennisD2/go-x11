@@ -108,7 +108,7 @@ Wrappers for:
 * XEvent
 
 ### From Xt (X Toolkit)
-Wrapper structs for:
+Wrapper for:
 * XtAppContext
 * Widget
 * WidgetClass
@@ -162,6 +162,7 @@ Xm Functions:
 * XmStringConcat
 
 ## Misc. and helpers
+Wrapper for:
 * CAddr
 
 Xt Args handling helpers:
