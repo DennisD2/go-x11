@@ -16,6 +16,11 @@ import "unsafe"
 type XmString unsafe.Pointer
 type XmStringCharset unsafe.Pointer
 
+type XmAnyCallbackStruct struct {
+	reason int
+	event  *XEvent
+}
+
 // ============================================================================
 // Xm Functions - Motif Toolkit
 // ============================================================================

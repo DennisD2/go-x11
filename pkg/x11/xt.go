@@ -650,3 +650,35 @@ func XtManageChildren(widgetList WidgetList) {
 	// call Xt function via wrapper
 	C.call_XtManageChildren(cPtr, C.int(len(widgetList)))
 }
+
+func XtCloseDisplay(display *Display) {
+	C.XtCloseDisplay((*C.Display)(unsafe.Pointer(display)))
+}
+
+func XtDestroyApplicationContext(appContext XtAppContext) {
+	C.XtDestroyApplicationContext(C.XtAppContext(appContext))
+}
+
+func XtCreateApplicationContext() XtAppContext {
+	return (XtAppContext(C.XtCreateApplicationContext()))
+}
+
+func XtOpenDisplay(ctx XtAppContext, display_string string, application_name string,
+	application_class string, options []OptionDescRec, num_options, argc *int, argv []string) Display {
+	var d Display
+	// TODO
+	println("XtOpenDisplay() to be implemented")
+	return d
+}
+
+func XtToolkitInitialize() {
+	C.XtToolkitInitialize()
+}
+
+func XtAppCreateShell(application_name string, application_class string, widgetClass WidgetClass,
+	display *Display, args *ArgList) Widget {
+	var w Widget
+	// TODO
+	println("XtAppCreateShell() to be implemented")
+	return w
+}
