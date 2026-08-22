@@ -65,6 +65,7 @@ package x11
 #include "Xm/VendorSEP.h"
 */
 import "C"
+import "unsafe"
 
 // WidgetClass defines - need to be functions
 
@@ -964,5 +965,5 @@ var XmNy = C.GoString(C.XtNy)
 
 //var XmNanimate = C.GoString(C."animate")
 
-var XmFONTLIST_DEFAULT_TAG = XmStringCharset{C.GoString(C.XmFONTLIST_DEFAULT_TAG)}
-var XmSTRING_DEFAULT_CHARSET = XmStringCharset{C.GoString(C.XmSTRING_DEFAULT_CHARSET)}
+var XmFONTLIST_DEFAULT_TAG = XmStringCharset((*C.char)(unsafe.Pointer(C.XmFONTLIST_DEFAULT_TAG)))
+var XmSTRING_DEFAULT_CHARSET = XmStringCharset((*C.char)(unsafe.Pointer(C.XmSTRING_DEFAULT_CHARSET)))
