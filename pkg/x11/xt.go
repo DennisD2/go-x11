@@ -31,6 +31,7 @@ type WidgetList []Widget
 type WidgetClass struct{ c C.WidgetClass }
 type XtArgVal unsafe.Pointer //  Xt generic argument value
 type CAddr unsafe.Pointer
+type XtPointer unsafe.Pointer
 
 // OptionDescRec Go structure
 type OptionDescRec struct {
@@ -58,8 +59,6 @@ type XtActionsRec struct {
 }
 
 type XtTranslations struct{ t C.XtTranslations }
-
-type XtPointer unsafe.Pointer
 
 type XtEventHandler func(w Widget, clientData CAddr, event *XEvent)
 
