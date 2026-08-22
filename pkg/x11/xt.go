@@ -59,7 +59,7 @@ type ArgList struct {
 
 type XtActionsRec struct {
 	ActionString string
-	Action       func(w Widget, event XEvent, params []string)
+	Action       func(w Widget, event *XEvent, params []string)
 }
 
 type XtTranslations struct{ t C.XtTranslations }
@@ -500,7 +500,7 @@ func XtAddCallback(widget Widget, callbackName string,
 
 // registry maps an ID to a go function
 var (
-	actionPool      = make(map[int]func(w Widget, event XEvent, params []string))
+	actionPool      = make(map[int]func(w Widget, event *XEvent, params []string))
 	nextActionID    = 0
 	actionPoolMutex sync.RWMutex
 )
@@ -525,7 +525,7 @@ func goActionBridgeWithId(w C.Widget, event *C.XEvent, params *C.String, num_par
 		}
 	}
 	goWidget := Widget(w)
-	goEvent := XEvent(event)
+	goEvent := (*XEvent)(unsafe.Pointer(event))
 
 	// call the go function
 	goFunc(goWidget, goEvent, goParams)

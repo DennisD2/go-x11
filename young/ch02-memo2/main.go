@@ -5,12 +5,12 @@ import (
 	"os"
 )
 
-func quitAction(w x11.Widget, event x11.XEvent, params []string) {
+func quitAction(w x11.Widget, event *x11.XEvent, params []string) {
 	println("quitAcion, q was pressed")
 	os.Exit(0)
 }
 
-func writeAction(w x11.Widget, event x11.XEvent, params []string) {
+func writeAction(w x11.Widget, event *x11.XEvent, params []string) {
 	println("writeAction, w was pressed")
 }
 
