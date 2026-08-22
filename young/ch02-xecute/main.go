@@ -102,6 +102,6 @@ func main() {
 	x11.XtAddCallback(no, x11.XmNactivateCallback, noCallback, x11.XtPointer(nil))
 
 	x11.XtRealizeWidget(shell)
-	x11.XtAppMainLoop(&appContext)
+	x11.XtAppMainLoop(appContext)
 	//x11.
 }

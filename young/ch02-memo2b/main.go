@@ -76,5 +76,5 @@ func main() {
 		quit, nil)
 
 	x11.XtRealizeWidget(shell)
-	x11.XtAppMainLoop(&appContext)
+	x11.XtAppMainLoop(appContext)
 }

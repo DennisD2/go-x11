@@ -41,5 +41,5 @@ func main() {
 	x11.XmStringFree(xmStr) /* Free the compound string */
 
 	x11.XtRealizeWidget(shell)
-	x11.XtAppMainLoop(&appContext)
+	x11.XtAppMainLoop(appContext)
 }

@@ -25,7 +25,7 @@ import "C"
 // Xt definitions
 // ============================================================================
 // Wrapper types
-type XtAppContext struct{ ctx C.XtAppContext }
+type XtAppContext unsafe.Pointer
 type Widget unsafe.Pointer
 type WidgetList []Widget
 type WidgetClass struct{ c C.WidgetClass }
@@ -88,7 +88,7 @@ func XtNextEvent(e *XEvent) {
 }
 
 func XtAppNextEvent(appContext XtAppContext, e *XEvent) {
-	C.XtAppNextEvent(appContext.ctx, (*C.XEvent)(unsafe.Pointer(e)))
+	C.XtAppNextEvent((C.XtAppContext)(unsafe.Pointer(appContext)), (*C.XEvent)(unsafe.Pointer(e)))
 }
 
 func XtInitialize(
@@ -226,7 +226,7 @@ func XtAppInitialize(
 
 	// call Xt function via wrapper
 	cWidget := C.call_XtAppInitialize(
-		&appContext.ctx,
+		(*C.XtAppContext)(unsafe.Pointer(appContext)),
 		cAppClass,
 		cOptions, numOptions,
 		&argc,
@@ -321,12 +321,11 @@ func XtWindow(w Widget) Window {
 }
 
 // AppMainLoop enters the Xt event loop
-func XtAppMainLoop(ctx *XtAppContext) {
-	C.XtAppMainLoop(ctx.ctx)
+func XtAppMainLoop(ctx XtAppContext) {
+	C.XtAppMainLoop((C.XtAppContext)(ctx))
 }
 
 func XtArgValFromXmString(xmstr XmString) uintptr {
-	// Konvertiert den C-Pointer (*C.char / XmString) in eine Go-Ganzzahl (uintptr)
 	return uintptr(unsafe.Pointer(xmstr))
 }
 
@@ -558,7 +557,7 @@ func XtAppAddActions(appContext XtAppContext, actionsTable []XtActionsRec) {
 	}
 	actionPoolMutex.Unlock()
 	// with valid C values, call C function
-	C.XtAppAddActions(appContext.ctx, &cActionsTable[0], C.Cardinal(numActions))
+	C.XtAppAddActions((C.XtAppContext)(unsafe.Pointer(appContext)), &cActionsTable[0], C.Cardinal(numActions))
 }
 
 func XtParseTranslationTable(table []string) XtTranslations {
