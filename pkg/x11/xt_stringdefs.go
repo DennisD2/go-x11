@@ -16,6 +16,7 @@ package x11
 import "C"
 import "unsafe"
 
+// Xt Widget classes
 func ApplicationShellWidgetClass() WidgetClass {
 	return WidgetClass(unsafe.Pointer(C.applicationShellWidgetClass))
 }
