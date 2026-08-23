@@ -128,6 +128,13 @@ Go structs for:
 Xt Functions:
 * XtInitialize
 * XtAppInitialize
+* XtOpenDisplay
+* XtCloseDisplay
+* XtCreateApplicationContext
+* XtDestroyApplicationContext
+* XtToolkitInitialize
+* XtAppCreateShell
+* XtWarning
 * XtCreateWidget
 * XtCreateManagedWidget
 * XtRealizeWidget
