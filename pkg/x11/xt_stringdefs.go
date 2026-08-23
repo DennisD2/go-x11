@@ -6,11 +6,19 @@ package x11
 
 // Xt includes
 #include <X11/Intrinsic.h>
+#include <X11/Shell.h>
 
 #include "cheader.h"
 #include "wrapperInfo.h"
+
+
 */
 import "C"
+import "unsafe"
+
+func ApplicationShellWidgetClass() WidgetClass {
+	return WidgetClass(unsafe.Pointer(C.applicationShellWidgetClass))
+}
 
 // String defines
 var XtNaccelerators = C.GoString(C.XtNaccelerators)

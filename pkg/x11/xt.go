@@ -664,7 +664,7 @@ func XtCreateApplicationContext() XtAppContext {
 }
 
 func XtOpenDisplay(appContext XtAppContext, display_string string, application_name string,
-	application_class string, options []OptionDescRec, num_options, argc *int, argv []string) Display {
+	application_class string, options []OptionDescRec, num_options, argc *int, argv []string) *Display {
 	var cDisplay = C.CString(display_string)
 	defer C.free(unsafe.Pointer(cDisplay))
 	cName := C.CString(application_name)
@@ -695,19 +695,17 @@ func XtOpenDisplay(appContext XtAppContext, display_string string, application_n
 		cArgv = (**C.char)(unsafe.Pointer(&cArgvArr[0]))
 	}
 
-	XtWarning("XtOpenDisplay() to be tested")
 	d := C.XtOpenDisplay(C.XtAppContext(appContext), cDisplay, cName, cClass,
 		cOptions, cOptionLength, &cArgc, cArgv)
-	return (Display)(unsafe.Pointer(d))
+	return (*Display)(unsafe.Pointer(d))
 }
 
 func XtToolkitInitialize() {
-	XtWarning("XtToolkitInitialize() to be tested")
 	C.XtToolkitInitialize()
 }
 
 func XtAppCreateShell(application_name string, application_class string, widgetClass WidgetClass,
-	display *Display, args []Arg) Widget { // <- numArgs hinzugefügt
+	display *Display, args []Arg) Widget {
 
 	cName := C.CString(application_name)
 	defer C.free(unsafe.Pointer(cName))
@@ -733,7 +731,6 @@ func XtAppCreateShell(application_name string, application_class string, widgetC
 		cArgsList = cArgsSlice
 	}
 
-	XtWarning("XtAppCreateShell() to be tested")
 	w := C.call_XtAppCreateShell(cName, cClass, cWidgetClass, cDisplay, cArgsList, cNumArgs)
 
 	return (Widget)(unsafe.Pointer(w))
