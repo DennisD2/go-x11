@@ -33,6 +33,16 @@ extern Widget call_XtCreateManagedWidget(
     void *args, Cardinal num_args
 );
 
+// args: void* -> ArgList
+extern Widget call_XtAppCreateShell(
+    char *application_name,
+    char *application_class,
+    WidgetClass widget_class,
+    Display *display,
+    void *args, Cardinal num_args
+);
+
+
 extern void set_option_rec(void *options_base, int index, char *opt, char *spec, int kind, char *val);
 
 // callback handling

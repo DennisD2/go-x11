@@ -663,24 +663,80 @@ func XtCreateApplicationContext() XtAppContext {
 	return (XtAppContext(C.XtCreateApplicationContext()))
 }
 
-func XtOpenDisplay(ctx XtAppContext, display_string string, application_name string,
+func XtOpenDisplay(appContext XtAppContext, display_string string, application_name string,
 	application_class string, options []OptionDescRec, num_options, argc *int, argv []string) Display {
-	var d Display
-	// TODO
-	XtWarning("XtOpenDisplay() to be implemented")
-	return d
+	var cDisplay = C.CString(display_string)
+	defer C.free(unsafe.Pointer(cDisplay))
+	cName := C.CString(application_name)
+	defer C.free(unsafe.Pointer(cName))
+	cClass := C.CString(application_class)
+	defer C.free(unsafe.Pointer(cClass))
+	var cArgc = C.int(*argc)
+
+	// 3. options-Slice zu C-Array-Pointer konvertieren
+	var cOptions *C.XrmOptionDescRec
+	if len(options) > 0 {
+		// Zeiger auf das erste Element des Slices holen und zu C-Typ casten
+		cOptions = (*C.XrmOptionDescRec)(unsafe.Pointer(&options[0]))
+	}
+	cOptionLength := C.Cardinal(len(options))
+
+	// 4. argv-Slice ([]string) zu C-Style char** konvertieren
+	var cArgv **C.char
+	if len(argv) > 0 {
+		// Allokiere ein C-Array von "char*" Pointern
+		cArgvArr := make([]*C.char, len(argv))
+		for i, s := range argv {
+			cStr := C.CString(s)
+			defer C.free(unsafe.Pointer(cStr)) // Wird nach Funktionsende freigegeben
+			cArgvArr[i] = cStr
+		}
+		// Zeiger auf das erste Element des Pointer-Arrays holen
+		cArgv = (**C.char)(unsafe.Pointer(&cArgvArr[0]))
+	}
+
+	XtWarning("XtOpenDisplay() to be tested")
+	d := C.XtOpenDisplay(C.XtAppContext(appContext), cDisplay, cName, cClass,
+		cOptions, cOptionLength, &cArgc, cArgv)
+	return (Display)(unsafe.Pointer(d))
 }
 
 func XtToolkitInitialize() {
+	XtWarning("XtToolkitInitialize() to be tested")
 	C.XtToolkitInitialize()
 }
 
 func XtAppCreateShell(application_name string, application_class string, widgetClass WidgetClass,
-	display *Display, args *ArgList) Widget {
-	var w Widget
-	// TODO
-	XtWarning("XtAppCreateShell() to be implemented")
-	return w
+	display *Display, args []Arg) Widget { // <- numArgs hinzugefügt
+
+	cName := C.CString(application_name)
+	defer C.free(unsafe.Pointer(cName))
+	cClass := C.CString(application_class)
+	defer C.free(unsafe.Pointer(cClass))
+
+	cWidgetClass := C.WidgetClass(widgetClass)
+	cDisplay := (*C.Display)(unsafe.Pointer(display))
+
+	// handle ArgList
+	var cArgsList unsafe.Pointer
+	cNumArgs := C.Cardinal(len(args))
+	if len(args) > 0 {
+		cArgsSlice := C.malloc(C.size_t(len(args)) * C.sizeof_Arg)
+		defer C.free(cArgsSlice)
+
+		cArgsArray := (*[1 << 20]C.Arg)(cArgsSlice)[:len(args):len(args)]
+		for i, arg := range args {
+			cArgsArray[i].name = C.CString(arg.Name)
+			cArgsArray[i].value = C.XtArgVal(arg.Value)
+			defer C.free(unsafe.Pointer(cArgsArray[i].name))
+		}
+		cArgsList = cArgsSlice
+	}
+
+	XtWarning("XtAppCreateShell() to be tested")
+	w := C.call_XtAppCreateShell(cName, cClass, cWidgetClass, cDisplay, cArgsList, cNumArgs)
+
+	return (Widget)(unsafe.Pointer(w))
 }
 
 func XtWarning(message string) {

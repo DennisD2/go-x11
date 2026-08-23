@@ -53,6 +53,17 @@ Widget call_XtCreateManagedWidget(
     return XtCreateManagedWidget(name, widget_class, parent, (ArgList)args, num_args);
 }
 
+Widget call_XtAppCreateShell(
+    char *application_name,
+    char *application_class,
+    WidgetClass widget_class,
+    Display *display,
+    void *args, Cardinal num_args
+) {
+    return XtAppCreateShell(application_name, application_class, widget_class, display,
+        (ArgList)args, num_args);
+}
+
 void set_option_rec(void *options_base, int index, char *opt, char *spec, int kind, char *val) {
     XrmOptionDescList list = (XrmOptionDescList)options_base;
     list[index].option = opt;
