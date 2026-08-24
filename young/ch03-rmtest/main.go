@@ -31,22 +31,27 @@ func main() {
 	x11.WrapperInfo()
 
 	argv := os.Args[1:]
+	for _, arg := range argv {
+		println(arg)
+	}
 
-	var appContext x11.XtAppContext
+	var appContext x11.XtAppContext // = x11.XtCreateApplicationContext()
+
 	var options []x11.OptionDescRec
 	//initArgs := []x11.Arg{{Name: "width", Value: 200}}
 
 	fallbacks := []string{""}
 	initArgs := []x11.Arg{}
-
 	toplevel := x11.XtAppInitialize(
 		&appContext,
 		"Rmtest",
 		options,
-		os.Args,
+		argv,
 		fallbacks,
 		initArgs,
 	)
+
+	//toplevel := x11.XtInitialize(argv[0], "Rmtest", options, argv)
 
 	argList := x11.ArgList{[]x11.Arg{}, 0}
 	x11.XtGetApplicationResources(toplevel, &data, resources, len(resources), argList)
