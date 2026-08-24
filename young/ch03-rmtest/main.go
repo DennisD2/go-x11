@@ -8,17 +8,17 @@ import (
 )
 
 type ApplicationData struct {
-	delay   int
-	verbose bool
+	Delay   int
+	Verbose bool
 }
 
 var data = ApplicationData{}
 
 //var defaultDelay = "1"
-//var defaultVerbose = "False"
+//var defaultVerbose = "true"
 
-var defaultDelayStr = C.CString("1024")
-var defaultVerboseStr = C.CString("True")
+var defaultDelayStr = C.CString("99")
+var defaultVerboseStr = C.CString("true")
 
 // TODO: currently, only XtRString will work; XtRImmediate fails
 var resources = []x11.GoXtResource{
@@ -50,7 +50,7 @@ func main() {
 	)
 
 	argList := x11.ArgList{[]x11.Arg{}, 0}
-	x11.XtGetApplicationResources(toplevel, (x11.XtPointer)(unsafe.Pointer(&data)), resources, len(resources), argList)
+	x11.XtGetApplicationResources(toplevel, &data, resources, len(resources), argList)
 
 	/* Convert string to the form expected by Motif */
 	xmStr := x11.XmStringCreateLtoR(argv[0], x11.XmFONTLIST_DEFAULT_TAG)

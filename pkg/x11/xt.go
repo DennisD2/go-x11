@@ -2,6 +2,7 @@ package x11
 
 import (
 	"fmt"
+	"reflect"
 	"runtime/cgo"
 	"sync"
 	"unsafe"
@@ -776,7 +777,95 @@ func calculateByteSize(class string, rtype string) int {
 	}
 }
 
-func XtGetApplicationResources(w Widget, base XtPointer, resources []GoXtResource, num_resources int,
+// ParseBufferToStruct nimmt den resultBuffer und schreibt die Daten
+// via Reflektion direkt in die übergebene Zielstruktur ("base").
+func ParseBufferToStruct(base any, resultBuffer []byte) error {
+	val := reflect.ValueOf(base)
+
+	// Da wir die Struktur beschreiben wollen, MUSS 'base' ein Zeiger sein
+	if val.Kind() != reflect.Ptr || val.IsNil() {
+		return fmt.Errorf("base muss ein gültiger, nicht-nil Zeiger auf eine Struktur sein")
+	}
+
+	// Wir holen uns die Struktur, auf die der Zeiger zeigt
+	structVal := val.Elem()
+	if structVal.Kind() != reflect.Struct {
+		return fmt.Errorf("base zeigt nicht auf eine Struktur (Kind: %s)", structVal.Kind())
+	}
+
+	structType := structVal.Type()
+
+	// Wir gehen Feld für Feld durch die Go-Struktur
+	for i := 0; i < structVal.NumField(); i++ {
+		field := structVal.Field(i)
+		fieldType := structType.Field(i)
+
+		// Das exakte Byte-Offset des Feldes innerhalb der Go-Struktur.
+		// Go berechnet hier das korrekte C-kompatible Speicher-Alignment automatisch!
+		offset := fieldType.Offset
+		size := field.Type().Size()
+
+		// Sicherheitscheck, damit wir nicht über die Buffer-Grenzen lesen
+		if int(offset+size) > len(resultBuffer) {
+			return fmt.Errorf("Feld %s liegt außerhalb des resultBuffers", fieldType.Name)
+		}
+
+		// Hol den Zeiger auf den Speicherplatz DIESES spezifischen Feldes
+		//fieldPtr := unsafe.Pointer(field.UnsafeAddr())
+
+		// Typabhängiges Auslesen aus dem resultBuffer
+		switch field.Kind() {
+		case reflect.Int32:
+			// Kopiere 4 Bytes und interpretiere sie als int32
+			val := *(*int32)(unsafe.Pointer(&resultBuffer[offset]))
+			field.SetInt(int64(val))
+
+		case reflect.Int: // Auf 64-Bit-Systemen ist das Go-eigene 'int' meist 64-Bit groß
+			// WICHTIG: Xt schreibt als 'XtRInt' IMMER nur 4 Bytes (int32) in den Buffer!
+			// Wir lesen daher strikt nur die 4 Bytes von Xt...
+			val32 := *(*int32)(unsafe.Pointer(&resultBuffer[offset]))
+
+			// ... und übergeben den Wert als int64 an Go. Go erweitert die Zahl
+			// dann vollautomatisch und sicher auf 64-Bit, ohne Nachbar-Bytes zu lesen.
+			field.SetInt(int64(val32))
+
+		case reflect.Bool:
+			// Xt liefert Booleans oft als 4-Byte-Wert (wie gesehen: 1 0 0 0)
+			// Wir prüfen, ob im 4-Byte Segment ein Wert ungleich Null steht
+			isTrue := false
+			if size == 4 {
+				val := *(*int32)(unsafe.Pointer(&resultBuffer[offset]))
+				isTrue = val != 0
+			} else {
+				// Falls es doch ein echtes 1-Byte C-Boolean ist
+				val := resultBuffer[offset]
+				isTrue = val != 0
+			}
+			field.SetBool(isTrue)
+
+		case reflect.String:
+			// Extrem wichtig: Xt schreibt bei Strings die 8-Byte Speicheradresse (char*)
+			// in den Buffer, nicht den Text selbst!
+			cStrPtr := *(*unsafe.Pointer)(unsafe.Pointer(&resultBuffer[offset]))
+
+			if cStrPtr != nil {
+				// Konvertiere die C-Adresse zurück in einen echten Go-String
+				// (Hier nutzen wir C.GoString, stelle sicher, dass "C" importiert ist)
+				goStr := C.GoString((*C.char)(cStrPtr))
+				field.SetString(goStr)
+			} else {
+				field.SetString("")
+			}
+
+		default:
+			return fmt.Errorf("Nicht unterstützter Feldtyp für Reflektion: %s (%s)", fieldType.Name, field.Kind())
+		}
+	}
+
+	return nil
+}
+
+func XtGetApplicationResources(w Widget, base any, resources []GoXtResource, num_resources int,
 	args ArgList) {
 	XtWarning("XtGetApplicationResources() to be implemented")
 
@@ -867,8 +956,8 @@ func XtGetApplicationResources(w Widget, base XtPointer, resources []GoXtResourc
 	fmt.Println()
 	fmt.Println()
 
-	C.call_XtGetApplicationResources(C.Widget(w), (C.XtPointer)(unsafe.Pointer(&resultBuffer)),
-		(*C.XtResource)(cResList), cNumRes, cArgsList, cNumArgs)
+	/*C.call_XtGetApplicationResources(C.Widget(w), (C.XtPointer)(unsafe.Pointer(&resultBuffer)),
+	(*C.XtResource)(cResList), cNumRes, cArgsList, cNumArgs)*/
 	/*
 		extern void XtGetApplicationResources(
 			Widget 		 widget
@@ -879,6 +968,29 @@ func XtGetApplicationResources(w Widget, base XtPointer, resources []GoXtResourc
 			Cardinal 		 num_args
 		);
 	*/
+
+	// 2. Sicheres Extrahieren des Zeigers für den C-Aufruf
+	val := reflect.ValueOf(base)
+	if val.Kind() != reflect.Ptr || val.IsNil() {
+		fmt.Println("Fehler: base muss ein gültiger Zeiger sein")
+		return
+	}
+
+	// Holt die rohe Speicheradresse der Go-Struktur für C
+	//cBasePtr := (C.XtPointer)(unsafe.Pointer(val.Pointer()))
+
+	// 3. Übergib den extrahierten Puffer an C
+	// Wichtig: Wir übergeben hier deinen 'resultBuffer', nicht die Go-Struktur,
+	// da Xt seine Ergebnisse in das 'resultBuffer'-Layout schreiben soll!
+	C.call_XtGetApplicationResources(
+		C.Widget(w),
+		(C.XtPointer)(unsafe.Pointer(&resultBuffer)), // Xt schreibt in den temporären byteBuffer
+		(*C.XtResource)(cResList),
+		cNumRes,
+		cArgsList,
+		cNumArgs,
+	)
+
 	for i, b := range resultBuffer {
 		fmt.Printf("[%v]=%v ", i, b)
 		if i > 0 && i%8 == 0 {
@@ -887,4 +999,10 @@ func XtGetApplicationResources(w Widget, base XtPointer, resources []GoXtResourc
 	}
 	fmt.Println()
 	fmt.Println()
+
+	// JETZT: Befülle die Go-Struktur vollautomatisch aus dem veränderten resultBuffer
+	err := ParseBufferToStruct(base, resultBuffer[:])
+	if err != nil {
+		fmt.Printf("Fehler beim Reflektion-Parsing: %v\n", err)
+	}
 }
