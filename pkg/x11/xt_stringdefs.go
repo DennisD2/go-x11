@@ -170,3 +170,13 @@ var XtRDirectoryString = C.GoString(C.XtRDirectoryString)
 var XtREnvironmentArray = C.GoString(C.XtREnvironmentArray)
 var XtRRestartStyle = C.GoString(C.XtRRestartStyle)
 var XtRSmcConn = C.GoString(C.XtRSmcConn)
+
+// Xrm* defines
+var XrmoptionNoArg = int(C.XrmoptionNoArg)
+var XrmoptionIsArg = int(C.XrmoptionIsArg)
+var XrmoptionStickyArg = int(C.XrmoptionStickyArg)
+var XrmoptionSepArg = int(C.XrmoptionSepArg)
+var XrmoptionResArg = int(C.XrmoptionResArg)
+var XrmoptionSkipArg = int(C.XrmoptionSkipArg)
+var XrmoptionSkipLine = int(C.XrmoptionSkipLine)
+var XrmoptionSkipNArgs = int(C.XrmoptionSkipNArgs)

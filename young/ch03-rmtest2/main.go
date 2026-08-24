@@ -27,6 +27,11 @@ var resources = []x11.GoXtResource{
 	{"verbose", "Verbose", x11.XtRBoolean, x11.XtRString, unsafe.Pointer(defaultVerboseStr)},
 }
 
+var options = []x11.XrmOptionDescRec{
+	{"-verbose", "*verbose", x11.XrmoptionNoArg, "TRUE"},
+	{"-delay", "*delay", x11.XrmoptionSepArg, ""},
+}
+
 func main() {
 	x11.WrapperInfo()
 
@@ -36,12 +41,10 @@ func main() {
 	}
 
 	var appContext x11.XtAppContext // = x11.XtCreateApplicationContext()
-
-	var options []x11.XrmOptionDescRec
 	//initArgs := []x11.Arg{{Name: "width", Value: 200}}
-
 	fallbacks := []string{""}
 	initArgs := []x11.Arg{}
+
 	toplevel := x11.XtAppInitialize(
 		&appContext,
 		"Rmtest",

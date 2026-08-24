@@ -63,6 +63,23 @@ type XtActionsRec struct {
 
 type XtEventHandler func(w Widget, clientData CAddr, event *XEvent)
 
+type GoXtResource struct {
+	Name  string
+	Class string
+	Rtype string
+	//Size  uint32 not used in Go structure
+	//Offset       uint32 not used in Go structure
+	Default_type string
+	Default_addr unsafe.Pointer
+}
+
+type XrmOptionDescRec struct {
+	Option    string
+	Specifier string
+	Kind      int
+	Value     string
+}
+
 // ============================================================================
 // Wrapper own definitions
 // ============================================================================
@@ -89,7 +106,7 @@ func XtAppNextEvent(appContext XtAppContext, e *XEvent) {
 func XtInitialize(
 	shellName string,
 	appClass string,
-	options []OptionDescRec,
+	options []XrmOptionDescRec,
 	argv []string,
 ) Widget {
 	cAppClass := C.CString(appClass)
@@ -145,7 +162,7 @@ func XtInitialize(
 func XtAppInitialize(
 	appContext *XtAppContext,
 	appClass string,
-	options []OptionDescRec,
+	options []XrmOptionDescRec,
 	argv []string,
 	fallbackResources []string,
 	args []Arg,
@@ -740,16 +757,6 @@ func XtAppCreateShell(application_name string, application_class string, widgetC
 
 func XtWarning(message string) {
 	C.XtWarning(C.CString(message))
-}
-
-type GoXtResource struct {
-	Name  string
-	Class string
-	Rtype string
-	//Size  uint32 not used in Go structure
-	//Offset       uint32 not used in Go structure
-	Default_type string
-	Default_addr unsafe.Pointer
 }
 
 func calculateByteSize(class string, rtype string) int {

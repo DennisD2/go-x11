@@ -193,8 +193,6 @@ Xt Args handling helpers:
   cannot take parameters, this should be added.
 * XtAppInitialize does not return modified argv
 * XtGetApplicationResources is implemented very/too partially
-* Neither XtAppInitialize/XtInitialize seem to use command line
-  arguments like "-verbose true -delay 123"
 
 ## Fixed issues
 * XtAddEventHandler(w Widget, eventMask EventMask, nonMaskable bool, proc GoXtEventHandler, clientData CAddr) is

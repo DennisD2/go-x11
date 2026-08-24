@@ -15,7 +15,7 @@ func main() {
 	argv := os.Args[1:]
 
 	var appContext x11.XtAppContext
-	var options []x11.OptionDescRec
+	var options []x11.XrmOptionDescRec
 	fallbacks := []string{""}
 	//initArgs := []x11.Arg{{Name: "width", Value: 200}}
 	initArgs := []x11.Arg{}
