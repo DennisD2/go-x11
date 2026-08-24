@@ -15,18 +15,16 @@ type ApplicationData struct {
 
 var data = ApplicationData{}
 
-//var defaultDelay = "1"
-//var defaultVerbose = "true"
-
+// TODO: currently, only XtRString will work; XtRImmediate fails
 var defaultDelayStr = C.CString("99")
 var defaultVerboseStr = C.CString("true")
 
-// TODO: currently, only XtRString will work; XtRImmediate fails
+// var defaultDelay = "1"
+// var defaultVerbose = "true"
+
 var resources = []x11.GoXtResource{
 	{"delay", "Delay", x11.XtRInt, x11.XtRString, unsafe.Pointer(defaultDelayStr)},
 	{"verbose", "Verbose", x11.XtRBoolean, x11.XtRString, unsafe.Pointer(defaultVerboseStr)},
-	/*{x11.XtNforeground, "class", "rtype", 1, 100, "deftype", (*byte)(unsafe.Pointer(&data))},
-	{x11.XtNbackground, "class", "rtype", 1, 100, "deftype", (*byte)(unsafe.Pointer(&data))},*/
 }
 
 func main() {
