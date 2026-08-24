@@ -976,6 +976,6 @@ func XtGetApplicationResources(w Widget, base any, resources []GoXtResource, num
 	// fill in result struct
 	err := ParseBufferToStruct(base, resultBuffer[:])
 	if err != nil {
-		fmt.Printf(Error during parsing/refelction: %v\n", err)
+		fmt.Printf("Error during parsing/reflection: %v\n", err)
 	}
 }
