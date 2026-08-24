@@ -69,3 +69,7 @@ extern void call_XtAddEventHandler(Widget w, EventMask mask, Boolean non_maskabl
 extern void call_XtManageChildren(Widget **widgets, int num_widgets);
 
 extern void call_XtSetValues( Widget w, void *args, Cardinal n);
+
+// args: void* -> ArgList
+extern void call_XtGetApplicationResources(Widget w, XtPointer base,
+		XtResourceList resources, Cardinal num_resources, void *args, Cardinal num_args);

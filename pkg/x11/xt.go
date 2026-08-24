@@ -752,21 +752,41 @@ type GoXtResource struct {
 }
 
 func XtGetApplicationResources(w Widget, base XtPointer, resources []GoXtResource, num_resources int,
-	args []Arg) {
+	args ArgList) {
 	XtWarning("XtGetApplicationResources() to be implemented")
 
 	for _, resource := range resources {
 		fmt.Printf("%v\n", resource)
 	}
 
+	// The C implementation uses two parameters to write back requested resources
+	// How C implementation works:
+	// 1. "base" - this a generic pointer to a C struct where results are written to
+	//             the struct offers "place" for result data (primitves, pointers to char* etc
+	// 2. "resources: fields "size" and "offset" are information regarding result data size
+	//             and offset into/inside "base" space. This allows C to do a generic copy
+	//             like "copy( from, to, size) where to and size are given by "base", offset and size
+
+	// Approach to do this with a Go implementation
+	// 1. Set up internal C array from Go data which can be used and filled by C
+	// 2. Copy back retrieved values from C array into Go struct pointed to by "base"
+
+	// First step is just set up C array with all required data feasible for call of C function
+	// While string parts are trivial, the complicated fields are: resource_offset, resource_offset
+	// A. resource_offset: this must be the value which sizeof(<type>) calculated in C.
+	// B. resource_offset: this must pointb to some memory location aligned correctly and with enough space
+	//    for datatype to be retrieved
+
 	// handle resources
 	var cResList unsafe.Pointer
 	cNumRes := C.Cardinal(len(resources))
+	var cResArray []C.XtResource
 	if len(resources) > 0 {
 		cResSlice := C.malloc(C.size_t(len(resources)) * C.sizeof_XtResource)
 		defer C.free(cResSlice)
 
-		cResArray := (*[1 << 20]C.XtResource)(cResSlice)[:len(resources):len(resources)]
+		//cResArray := (*[1 << 20]C.XtResource)(cResSlice)[:len(resources):len(resources)]
+		cResArray = unsafe.Slice((*C.XtResource)(cResSlice), len(resources))
 		for i, res := range resources {
 			cResArray[i].resource_name = C.CString(res.Name)
 			cResArray[i].resource_class = C.CString(res.Class)
@@ -785,13 +805,13 @@ func XtGetApplicationResources(w Widget, base XtPointer, resources []GoXtResourc
 
 	// handle ArgList
 	var cArgsList unsafe.Pointer
-	cNumArgs := C.Cardinal(len(args))
-	if len(args) > 0 {
-		cArgsSlice := C.malloc(C.size_t(len(args)) * C.sizeof_Arg)
+	cNumArgs := C.Cardinal(args.Size)
+	if args.Size > 0 {
+		cArgsSlice := C.malloc(C.size_t(args.Size) * C.sizeof_Arg)
 		defer C.free(cArgsSlice)
 
-		cArgsArray := (*[1 << 20]C.Arg)(cArgsSlice)[:len(args):len(args)]
-		for i, arg := range args {
+		cArgsArray := (*[1 << 20]C.Arg)(cArgsSlice)[:args.Size:args.Size]
+		for i, arg := range args.Slice {
 			cArgsArray[i].name = C.CString(arg.Name)
 			cArgsArray[i].value = C.XtArgVal(arg.Value)
 			defer C.free(unsafe.Pointer(cArgsArray[i].name))
@@ -799,7 +819,8 @@ func XtGetApplicationResources(w Widget, base XtPointer, resources []GoXtResourc
 		cArgsList = cArgsSlice
 	}
 
-	C.XtGetApplicationResources(C.Widget(w), (C.XtPointer)(cResArray), (*C.XtResource)(cResList), cNumRes, cArgsList, cNumArgs)
+	C.call_XtGetApplicationResources(C.Widget(w), (C.XtPointer)(unsafe.Pointer(&cResArray)),
+		(*C.XtResource)(cResList), cNumRes, cArgsList, cNumArgs)
 	/*
 		extern void XtGetApplicationResources(
 			Widget 		 widget

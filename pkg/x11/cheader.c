@@ -132,3 +132,12 @@ void call_XtAddEventHandler(Widget w, EventMask mask, Boolean non_maskable, XtEv
     XtPointer client_data) {
         XtAddEventHandler(w, mask, non_maskable, proc, client_data);
 }
+
+void call_XtGetApplicationResources(Widget w, XtPointer base, XtResourceList resources, Cardinal num_resources,
+    void *args, Cardinal num_args) {
+    XtGetApplicationResources(w,
+        base,
+        resources, num_resources,
+        (ArgList)args, num_args
+    );
+}
