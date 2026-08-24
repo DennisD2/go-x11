@@ -751,6 +751,31 @@ type GoXtResource struct {
 	Default_addr unsafe.Pointer
 }
 
+func calculateByteSize(class string, rtype string) int {
+	switch rtype {
+	case "Integer", "Int": // entspricht XtRInt
+		return int(C.sizeof_int) // liefert verlässlich 4
+
+	case "Boolean": // entspricht XtRBoolean
+		return int(C.sizeof_Boolean) // liefert meist 1 (oder Compiler-abhängig gepadded)
+
+	case "String": // entspricht XtRString (C-Typ: char*)
+		// Ein C-Zeiger hat exakt dieselbe Bit-Breite wie ein Go-Pointer/uintptr.
+		// Das vermeidet Cgo-Übersetzungsfehler vollständig!
+		return int(unsafe.Sizeof(uintptr(0))) // liefert verlässlich 8 auf 64-Bit
+
+	case "Pixel": // entspricht XtRPixel (C-Typ: unsigned long)
+		return int(C.sizeof_ulong) // liefert verlässlich 8 auf 64-Bit
+
+	case "Widget": // entspricht XtRWidget (C-Typ: Widget, ein Pointer)
+		return int(unsafe.Sizeof(uintptr(0))) // liefert verlässlich 8
+
+	default:
+		// Sicherer Fallback für unmanaged Typen
+		return int(C.sizeof_int)
+	}
+}
+
 func XtGetApplicationResources(w Widget, base XtPointer, resources []GoXtResource, num_resources int,
 	args ArgList) {
 	XtWarning("XtGetApplicationResources() to be implemented")
@@ -758,6 +783,8 @@ func XtGetApplicationResources(w Widget, base XtPointer, resources []GoXtResourc
 	for _, resource := range resources {
 		fmt.Printf("%v\n", resource)
 	}
+
+	var resultBuffer [64]byte
 
 	// The C implementation uses two parameters to write back requested resources
 	// How C implementation works:
@@ -781,6 +808,8 @@ func XtGetApplicationResources(w Widget, base XtPointer, resources []GoXtResourc
 	var cResList unsafe.Pointer
 	cNumRes := C.Cardinal(len(resources))
 	var cResArray []C.XtResource
+
+	resultBufferOffset := 0
 	if len(resources) > 0 {
 		cResSlice := C.malloc(C.size_t(len(resources)) * C.sizeof_XtResource)
 		defer C.free(cResSlice)
@@ -791,8 +820,18 @@ func XtGetApplicationResources(w Widget, base XtPointer, resources []GoXtResourc
 			cResArray[i].resource_name = C.CString(res.Name)
 			cResArray[i].resource_class = C.CString(res.Class)
 			cResArray[i].resource_type = C.CString(res.Rtype)
-			cResArray[i].resource_size = 0   // TBD
-			cResArray[i].resource_offset = 0 // TBD
+
+			size := calculateByteSize(res.Class, res.Rtype)
+			if size > 1 {
+				remainder := resultBufferOffset % size
+				if remainder != 0 {
+					resultBufferOffset += (size - remainder) // Füge Padding-Bytes ein
+				}
+			}
+			cResArray[i].resource_size = C.Cardinal(size)
+			cResArray[i].resource_offset = C.Cardinal(resultBufferOffset)
+			resultBufferOffset += size
+
 			cResArray[i].default_type = C.CString(res.Default_type)
 			cResArray[i].default_addr = (C.XtPointer)(res.Default_addr)
 			defer C.free(unsafe.Pointer(cResArray[i].resource_name))
@@ -819,7 +858,16 @@ func XtGetApplicationResources(w Widget, base XtPointer, resources []GoXtResourc
 		cArgsList = cArgsSlice
 	}
 
-	C.call_XtGetApplicationResources(C.Widget(w), (C.XtPointer)(unsafe.Pointer(&cResArray)),
+	for i, b := range resultBuffer {
+		fmt.Printf("[%v]=%v ", i, b)
+		if i > 0 && i%8 == 0 {
+			fmt.Println()
+		}
+	}
+	fmt.Println()
+	fmt.Println()
+
+	C.call_XtGetApplicationResources(C.Widget(w), (C.XtPointer)(unsafe.Pointer(&resultBuffer)),
 		(*C.XtResource)(cResList), cNumRes, cArgsList, cNumArgs)
 	/*
 		extern void XtGetApplicationResources(
@@ -831,4 +879,12 @@ func XtGetApplicationResources(w Widget, base XtPointer, resources []GoXtResourc
 			Cardinal 		 num_args
 		);
 	*/
+	for i, b := range resultBuffer {
+		fmt.Printf("[%v]=%v ", i, b)
+		if i > 0 && i%8 == 0 {
+			fmt.Println()
+		}
+	}
+	fmt.Println()
+	fmt.Println()
 }

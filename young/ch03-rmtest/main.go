@@ -14,12 +14,16 @@ type ApplicationData struct {
 
 var data = ApplicationData{}
 
-var defaultDelay = 2
-var defaultVerbose = false
+//var defaultDelay = "1"
+//var defaultVerbose = "False"
 
+var defaultDelayStr = C.CString("1024")
+var defaultVerboseStr = C.CString("True")
+
+// TODO: currently, only XtRString will work; XtRImmediate fails
 var resources = []x11.GoXtResource{
-	{"delay", "Delay", x11.XtRInt, x11.XtRImmediate, unsafe.Pointer(&defaultDelay)},
-	{"verbose", "Verbose", x11.XtRBoolean, x11.XtRString, unsafe.Pointer(&defaultVerbose)},
+	{"delay", "Delay", x11.XtRInt, x11.XtRString, unsafe.Pointer(defaultDelayStr)},
+	{"verbose", "Verbose", x11.XtRBoolean, x11.XtRString, unsafe.Pointer(defaultVerboseStr)},
 	/*{x11.XtNforeground, "class", "rtype", 1, 100, "deftype", (*byte)(unsafe.Pointer(&data))},
 	{x11.XtNbackground, "class", "rtype", 1, 100, "deftype", (*byte)(unsafe.Pointer(&data))},*/
 }

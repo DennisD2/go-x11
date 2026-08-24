@@ -190,6 +190,7 @@ Xt Args handling helpers:
 * API deviates slightly from X11. Check this, use tests. Not done yet.
 * XtAppAddActions and Action handling is not complete. Action functions
   cannot take parameters, this should be added.
+* XtAppInitialize does not return modified argv
 
 ## Fixed issues
 * XtAddEventHandler(w Widget, eventMask EventMask, nonMaskable bool, proc GoXtEventHandler, clientData CAddr) is
