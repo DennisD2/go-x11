@@ -865,9 +865,11 @@ func ParseBufferToStruct(base any, resultBuffer []byte) error {
 func XtGetApplicationResources(w Widget, base any, resources []GoXtResource, num_resources int,
 	args ArgList) {
 
-	for _, resource := range resources {
-		fmt.Printf("%v\n", resource)
-	}
+	/*
+		for _, resource := range resources {
+			fmt.Printf("%v\n", resource)
+		}
+	*/
 
 	var resultBuffer [64]byte
 
