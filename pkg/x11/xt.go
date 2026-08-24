@@ -778,56 +778,52 @@ func calculateByteSize(class string, rtype string) int {
 	}
 }
 
-// ParseBufferToStruct nimmt den resultBuffer und schreibt die Daten
-// via Reflektion direkt in die übergebene Zielstruktur ("base").
+// ParseBufferToStruct uses data from resultBuffer and writes it to the
+// related fields in "base" struct. Uses reflection
 func ParseBufferToStruct(base any, resultBuffer []byte) error {
 	val := reflect.ValueOf(base)
 
-	// Da wir die Struktur beschreiben wollen, MUSS 'base' ein Zeiger sein
+	// make sure this is a pointer to a struct
 	if val.Kind() != reflect.Ptr || val.IsNil() {
 		return fmt.Errorf("base muss ein gültiger, nicht-nil Zeiger auf eine Struktur sein")
 	}
 
-	// Wir holen uns die Struktur, auf die der Zeiger zeigt
+	// get structure information
 	structVal := val.Elem()
 	if structVal.Kind() != reflect.Struct {
 		return fmt.Errorf("base zeigt nicht auf eine Struktur (Kind: %s)", structVal.Kind())
 	}
-
 	structType := structVal.Type()
 
-	// Wir gehen Feld für Feld durch die Go-Struktur
+	// iterate through all fields in struct
 	for i := 0; i < structVal.NumField(); i++ {
 		field := structVal.Field(i)
 		fieldType := structType.Field(i)
 
-		// Das exakte Byte-Offset des Feldes innerhalb der Go-Struktur.
-		// Go berechnet hier das korrekte C-kompatible Speicher-Alignment automatisch!
+		// byte offset and size of this field inside go struct
+		// Go takes care for alignment
 		offset := fieldType.Offset
 		size := field.Type().Size()
 
 		// Sicherheitscheck, damit wir nicht über die Buffer-Grenzen lesen
 		if int(offset+size) > len(resultBuffer) {
-			return fmt.Errorf("Feld %s liegt außerhalb des resultBuffers", fieldType.Name)
+			return fmt.Errorf("Field %s lies outside of resultBuffer", fieldType.Name)
 		}
 
-		// Hol den Zeiger auf den Speicherplatz DIESES spezifischen Feldes
-		//fieldPtr := unsafe.Pointer(field.UnsafeAddr())
-
-		// Typabhängiges Auslesen aus dem resultBuffer
+		// read value from buffer into field, using correct type
 		switch field.Kind() {
 		case reflect.Int32:
-			// Kopiere 4 Bytes und interpretiere sie als int32
+			// copy 4 bytes and use as int32 value
 			val := *(*int32)(unsafe.Pointer(&resultBuffer[offset]))
+			// convert to int64 for Go and set field value
 			field.SetInt(int64(val))
 
-		case reflect.Int: // Auf 64-Bit-Systemen ist das Go-eigene 'int' meist 64-Bit groß
+		case reflect.Int:
+			// Auf 64-Bit-Systemen ist das Go-eigene 'int' meist 64-Bit groß
 			// WICHTIG: Xt schreibt als 'XtRInt' IMMER nur 4 Bytes (int32) in den Buffer!
 			// Wir lesen daher strikt nur die 4 Bytes von Xt...
 			val32 := *(*int32)(unsafe.Pointer(&resultBuffer[offset]))
-
-			// ... und übergeben den Wert als int64 an Go. Go erweitert die Zahl
-			// dann vollautomatisch und sicher auf 64-Bit, ohne Nachbar-Bytes zu lesen.
+			/// convert to int64 for Go and set field value
 			field.SetInt(int64(val32))
 
 		case reflect.Bool:
@@ -859,7 +855,7 @@ func ParseBufferToStruct(base any, resultBuffer []byte) error {
 			}
 
 		default:
-			return fmt.Errorf("Nicht unterstützter Feldtyp für Reflektion: %s (%s)", fieldType.Name, field.Kind())
+			return fmt.Errorf("Yet unsupported field type, reflection fails for: %s (type %s)", fieldType.Name, field.Kind())
 		}
 	}
 
@@ -878,7 +874,7 @@ func XtGetApplicationResources(w Widget, base any, resources []GoXtResource, num
 	// The C implementation uses two parameters to write back requested resources
 	// How C implementation works:
 	// 1. "base" - this a generic pointer to a C struct where results are written to
-	//             the struct offers "place" for result data (primitves, pointers to char* etc
+	//             the struct offers "place" for result data (primitives, pointers to char* etc
 	// 2. "resources: fields "size" and "offset" are information regarding result data size
 	//             and offset into/inside "base" space. This allows C to do a generic copy
 	//             like "copy( from, to, size) where to and size are given by "base", offset and size
@@ -889,9 +885,15 @@ func XtGetApplicationResources(w Widget, base any, resources []GoXtResource, num
 
 	// First step is just set up C array with all required data feasible for call of C function
 	// While string parts are trivial, the complicated fields are: resource_offset, resource_offset
-	// A. resource_offset: this must be the value which sizeof(<type>) calculated in C.
-	// B. resource_offset: this must pointb to some memory location aligned correctly and with enough space
+	// A. resource_size: this must be the value which sizeof(<type>) calculated in C.
+	// B. resource_offset: this must point to some memory location aligned correctly and with enough space
 	//    for datatype to be retrieved
+
+	// Solution approach that was taken:
+	// issue A: is solved by function calculateByteSize()
+	// issue B: we use a byte buffer and let write C the data there using size+offset values
+	//          From the flat byte buffer, the return value struct is filled by function
+	//          ParseBufferToStruct()
 
 	// handle resources
 	var cResList unsafe.Pointer
