@@ -156,6 +156,7 @@ Xt Functions:
 * XtParseTranslationTable
 * XtAugmentTranslations
 * XtAddEventHandler
+* XtGetApplicationResources (partially)
 
 ## From Xm (Motif)
 Wrappers for:
