@@ -191,6 +191,7 @@ Xt Args handling helpers:
 * XtAppAddActions and Action handling is not complete. Action functions
   cannot take parameters, this should be added.
 * XtAppInitialize does not return modified argv
+* XtGetApplicationResources is implemented very/too partially
 
 ## Fixed issues
 * XtAddEventHandler(w Widget, eventMask EventMask, nonMaskable bool, proc GoXtEventHandler, clientData CAddr) is
