@@ -755,7 +755,8 @@ type GoXtResource struct {
 func calculateByteSize(class string, rtype string) int {
 	switch rtype {
 	case "Integer", "Int": // entspricht XtRInt
-		return int(C.sizeof_int) // liefert verlässlich 4
+		//return int(C.sizeof_int) // liefert verlässlich 4
+		return int(unsafe.Sizeof(int(0)))
 
 	case "Boolean": // entspricht XtRBoolean
 		return int(C.sizeof_Boolean) // liefert meist 1 (oder Compiler-abhängig gepadded)
@@ -867,7 +868,6 @@ func ParseBufferToStruct(base any, resultBuffer []byte) error {
 
 func XtGetApplicationResources(w Widget, base any, resources []GoXtResource, num_resources int,
 	args ArgList) {
-	XtWarning("XtGetApplicationResources() to be implemented")
 
 	for _, resource := range resources {
 		fmt.Printf("%v\n", resource)
@@ -947,41 +947,13 @@ func XtGetApplicationResources(w Widget, base any, resources []GoXtResource, num
 		cArgsList = cArgsSlice
 	}
 
-	for i, b := range resultBuffer {
-		fmt.Printf("[%v]=%v ", i, b)
-		if i > 0 && i%8 == 0 {
-			fmt.Println()
-		}
-	}
-	fmt.Println()
-	fmt.Println()
-
-	/*C.call_XtGetApplicationResources(C.Widget(w), (C.XtPointer)(unsafe.Pointer(&resultBuffer)),
-	(*C.XtResource)(cResList), cNumRes, cArgsList, cNumArgs)*/
-	/*
-		extern void XtGetApplicationResources(
-			Widget 		 widget
-			XtPointer 		 base
-			XtResourceList 	 resources
-			Cardinal 		 num_resources
-			ArgList 		 args
-			Cardinal 		 num_args
-		);
-	*/
-
-	// 2. Sicheres Extrahieren des Zeigers für den C-Aufruf
 	val := reflect.ValueOf(base)
 	if val.Kind() != reflect.Ptr || val.IsNil() {
-		fmt.Println("Fehler: base muss ein gültiger Zeiger sein")
+		fmt.Println("base pointer is not valid")
 		return
 	}
 
-	// Holt die rohe Speicheradresse der Go-Struktur für C
-	//cBasePtr := (C.XtPointer)(unsafe.Pointer(val.Pointer()))
-
-	// 3. Übergib den extrahierten Puffer an C
-	// Wichtig: Wir übergeben hier deinen 'resultBuffer', nicht die Go-Struktur,
-	// da Xt seine Ergebnisse in das 'resultBuffer'-Layout schreiben soll!
+	// result bytes will be found in resultBuffer
 	C.call_XtGetApplicationResources(
 		C.Widget(w),
 		(C.XtPointer)(unsafe.Pointer(&resultBuffer)), // Xt schreibt in den temporären byteBuffer
@@ -991,18 +963,19 @@ func XtGetApplicationResources(w Widget, base any, resources []GoXtResource, num
 		cNumArgs,
 	)
 
-	for i, b := range resultBuffer {
-		fmt.Printf("[%v]=%v ", i, b)
-		if i > 0 && i%8 == 0 {
-			fmt.Println()
+	/*
+		for i, b := range resultBuffer {
+			fmt.Printf("[%v]=%v ", i, b)
+			if i > 0 && i%8 == 0 {
+				fmt.Println()
+			}
 		}
-	}
-	fmt.Println()
-	fmt.Println()
-
-	// JETZT: Befülle die Go-Struktur vollautomatisch aus dem veränderten resultBuffer
+		fmt.Println()
+		fmt.Println()
+	*/
+	// fill in result struct
 	err := ParseBufferToStruct(base, resultBuffer[:])
 	if err != nil {
-		fmt.Printf("Fehler beim Reflektion-Parsing: %v\n", err)
+		fmt.Printf(Error during parsing/refelction: %v\n", err)
 	}
 }

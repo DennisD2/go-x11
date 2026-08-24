@@ -2,6 +2,7 @@ package main
 
 import "C"
 import (
+	"fmt"
 	"go-x11/pkg/x11"
 	"os"
 	"unsafe"
@@ -51,6 +52,8 @@ func main() {
 
 	argList := x11.ArgList{[]x11.Arg{}, 0}
 	x11.XtGetApplicationResources(toplevel, &data, resources, len(resources), argList)
+
+	fmt.Printf("delay = %v, verbose = %v\n", data.Delay, data.Verbose)
 
 	/* Convert string to the form expected by Motif */
 	xmStr := x11.XmStringCreateLtoR(argv[0], x11.XmFONTLIST_DEFAULT_TAG)
