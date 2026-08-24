@@ -6,6 +6,7 @@ package x11
 
 /*
 #include <X11/Xlib.h>
+#include <X11/Intrinsic.h>
 */
 import "C"
 
@@ -13,6 +14,8 @@ type XAnyEvent C.XAnyEvent
 type XKeyEvent C.XKeyEvent
 type XButtonEvent C.XButtonEvent
 type XMotionEvent C.XMotionEvent
+type XtResource C.XtResource
+type XtResourceList C.XtResourceList
 
 // We have these as manually defined Go types, for better usability
 // type OptionDescRec C.XrmOptionDescRec

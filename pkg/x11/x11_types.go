@@ -66,3 +66,14 @@ type XMotionEvent struct {
 	Same_screen	int32
 	Pad_cgo_0	[4]byte
 }
+
+type XtResource struct {
+	Resource_name	*int8
+	Resource_class	*int8
+	Resource_type	*int8
+	Resource_size	uint32
+	Resource_offset	uint32
+	Default_type	*int8
+	Default_addr	*byte
+}
+type XtResourceList *XtResource

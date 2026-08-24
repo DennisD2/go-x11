@@ -1,6 +1,7 @@
 package x11
 
 import (
+	"fmt"
 	"runtime/cgo"
 	"sync"
 	"unsafe"
@@ -738,4 +739,75 @@ func XtAppCreateShell(application_name string, application_class string, widgetC
 
 func XtWarning(message string) {
 	C.XtWarning(C.CString(message))
+}
+
+type GoXtResource struct {
+	Name  string
+	Class string
+	Rtype string
+	//Size  uint32 not used in Go structure
+	//Offset       uint32 not used in Go structure
+	Default_type string
+	Default_addr unsafe.Pointer
+}
+
+func XtGetApplicationResources(w Widget, base XtPointer, resources []GoXtResource, num_resources int,
+	args []Arg) {
+	XtWarning("XtGetApplicationResources() to be implemented")
+
+	for _, resource := range resources {
+		fmt.Printf("%v\n", resource)
+	}
+
+	// handle resources
+	var cResList unsafe.Pointer
+	cNumRes := C.Cardinal(len(resources))
+	if len(resources) > 0 {
+		cResSlice := C.malloc(C.size_t(len(resources)) * C.sizeof_XtResource)
+		defer C.free(cResSlice)
+
+		cResArray := (*[1 << 20]C.XtResource)(cResSlice)[:len(resources):len(resources)]
+		for i, res := range resources {
+			cResArray[i].resource_name = C.CString(res.Name)
+			cResArray[i].resource_class = C.CString(res.Class)
+			cResArray[i].resource_type = C.CString(res.Rtype)
+			cResArray[i].resource_size = 0   // TBD
+			cResArray[i].resource_offset = 0 // TBD
+			cResArray[i].default_type = C.CString(res.Default_type)
+			cResArray[i].default_addr = (C.XtPointer)(res.Default_addr)
+			defer C.free(unsafe.Pointer(cResArray[i].resource_name))
+			defer C.free(unsafe.Pointer(cResArray[i].resource_class))
+			defer C.free(unsafe.Pointer(cResArray[i].resource_type))
+			defer C.free(unsafe.Pointer(cResArray[i].default_type))
+		}
+		cResList = cResSlice
+	}
+
+	// handle ArgList
+	var cArgsList unsafe.Pointer
+	cNumArgs := C.Cardinal(len(args))
+	if len(args) > 0 {
+		cArgsSlice := C.malloc(C.size_t(len(args)) * C.sizeof_Arg)
+		defer C.free(cArgsSlice)
+
+		cArgsArray := (*[1 << 20]C.Arg)(cArgsSlice)[:len(args):len(args)]
+		for i, arg := range args {
+			cArgsArray[i].name = C.CString(arg.Name)
+			cArgsArray[i].value = C.XtArgVal(arg.Value)
+			defer C.free(unsafe.Pointer(cArgsArray[i].name))
+		}
+		cArgsList = cArgsSlice
+	}
+
+	C.XtGetApplicationResources(C.Widget(w), (C.XtPointer)(cResArray), (*C.XtResource)(cResList), cNumRes, cArgsList, cNumArgs)
+	/*
+		extern void XtGetApplicationResources(
+			Widget 		 widget
+			XtPointer 		 base
+			XtResourceList 	 resources
+			Cardinal 		 num_resources
+			ArgList 		 args
+			Cardinal 		 num_args
+		);
+	*/
 }
