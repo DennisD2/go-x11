@@ -1024,6 +1024,7 @@ func XtAddConverter(from_type string, to_type string, converter GoXtConverter,
 	// set up conversion ArgList from: convert_args
 	var cConvertArgs unsafe.Pointer
 
+	XtWarning("XtAddConverter to be implemented")
 	C.call_XtAddConverter(C.CString(from_type), C.CString(to_type), cConv, cConvertArgs, cNumArgs)
 }
 
