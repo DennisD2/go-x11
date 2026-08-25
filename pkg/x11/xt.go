@@ -990,3 +990,48 @@ func XtGetApplicationResources(w Widget, base any, resources []GoXtResource, num
 		fmt.Printf("Error during parsing/reflection: %v\n", err)
 	}
 }
+
+type XrmValue struct {
+	size int
+	addr XPointer
+}
+
+type GoXtConverter func(args *XrmValue, num_args int, from *XrmValue, to *XrmValue)
+
+// C.XtAddressMode enum values see
+var XtAddress = int(C.XtAddress)
+
+type XtConvertArgList struct {
+	address_mode int // XtAddressMode
+	address_id   XtPointer
+	size         int
+}
+
+func XtAddConverter(from_type string, to_type string, converter GoXtConverter,
+	convert_args XtConvertArgList) {
+
+	// We need to set up a C converter function, which points back into out Go converter function
+	// - Set a general cConverterBridge() receiving all conversion calls
+	// - depending on incoming types of from and to values (e.g. char* and int) we lookup in a map[from,to] -> goFunction
+	//   to retrieve the C function to call
+	// - call function
+	// - copy result back to C "to" parameter
+
+	// set up conversion C function from: converter
+	var cConv unsafe.Pointer
+	var cNumArgs = C.Cardinal(0)
+
+	// set up conversion ArgList from: convert_args
+	var cConvertArgs unsafe.Pointer
+
+	C.call_XtAddConverter(C.CString(from_type), C.CString(to_type), cConv, cConvertArgs, cNumArgs)
+}
+
+func XtAppAddConverter(ctx XtAppContext, from_type string, to_type string, converter GoXtConverter,
+	convert_args XtConvertArgList) {
+	//C.XtAppAddConverter(C.XtAppContext(ctx), C.CString(from_type), C.CString(to_type), converter, convert_args, C.Cardinal(num_args))
+}
+
+func XtStringConversionWarning(from_value string, to_type string) {
+	C.XtStringConversionWarning(C.CString(from_value), C.CString(to_type))
+}

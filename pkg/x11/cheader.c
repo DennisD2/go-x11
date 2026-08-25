@@ -133,6 +133,7 @@ void call_XtAddEventHandler(Widget w, EventMask mask, Boolean non_maskable, XtEv
         XtAddEventHandler(w, mask, non_maskable, proc, client_data);
 }
 
+// void* args
 void call_XtGetApplicationResources(Widget w, XtPointer base, XtResourceList resources, Cardinal num_resources,
     void *args, Cardinal num_args) {
     XtGetApplicationResources(w,
@@ -140,4 +141,10 @@ void call_XtGetApplicationResources(Widget w, XtPointer base, XtResourceList res
         resources, num_resources,
         (ArgList)args, num_args
     );
+}
+
+// void* converter, void *convert_args
+void call_XtAddConverter(_XtString from_type, _XtString to_type, void *converter,
+    void *convert_args, Cardinal num_args) {
+    XtAddConverter(from_type, to_type, converter, convert_args, num_args);
 }

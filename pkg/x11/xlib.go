@@ -21,6 +21,7 @@ type Display unsafe.Pointer
 type Screen unsafe.Pointer
 type Window unsafe.Pointer
 type XEvent unsafe.Pointer
+type XPointer unsafe.Pointer
 
 type EventMask int64
 

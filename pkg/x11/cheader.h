@@ -73,3 +73,7 @@ extern void call_XtSetValues( Widget w, void *args, Cardinal n);
 // args: void* -> ArgList
 extern void call_XtGetApplicationResources(Widget w, XtPointer base,
 		XtResourceList resources, Cardinal num_resources, void *args, Cardinal num_args);
+
+// converter
+extern void call_XtAddConverter(_XtString from_type, _XtString to_type, void *converter,
+    void *convert_args, Cardinal num_args);
