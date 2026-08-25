@@ -193,6 +193,8 @@ Xt Args handling helpers:
   cannot take parameters, this should be added.
 * XtAppInitialize does not return modified argv
 * XtGetApplicationResources is implemented very/too partially
+* GoXtResource takes unsafePointer parameter which is currently C.CString etc.
+  Improve this to Go types. Example ch02-rmtest2
 
 ## Fixed issues
 * XtAddEventHandler(w Widget, eventMask EventMask, nonMaskable bool, proc GoXtEventHandler, clientData CAddr) is
