@@ -14,17 +14,17 @@
 
 ! Default fonts
 
-!*fontList:  8x13
+*fontList:  8x13
 
 ! Color resources. Uncomment the following lines
 ! if you have a color display
 
-!*foreground:                        white
-!*XmDrawingArea*background:          Turquoise
-!*options*background:                Blue
-!*commands*background:               Green
-!*options*XmPushButton*background:   LightBlue
-!*commands*XmPushButton*background:  grey50
+*foreground:                        white
+*XmDrawingArea*background:          Turquoise
+*options*background:                Blue
+*commands*background:               Green
+*options*XmPushButton*background:   LightBlue
+*commands*XmPushButton*background:  grey50
 
 ! Monochrome resources. Uncomment the following lines
 ! if you have a black and white display
