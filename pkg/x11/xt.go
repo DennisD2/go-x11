@@ -1010,7 +1010,7 @@ type XtConvertArgList struct {
 func XtAddConverter(from_type string, to_type string, converter GoXtConverter,
 	convert_args XtConvertArgList) {
 
-	// We need to set up a C converter function, which points back into out Go converter function
+	// We need to set up a C converter function, which points back into our Go converter function
 	// - Set a general cConverterBridge() receiving all conversion calls
 	// - depending on incoming types of from and to values (e.g. char* and int) we lookup in a map[from,to] -> goFunction
 	//   to retrieve the C function to call
