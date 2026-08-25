@@ -1,0 +1,33 @@
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !! Editor: app-defaults file for the editor program
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+ !  Labels for buttons used in editor program
+
+ *options*button1*labelString: Option 1
+ *options*button2*labelString: Option 2
+ *options*button3*labelString: Option 3
+
+*commands*button1*labelString: Command One
+*commands*button2*labelString: Command Two
+*commands*button3*labelString: Command Three
+
+! Default fonts
+
+!*fontList:  8x13
+
+! Color resources. Uncomment the following lines
+! if you have a color display
+
+!*foreground:                        white
+!*XmDrawingArea*background:          Turquoise
+!*options*background:                Blue
+!*commands*background:               Green
+!*options*XmPushButton*background:   LightBlue
+!*commands*XmPushButton*background:  grey50
+
+! Monochrome resources. Uncomment the following lines
+! if you have a black and white display
+
+!*foreground: white
+!*background: black
