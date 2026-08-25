@@ -21,6 +21,26 @@ type XmAnyCallbackStruct struct {
 	event  *XEvent
 }
 
+type Orientation int
+
+const (
+	XmNO_ORIENTATION Orientation = iota // 0
+	XmVERTICAL                          // 1
+	XmHORIZONTAL                        // 2
+)
+
+type Attachment int
+
+const (
+	XmATTACH_NONE            Attachment = iota // 0
+	XmATTACH_FORM                              // 1
+	XmATTACH_OPPOSITE_FORM                     // 2
+	XmATTACH_WIDGET                            // 3
+	XmATTACH_OPPOSITE_WIDGET                   // 4
+	XmATTACH_POSITION                          // 5
+	XmATTACH_SELF                              // 6
+)
+
 // ============================================================================
 // Xm Functions - Motif Toolkit
 // ============================================================================
