@@ -74,16 +74,40 @@ func finance() {
 }
 
 func drawIt(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
-	println("Button was selected! Pure Go code + X11 did this!")
+	println("Some drawing primitives...")
 
+	// FillRectangle
 	cw := x11.XtWindow(canvas)
+	drawable := x11.Drawable(cw)
 	d := x11.XtDisplay(canvas)
-	gc := x11.XCreateGC(d, x11.Drawable(cw), 0, nil)
+	gc := x11.XCreateGC(d, drawable, 0, nil)
 	//x11.XSetForeground(d, gc, x11.BlackPixelOfScreen(x11.XtScreen(canvas)))
-	x11.XSetForeground(d, gc, 0xff00ff)
+	x11.XSetForeground(d, gc, 0x0000ff)
+	//x11.XDrawRectangle(d, drawable, gc, 10, 10, 90, 70)
+	x11.XFillRectangle(d, drawable, gc, 10, 10, 90, 70)
 
-	//x11.XDrawRectangle(d, x11.Drawable(cw), gc, 10, 10, 90, 70)
-	x11.XFillRectangle(d, x11.Drawable(cw), gc, 10, 10, 90, 70)
+	// Lines
+	x11.XSetForeground(d, gc, 0x00ff00)
+	x11.XDrawLine(d, drawable, gc, 20, 25, 70, 20)
+	x11.XSetForeground(d, gc, 0x00ffff)
+	x11.XDrawLine(d, drawable, gc, 30, 30, 70, 30)
+
+	// Arc/Circle
+	x11.XSetForeground(d, gc, 0xff0000)
+	x11.XFillArc(d, drawable, gc, 30, 30, 50, 50, 0, 360*64)
+
+	// String
+	x11.XSetForeground(d, gc, 0xffffff)
+	x11.XDrawString(d, drawable, gc, 40, 20, "HELLO")
+
+	// Pixels
+	x11.XSetForeground(d, gc, 0xffff00)
+	x11.XDrawPoint(d, drawable, gc, 50, 50)
+	x11.XDrawPoint(d, drawable, gc, 52, 50)
+	x11.XDrawPoint(d, drawable, gc, 54, 50)
+	x11.XDrawPoint(d, drawable, gc, 56, 50)
+	x11.XDrawPoint(d, drawable, gc, 58, 50)
+	x11.XDrawPoint(d, drawable, gc, 60, 50)
 }
 
 func main() {

@@ -55,8 +55,8 @@ func XCreateGC(display *Display, d Drawable, valuemask int, values *XGCValues) G
 	return GC(unsafe.Pointer(ret))
 }
 
-func XDrawRectangle(display *Display, d Drawable, gc GC, x int, y int, width uint, height uint) {
-	C.XDrawRectangle(
+func XDrawRectangle(display *Display, d Drawable, gc GC, x int, y int, width uint, height uint) int {
+	ret := C.XDrawRectangle(
 		(*C.Display)(unsafe.Pointer(display)),
 		C.Drawable(d),
 		C.GC(unsafe.Pointer(gc)),
@@ -65,10 +65,11 @@ func XDrawRectangle(display *Display, d Drawable, gc GC, x int, y int, width uin
 		C.uint(width),
 		C.uint(height),
 	)
+	return int(ret)
 }
 
-func XFillRectangle(display *Display, d Drawable, gc GC, x int, y int, width uint, height uint) {
-	C.XFillRectangle(
+func XFillRectangle(display *Display, d Drawable, gc GC, x int, y int, width uint, height uint) int {
+	ret := C.XFillRectangle(
 		(*C.Display)(unsafe.Pointer(display)),
 		C.Drawable(d),
 		C.GC(unsafe.Pointer(gc)),
@@ -77,6 +78,7 @@ func XFillRectangle(display *Display, d Drawable, gc GC, x int, y int, width uin
 		C.uint(width),
 		C.uint(height),
 	)
+	return int(ret)
 }
 
 func XSetForeground(display *Display, gc GC, pixel Pixel) {
@@ -96,3 +98,93 @@ func WhitePixelOfScreen(screen *Screen) Pixel {
 	var cs *C.Screen = (*C.Screen)(unsafe.Pointer(screen))
 	return Pixel(cs.white_pixel)
 }
+
+func XDrawLine(display *Display, d Drawable, gc GC, x1 int, y1 int, x2 uint, y2 uint) int {
+	ret := C.XDrawLine(
+		(*C.Display)(unsafe.Pointer(display)),
+		C.Drawable(d),
+		C.GC(unsafe.Pointer(gc)),
+		C.int(x1),
+		C.int(y1),
+		C.int(x2),
+		C.int(y2),
+	)
+	return int(ret)
+}
+
+func XDrawArc(display *Display, d Drawable, gc GC, x int, y int,
+	width uint, height uint,
+	angle1 int, angle2 int) int {
+	ret := C.XDrawArc(
+		(*C.Display)(unsafe.Pointer(display)),
+		C.Drawable(d),
+		C.GC(unsafe.Pointer(gc)),
+		C.int(x),
+		C.int(y),
+		C.uint(width),
+		C.uint(height),
+		C.int(angle1),
+		C.int(angle2),
+	)
+	return int(ret)
+}
+
+func XFillArc(display *Display, d Drawable, gc GC, x int, y int,
+	width uint, height uint,
+	angle1 int, angle2 int) int {
+	ret := C.XFillArc(
+		(*C.Display)(unsafe.Pointer(display)),
+		C.Drawable(d),
+		C.GC(unsafe.Pointer(gc)),
+		C.int(x),
+		C.int(y),
+		C.uint(width),
+		C.uint(height),
+		C.int(angle1),
+		C.int(angle2),
+	)
+	return int(ret)
+}
+
+/*
+func XDrawArcs(display *Display, d Drawable, gc GC, arcs []XArc) int {
+	var xarcs []C.XArc
+	ret := C.XDrawArcs(
+		(*C.Display)(unsafe.Pointer(display)),
+		C.Drawable(d),
+		xarcs,
+		C.int(len(arcs)),
+	)
+return int(ret)
+}*/
+
+func XDrawString(display *Display, d Drawable, gc GC, x int, y int, str string) int {
+	ret := C.XDrawString((*C.Display)(unsafe.Pointer(display)),
+		C.Drawable(d),
+		C.GC(unsafe.Pointer(gc)),
+		C.int(x),
+		C.int(y),
+		C.CString(str),
+		C.int(len(str)))
+	return int(ret)
+}
+
+func XDrawPoint(display *Display, d Drawable, gc GC, x int, y int) int {
+	ret := C.XDrawPoint((*C.Display)(unsafe.Pointer(display)),
+		C.Drawable(d),
+		C.GC(unsafe.Pointer(gc)),
+		C.int(x),
+		C.int(y))
+	return int(ret)
+}
+
+/*
+func XDrawPoints(display *Display, d Drawable, gc GC, points []XPoint) int {
+	ret := C.XDrawPoints((*C.Display)(unsafe.Pointer(display)),
+		C.Drawable(d),
+		C.GC(unsafe.Pointer(gc)),
+		C.int(x),
+		C.int(y))
+	return int(ret)
+}
+*/

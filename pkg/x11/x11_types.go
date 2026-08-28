@@ -104,3 +104,12 @@ type XGCValues struct {
 	Dashes			int8
 	Pad_cgo_0		[3]byte
 }
+
+type XArc struct {
+	X	int16
+	Y	int16
+	Width	uint16
+	Height	uint16
+	Angle1	int16
+	Angle2	int16
+}

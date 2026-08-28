@@ -17,6 +17,7 @@ type XMotionEvent C.XMotionEvent
 type XtResource C.XtResource
 type XtResourceList C.XtResourceList
 type XGCValues C.XGCValues
+type XArc C.XArc
 
 // We have these as manually defined Go types, for better usability
 // type OptionDescRec C.XrmOptionDescRec

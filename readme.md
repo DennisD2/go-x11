@@ -109,6 +109,7 @@ Wrappers for:
 * XEvent
 * GC
 * XGCValues
+* XArc
 
 Xlib functions:
 * BlackPixelOfScreen
@@ -117,6 +118,11 @@ Xlib functions:
 * XSetForeground
 * XDrawRectangle
 * XFillRectangle
+* XDrawLine
+* XDrawArc
+* XFillArc
+* XDrawString
+* XDrawPoint
 
 ### From Xt (X Toolkit)
 Wrapper for:
