@@ -60,7 +60,7 @@ func finance() {
 
 	p := quote.RegularMarketPrice
 	//var q norm.ScaledDecimal = p
-	fmt.Printf("Quote: %s\n", quote)
+	fmt.Printf("Quote: %v\n", quote)
 	price := float64(p.Scaled) / math.Pow(10, float64(p.Scale))
 	fmt.Printf("Quote: Regular %v %s\n", price, currency)
 
