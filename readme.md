@@ -83,12 +83,14 @@ go build ./...
 ```
 
 ## Run it
-in main.go, a single Motif widget is created, and a callback is appended to it.
+in toplevel main.go, a single Motif widget is created, and a callback is appended to it.
 ```shell
 go run . 
 # or with some args
 go run . abc def ghi
 ```
+In young/*, there are other example applications, which also can be
+built with "go build ." executed in their directory.
 
 ## Tests
 Execute tests:

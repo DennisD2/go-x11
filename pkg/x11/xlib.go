@@ -45,7 +45,6 @@ var MotionNotify int32 = C.MotionNotify
 var GenericEvent int32 = C.GenericEvent
 
 func XCreateGC(display *Display, d Drawable, valuemask int, values *XGCValues) GC {
-	//ret := C.XCreateGC((*C.Display)(unsafe.Pointer(display)), C.Drawable(unsafe.Pointer(d)), valuemask, values)
 	ret := C.XCreateGC(
 		(*C.Display)(unsafe.Pointer(display)),
 		C.Drawable(d),
@@ -155,7 +154,7 @@ func XDrawArcs(display *Display, d Drawable, gc GC, arcs []XArc) int {
 		xarcs,
 		C.int(len(arcs)),
 	)
-return int(ret)
+	return int(ret)
 }*/
 
 func XDrawString(display *Display, d Drawable, gc GC, x int, y int, str string) int {
