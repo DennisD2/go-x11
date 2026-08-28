@@ -42,6 +42,7 @@ jobs:
         run: |
           go version
           go env
+          go get go-x11/playground/casino
           go build -v ./...
 
       - name: Run tests
