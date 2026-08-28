@@ -105,7 +105,18 @@ Wrappers for:
 * Display
 * Screen
 * Window
+* Drawable
 * XEvent
+* GC
+* XGCValues
+
+Xlib functions:
+* BlackPixelOfScreen
+* WhitePixelOfScreen
+* XCreateGC
+* XSetForeground
+* XDrawRectangle
+* XFillRectangle
 
 ### From Xt (X Toolkit)
 Wrapper for:
@@ -116,6 +127,7 @@ Wrapper for:
 * XtTranslations
 * XtPointer
 * EventMask
+* Pixel
 
 Go structs for:
 * OptionDescRec

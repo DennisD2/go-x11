@@ -16,6 +16,8 @@ import (
 "github.com/AmpyFin/yfinance-go"
 */
 
+var canvas x11.Widget
+
 var client = yfinance.NewClient()
 
 func finance() {
@@ -71,6 +73,19 @@ func finance() {
 	fmt.Printf("Quote: Low     %v %s\n", price, currency)
 }
 
+func drawIt(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
+	println("Button was selected! Pure Go code + X11 did this!")
+
+	cw := x11.XtWindow(canvas)
+	d := x11.XtDisplay(canvas)
+	gc := x11.XCreateGC(d, x11.Drawable(cw), 0, nil)
+	//x11.XSetForeground(d, gc, x11.BlackPixelOfScreen(x11.XtScreen(canvas)))
+	x11.XSetForeground(d, gc, 0xff00ff)
+
+	//x11.XDrawRectangle(d, x11.Drawable(cw), gc, 10, 10, 90, 70)
+	x11.XFillRectangle(d, x11.Drawable(cw), gc, 10, 10, 90, 70)
+}
+
 func main() {
 	x11.WrapperInfo()
 
@@ -117,10 +132,9 @@ func main() {
 	args = x11.AppendArgList(args, x11.XmNleftWidget, uintptr(options))
 	args = x11.AppendArgList(args, x11.XmNleftAttachment, uintptr(x11.XmATTACH_WIDGET))
 	args = x11.AppendArgList(args, x11.XmNbottomAttachment, uintptr(x11.XmATTACH_FORM))
-	canvas := x11.XtCreateManagedWidget("canvas", x11.DrawingAreaWidgetClass(), panel, args)
-	_ = canvas
+	canvas = x11.XtCreateManagedWidget("canvas", x11.DrawingAreaWidgetClass(), panel, args)
 
-	x11.XtCreateManagedWidget("button1", x11.PushButtonWidgetClass(), commands, nil)
+	bu1 := x11.XtCreateManagedWidget("button1", x11.PushButtonWidgetClass(), commands, nil)
 	x11.XtCreateManagedWidget("button2", x11.PushButtonWidgetClass(), commands, nil)
 	x11.XtCreateManagedWidget("button3", x11.PushButtonWidgetClass(), commands, nil)
 
@@ -128,9 +142,12 @@ func main() {
 	x11.XtCreateManagedWidget("button2", x11.PushButtonWidgetClass(), options, nil)
 	x11.XtCreateManagedWidget("button3", x11.PushButtonWidgetClass(), options, nil)
 
+	x11.XtAddCallback(bu1, x11.XmNactivateCallback, drawIt, x11.XtPointer(nil))
+
 	finance()
 
 	x11.XtRealizeWidget(shell)
+
 	x11.XtAppMainLoop(app)
 
 }

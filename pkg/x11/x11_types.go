@@ -77,3 +77,30 @@ type XtResource struct {
 	Default_addr	*byte
 }
 type XtResourceList *XtResource
+
+type XGCValues struct {
+	Function		int32
+	Plane_mask		uint64
+	Foreground		uint64
+	Background		uint64
+	Line_width		int32
+	Line_style		int32
+	Cap_style		int32
+	Join_style		int32
+	Fill_style		int32
+	Fill_rule		int32
+	Arc_mode		int32
+	Tile			uint64
+	Stipple			uint64
+	Ts_x_origin		int32
+	Ts_y_origin		int32
+	Font			uint64
+	Subwindow_mode		int32
+	Graphics_exposures	int32
+	Clip_x_origin		int32
+	Clip_y_origin		int32
+	Clip_mask		uint64
+	Dash_offset		int32
+	Dashes			int8
+	Pad_cgo_0		[3]byte
+}

@@ -35,6 +35,7 @@ type XtArgVal unsafe.Pointer //  Xt generic argument value
 type CAddr unsafe.Pointer
 type XtPointer unsafe.Pointer
 type XtTranslations unsafe.Pointer
+type Pixel uint32
 
 // OptionDescRec Go structure
 type OptionDescRec struct {
@@ -329,7 +330,7 @@ func XtScreen(w Widget) *Screen {
 // returns object, not reference
 func XtWindow(w Widget) Window {
 	cw := C.XtWindow(C.Widget(w))
-	return Window(unsafe.Pointer(&cw))
+	return Window(cw)
 }
 
 // AppMainLoop enters the Xt event loop
