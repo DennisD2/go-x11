@@ -44,6 +44,9 @@ var ButtonRelease int32 = C.ButtonRelease
 var MotionNotify int32 = C.MotionNotify
 var GenericEvent int32 = C.GenericEvent
 
+var CoordModeOrigin = C.CoordModeOrigin
+var CoordModePrevious = C.CoordModePrevious
+
 func XCreateGC(display *Display, d Drawable, valuemask int, values *XGCValues) GC {
 	ret := C.XCreateGC(
 		(*C.Display)(unsafe.Pointer(display)),
@@ -177,13 +180,12 @@ func XDrawPoint(display *Display, d Drawable, gc GC, x int, y int) int {
 	return int(ret)
 }
 
-/*
-func XDrawPoints(display *Display, d Drawable, gc GC, points []XPoint) int {
+func XDrawPoints(display *Display, d Drawable, gc GC, points []XPoint, mode int) int {
 	ret := C.XDrawPoints((*C.Display)(unsafe.Pointer(display)),
 		C.Drawable(d),
 		C.GC(unsafe.Pointer(gc)),
-		C.int(x),
-		C.int(y))
+		(*C.XPoint)(unsafe.Pointer(&points[0])),
+		C.int(len(points)),
+		C.int(mode))
 	return int(ret)
 }
-*/

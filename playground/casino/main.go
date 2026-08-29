@@ -57,20 +57,29 @@ func finance() {
 	currency := quote.CurrencyCode
 	q := *quote.RegularMarketVolume
 	fmt.Printf("Quote: Volume: %v\n", q)
+	fmt.Printf("Quote: %v\n", quote)
 
 	p := quote.RegularMarketPrice
 	//var q norm.ScaledDecimal = p
-	fmt.Printf("Quote: %v\n", quote)
-	price := float64(p.Scaled) / math.Pow(10, float64(p.Scale))
-	fmt.Printf("Quote: Regular %v %s\n", price, currency)
-
-	p = quote.RegularMarketHigh
-	price = float64(p.Scaled) / math.Pow(10, float64(p.Scale))
-	fmt.Printf("Quote: Hight   %v %s\n", price, currency)
-
-	p = quote.RegularMarketLow
-	price = float64(p.Scaled) / math.Pow(10, float64(p.Scale))
-	fmt.Printf("Quote: Low     %v %s\n", price, currency)
+	//var p ScaledDecimal
+	var price float64
+	if p != nil {
+		price = float64(p.Scaled) / math.Pow(10, float64(p.Scale))
+		fmt.Printf("Quote: Regular %v %s\n", price, currency)
+	}
+	if p != nil {
+		p = quote.RegularMarketHigh
+		price = float64(p.Scaled) / math.Pow(10, float64(p.Scale))
+		fmt.Printf("Quote: Hight   %v %s\n", price, currency)
+	}
+	if p != nil {
+		p = quote.RegularMarketLow
+		price = float64(p.Scaled) / math.Pow(10, float64(p.Scale))
+		fmt.Printf("Quote: Low     %v %s\n", price, currency)
+	}
+	if p == nil {
+		fmt.Printf("No RegularMarketPrice values found\n")
+	}
 }
 
 func drawIt(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
@@ -108,6 +117,26 @@ func drawIt(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	x11.XDrawPoint(d, drawable, gc, 56, 50)
 	x11.XDrawPoint(d, drawable, gc, 58, 50)
 	x11.XDrawPoint(d, drawable, gc, 60, 50)
+
+	// Array of pixels, CoordModeOrigin - coords based on widget 0,0
+	points = []x11.XPoint{
+		{80, 10},
+		{81, 11},
+		{82, 12},
+		{83, 13},
+	}
+	x11.XDrawPoints(d, drawable, gc, points, x11.CoordModeOrigin)
+
+	// Array of pixels, CoordModeOrigin - coords based on previous point
+	x11.XSetForeground(d, gc, 0x00ffff)
+	points := []x11.XPoint{
+		{90, 20},
+		{1, 2},
+		{1, 2},
+		{1, 2},
+	}
+	x11.XDrawPoints(d, drawable, gc, points, x11.CoordModePrevious)
+
 }
 
 func main() {

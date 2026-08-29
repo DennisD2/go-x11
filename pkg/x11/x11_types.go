@@ -105,6 +105,11 @@ type XGCValues struct {
 	Pad_cgo_0		[3]byte
 }
 
+type XPoint struct {
+	X	int16
+	Y	int16
+}
+
 type XArc struct {
 	X	int16
 	Y	int16
