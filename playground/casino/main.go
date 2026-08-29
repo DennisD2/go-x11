@@ -119,7 +119,7 @@ func drawIt(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	x11.XDrawPoint(d, drawable, gc, 60, 50)
 
 	// Array of pixels, CoordModeOrigin - coords based on widget 0,0
-	points = []x11.XPoint{
+	points := []x11.XPoint{
 		{80, 10},
 		{81, 11},
 		{82, 12},
@@ -129,7 +129,7 @@ func drawIt(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 
 	// Array of pixels, CoordModeOrigin - coords based on previous point
 	x11.XSetForeground(d, gc, 0x00ffff)
-	points := []x11.XPoint{
+	points = []x11.XPoint{
 		{90, 20},
 		{1, 2},
 		{1, 2},
