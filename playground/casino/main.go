@@ -137,6 +137,13 @@ func drawIt(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	}
 	x11.XDrawPoints(d, drawable, gc, points, x11.CoordModePrevious)
 
+	x11.XSetForeground(d, gc, 0xffff00)
+	arcs := []x11.XArc{
+		{10, 40, 20, 20, 0, 360 * 64},
+		{10, 60, 20, 20, 0, 360 * 64},
+		{10, 80, 20, 20, 0, 360 * 64},
+	}
+	x11.XDrawArcs(d, drawable, gc, arcs)
 }
 
 func main() {
