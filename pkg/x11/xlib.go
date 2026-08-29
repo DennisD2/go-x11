@@ -148,17 +148,16 @@ func XFillArc(display *Display, d Drawable, gc GC, x int, y int,
 	return int(ret)
 }
 
-/*
 func XDrawArcs(display *Display, d Drawable, gc GC, arcs []XArc) int {
-	var xarcs []C.XArc
 	ret := C.XDrawArcs(
 		(*C.Display)(unsafe.Pointer(display)),
 		C.Drawable(d),
-		xarcs,
+		C.GC(unsafe.Pointer(gc)),
+		(*C.XArc)(unsafe.Pointer(&arcs[0])),
 		C.int(len(arcs)),
 	)
 	return int(ret)
-}*/
+}
 
 func XDrawString(display *Display, d Drawable, gc GC, x int, y int, str string) int {
 	ret := C.XDrawString((*C.Display)(unsafe.Pointer(display)),
