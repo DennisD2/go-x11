@@ -333,6 +333,26 @@ func XtWindow(w Widget) Window {
 	return Window(cw)
 }
 
+func XtName(w Widget) string {
+	cn := C.XtName(C.Widget(w))
+	return C.GoString(cn)
+}
+
+func XtSuperclass(w Widget) WidgetClass {
+	cc := C.XtSuperclass(C.Widget(w))
+	return WidgetClass(cc)
+}
+
+func XtClass(w Widget) WidgetClass {
+	cc := C.XtClass(C.Widget(w))
+	return WidgetClass(cc)
+}
+
+func XtParent(w Widget) Widget {
+	cw := C.XtParent(C.Widget(w))
+	return Widget(cw)
+}
+
 // AppMainLoop enters the Xt event loop
 func XtAppMainLoop(ctx XtAppContext) {
 	C.XtAppMainLoop((C.XtAppContext)(ctx))
