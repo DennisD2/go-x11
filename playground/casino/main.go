@@ -21,11 +21,16 @@ var canvas x11.Widget
 
 var client = yfinance.NewClient()
 
+type QuoteData struct {
+	Date         time.Time
+	Close        float64
+	CurrencyCode string
+}
+
+var quoteData []QuoteData
+
 func finance() {
-	// Erstellt einen neuen Yahoo Finance Client
-
 	// Create a new client
-
 	ctx := context.Background()
 
 	//who := "ALV.DE"
@@ -43,12 +48,19 @@ func finance() {
 	}
 
 	fmt.Printf("Fetched %d bars for %v\n", len(bars.Bars), who)
+	quoteData = nil
 	for _, bar := range bars.Bars {
 		//test := math.Abs(1.0)
 		price := float64(bar.Close.Scaled) / math.Pow(10, float64(bar.Close.Scale))
 		fmt.Printf("Date: %s, Close: %.4f %s\n",
 			bar.EventTime.Format("2006-01-02"),
 			price, bar.CurrencyCode)
+		newQuote := QuoteData{
+			Date:         bar.EventTime,
+			Close:        price,
+			CurrencyCode: bar.CurrencyCode,
+		}
+		quoteData = append(quoteData, newQuote)
 	}
 
 	quote, err := client.FetchQuote(ctx, who, runId)
@@ -183,6 +195,15 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 		x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 		ctext := fmt.Sprintf("%d", i)
 		x11.XDrawString(d, drawable, gc, coo_x_start, coo_y_start+15, ctext)
+	}
+
+	divisionLength = int(width) / len(quoteData)
+	x11.XSetForeground(d, gc, 0xff0000)
+	for i, l := range quoteData {
+		fmt.Printf("Date: %s, Close: %.4f %s\n", l.Date, l.Close, l.CurrencyCode)
+		qx := i*divisionLength + 20
+		qy := int(l.Close)
+		x11.XFillArc(d, drawable, gc, qx, qy, 20, 20, 0, 360*64)
 	}
 
 }
