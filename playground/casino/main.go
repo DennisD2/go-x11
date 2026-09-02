@@ -9,6 +9,7 @@ import (
 	"math"
 	"os"
 	"time"
+	"unsafe"
 )
 
 /*
@@ -82,7 +83,7 @@ func finance() {
 	}
 }
 
-func drawIt(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
+func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	println("Some drawing primitives...")
 
 	// FillRectangle
@@ -93,21 +94,21 @@ func drawIt(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	//x11.XSetForeground(d, gc, x11.BlackPixelOfScreen(x11.XtScreen(canvas)))
 	x11.XSetForeground(d, gc, 0x0000ff)
 	//x11.XDrawRectangle(d, drawable, gc, 10, 10, 90, 70)
-	x11.XFillRectangle(d, drawable, gc, 10, 10, 90, 70)
+	x11.XFillRectangle(d, drawable, gc, 10, 10, 1900, 900)
 
 	// Lines
 	x11.XSetForeground(d, gc, 0x00ff00)
-	x11.XDrawLine(d, drawable, gc, 20, 25, 70, 20)
+	x11.XDrawLine(d, drawable, gc, 20, 25, 700, 20)
 	x11.XSetForeground(d, gc, 0x00ffff)
-	x11.XDrawLine(d, drawable, gc, 30, 30, 70, 30)
+	x11.XDrawLine(d, drawable, gc, 30, 30, 700, 300)
 
 	// Arc/Circle
 	x11.XSetForeground(d, gc, 0xff0000)
-	x11.XFillArc(d, drawable, gc, 30, 30, 50, 50, 0, 360*64)
+	x11.XFillArc(d, drawable, gc, 300, 500, 300, 300, 0, 360*64)
 
 	// String
 	x11.XSetForeground(d, gc, 0xffffff)
-	x11.XDrawString(d, drawable, gc, 40, 20, "HELLO")
+	x11.XDrawString(d, drawable, gc, 40, 200, "HELLO")
 
 	// Pixels
 	x11.XSetForeground(d, gc, 0xffff00)
@@ -139,11 +140,15 @@ func drawIt(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 
 	x11.XSetForeground(d, gc, 0xffff00)
 	arcs := []x11.XArc{
-		{10, 40, 20, 20, 0, 360 * 64},
-		{10, 60, 20, 20, 0, 360 * 64},
-		{10, 80, 20, 20, 0, 360 * 64},
+		{500, 40, 20, 20, 0, 360 * 64},
+		{500, 70, 20, 20, 0, 360 * 64},
+		{500, 100, 20, 20, 0, 360 * 64},
 	}
 	x11.XDrawArcs(d, drawable, gc, arcs)
+}
+
+type Data struct {
+	x int
 }
 
 func main() {
@@ -164,7 +169,7 @@ func main() {
 	)
 
 	// The overall window layout is handled by an XmForm widget
-	panel := x11.XtCreateManagedWidget("message", x11.FormWidgetClass(), shell, &x11.ArgList{})
+	panel := x11.XtCreateManagedWidget("panel", x11.FormWidgetClass(), shell, &x11.ArgList{})
 
 	//  An XmRowColumn widget holds the buttons along the top of the window
 	args := x11.AppendArgList(nil, x11.XmNnumColumns, 3)
@@ -192,9 +197,11 @@ func main() {
 	args = x11.AppendArgList(args, x11.XmNleftWidget, uintptr(options))
 	args = x11.AppendArgList(args, x11.XmNleftAttachment, uintptr(x11.XmATTACH_WIDGET))
 	args = x11.AppendArgList(args, x11.XmNbottomAttachment, uintptr(x11.XmATTACH_FORM))
+	args = x11.AppendArgList(args, x11.XtNwidth, 2000)
+	args = x11.AppendArgList(args, x11.XtNheight, 1000)
 	canvas = x11.XtCreateManagedWidget("canvas", x11.DrawingAreaWidgetClass(), panel, args)
 
-	bu1 := x11.XtCreateManagedWidget("button1", x11.PushButtonWidgetClass(), commands, nil)
+	x11.XtCreateManagedWidget("button1", x11.PushButtonWidgetClass(), commands, nil)
 	x11.XtCreateManagedWidget("button2", x11.PushButtonWidgetClass(), commands, nil)
 	x11.XtCreateManagedWidget("button3", x11.PushButtonWidgetClass(), commands, nil)
 
@@ -202,7 +209,8 @@ func main() {
 	x11.XtCreateManagedWidget("button2", x11.PushButtonWidgetClass(), options, nil)
 	x11.XtCreateManagedWidget("button3", x11.PushButtonWidgetClass(), options, nil)
 
-	x11.XtAddCallback(bu1, x11.XmNactivateCallback, drawIt, x11.XtPointer(nil))
+	var data Data
+	x11.XtAddCallback(canvas, x11.XmNexposeCallback, redisplay, (x11.XtPointer)(unsafe.Pointer(&data)))
 
 	finance()
 
