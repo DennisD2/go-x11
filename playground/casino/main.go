@@ -198,7 +198,7 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	}
 
 	divisionLength = int(width) / len(quoteData)
-	x11.XSetForeground(d, gc, 0xff0000)
+	x11.XSetForeground(d, gc, 0xe7e78d)
 	for i, l := range quoteData {
 		fmt.Printf("Date: %s, Close: %.4f %s\n", l.Date, l.Close, l.CurrencyCode)
 		qx := i*divisionLength + 20
