@@ -86,6 +86,20 @@ func finance() {
 func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	println("Some drawing primitives...")
 
+	var height uint16
+	var width uint16
+	// get pointer to var
+	ptrToHeight := unsafe.Pointer(&height)
+	ptrToWidth := unsafe.Pointer(&width)
+	//convert to uintptr to put it into ArgList
+	heightAsUintptr := uintptr(ptrToHeight)
+	widthAsUintptr := uintptr(ptrToWidth)
+	inargs := x11.AppendArgList(nil, x11.XmNheight, heightAsUintptr)
+	inargs = x11.AppendArgList(inargs, x11.XmNwidth, widthAsUintptr)
+	x11.XtGetValues(canvas, inargs)
+
+	fmt.Printf("canvas width*height: %d x %d\n", width, height)
+
 	// FillRectangle
 	cw := x11.XtWindow(canvas)
 	drawable := x11.Drawable(cw)
@@ -94,13 +108,13 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	//x11.XSetForeground(d, gc, x11.BlackPixelOfScreen(x11.XtScreen(canvas)))
 	x11.XSetForeground(d, gc, 0x0000ff)
 	//x11.XDrawRectangle(d, drawable, gc, 10, 10, 90, 70)
-	x11.XFillRectangle(d, drawable, gc, 10, 10, 1900, 900)
+	x11.XFillRectangle(d, drawable, gc, 0, 0, uint(width), uint(height))
 
 	// Lines
 	x11.XSetForeground(d, gc, 0x00ff00)
-	x11.XDrawLine(d, drawable, gc, 20, 25, 700, 20)
+	x11.XDrawLine(d, drawable, gc, 530, 100, 700, 50)
 	x11.XSetForeground(d, gc, 0x00ffff)
-	x11.XDrawLine(d, drawable, gc, 30, 30, 700, 300)
+	x11.XDrawLine(d, drawable, gc, 530, 100, 700, 300)
 
 	// Arc/Circle
 	x11.XSetForeground(d, gc, 0xff0000)
@@ -145,6 +159,32 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 		{500, 100, 20, 20, 0, 360 * 64},
 	}
 	x11.XDrawArcs(d, drawable, gc, arcs)
+
+	// Draw a XY coordinate system
+	coo_x_start := 20
+	coo_x_stop := uint(width) - 20
+	coo_y_start := int(height) - 40
+	coo_y_stop := uint(height) - 40
+	x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
+
+	coo_x_start = 20
+	coo_x_stop = 20
+	coo_y_start = int(height) - 40
+	coo_y_stop = 20
+	x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
+
+	divisionLength := 100
+	nDivisions := int(width) / divisionLength
+	for i := 1; i < nDivisions; i++ {
+		coo_x_start = 20 + i*divisionLength
+		coo_x_stop = 20 + uint(i*divisionLength)
+		coo_y_start = int(height) - 40 + 5
+		coo_y_stop = uint(height) - 40 - 5
+		x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
+		ctext := fmt.Sprintf("%d", i)
+		x11.XDrawString(d, drawable, gc, coo_x_start, coo_y_start+15, ctext)
+	}
+
 }
 
 type Data struct {
