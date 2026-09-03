@@ -233,8 +233,8 @@ func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uin
 	// ticks
 	divisionLength = (int(height) - (coo.margin_top + coo.margin_bottom)) / coo.num_ticks_y
 	for i := 0; i <= coo.num_ticks_y; i++ {
-		coo_y_start = int(coo.margin_bottom) + int(height) - int(i*divisionLength)
-		coo_y_stop = uint(coo.margin_bottom + int(height) - i*divisionLength)
+		coo_y_start = int(height) - coo.margin_bottom - i*divisionLength
+		coo_y_stop = uint(height) - uint(coo.margin_bottom) - uint(i*divisionLength)
 		// len of tick = 10 (5+5)
 		coo_x_start = int(coo.margin_l) + 5
 		coo_x_stop = uint(coo.margin_l) - 5
