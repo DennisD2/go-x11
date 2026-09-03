@@ -244,13 +244,15 @@ func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uin
 		x11.XDrawString(d, drawable, gc, coo_x_start-18, coo_y_start+15, ctext)
 	}
 
-	divisionLength = int(width) / len(quoteData)
+	// some quote data points
+	divisionLength = (int(width) - (coo.margin_r + coo.margin_l)) / len(quoteData)
 	x11.XSetForeground(d, gc, 0xe7e78d)
+	var arcsize uint = 20
 	for i, l := range quoteData {
 		fmt.Printf("Date: %s, Close: %.4f %s\n", l.Date, l.Close, l.CurrencyCode)
-		qx := i*divisionLength + 20
+		qx := i*divisionLength + coo.margin_l - int(arcsize)/2
 		qy := int(l.Close)
-		x11.XFillArc(d, drawable, gc, qx, qy, 20, 20, 0, 360*64)
+		x11.XFillArc(d, drawable, gc, qx, qy, arcsize, arcsize, 0, 360*64)
 	}
 }
 
