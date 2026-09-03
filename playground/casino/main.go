@@ -102,7 +102,7 @@ type CoordSystemInfo struct {
 	margin_bottom int
 	num_ticks_x   int
 	num_ticks_y   int
-	len_div       int
+	len_tick      int
 	legend_x      []string
 	legend_y      []string
 }
@@ -191,18 +191,34 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 		margin_bottom: 40,
 		num_ticks_x:   20,
 		num_ticks_y:   10,
-		len_div:       0,
+		len_tick:      10,
 		legend_x:      nil,
 		legend_y:      nil,
 	}
 
 	drawCoordSystem(d, drawable, gc, width, height, &coordSystem)
 
+	// some quote data points
+	divisionLength := (int(width) - (coordSystem.margin_r + coordSystem.margin_l)) / len(quoteData)
+	x11.XSetForeground(d, gc, 0xe7e78d)
+	var arcsize uint = 20
+	for i, l := range quoteData {
+		fmt.Printf("Date: %s, Close: %.4f %s\n", l.Date, l.Close, l.CurrencyCode)
+		qx := i*divisionLength + coordSystem.margin_l - int(arcsize)/2
+		qy := int(l.Close)
+		x11.XFillArc(d, drawable, gc, qx, qy, arcsize, arcsize, 0, 360*64)
+	}
+
 }
 
 func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uint16, height uint16,
 	coo *CoordSystemInfo) {
 	// Draw a XY coordinate system
+
+	//TODO
+	// check numeric values below (15,18) these offsets need to be calculated by font size
+
+	tickLen := coo.len_tick / 2
 
 	// X axis
 	coo_x_start := coo.margin_l
@@ -216,8 +232,8 @@ func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uin
 		coo_x_start = coo.margin_l + i*divisionLength
 		coo_x_stop = uint(coo.margin_l) + uint(i*divisionLength)
 		// len of tick = 10 (5+5)
-		coo_y_start = int(height) - 40 + 5
-		coo_y_stop = uint(height) - 40 - 5
+		coo_y_start = int(height) - coo.margin_bottom + tickLen
+		coo_y_stop = uint(height) - uint(coo.margin_bottom) - uint(tickLen)
 		x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 		// legend
 		ctext := fmt.Sprintf("%d", i)
@@ -236,24 +252,14 @@ func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uin
 		coo_y_start = int(height) - coo.margin_bottom - i*divisionLength
 		coo_y_stop = uint(height) - uint(coo.margin_bottom) - uint(i*divisionLength)
 		// len of tick = 10 (5+5)
-		coo_x_start = int(coo.margin_l) + 5
-		coo_x_stop = uint(coo.margin_l) - 5
+		coo_x_start = int(coo.margin_l) + tickLen
+		coo_x_stop = uint(coo.margin_l) - uint(tickLen)
 		x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 		// legend
 		ctext := fmt.Sprintf("%d", i)
 		x11.XDrawString(d, drawable, gc, coo_x_start-18, coo_y_start+15, ctext)
 	}
 
-	// some quote data points
-	divisionLength = (int(width) - (coo.margin_r + coo.margin_l)) / len(quoteData)
-	x11.XSetForeground(d, gc, 0xe7e78d)
-	var arcsize uint = 20
-	for i, l := range quoteData {
-		fmt.Printf("Date: %s, Close: %.4f %s\n", l.Date, l.Close, l.CurrencyCode)
-		qx := i*divisionLength + coo.margin_l - int(arcsize)/2
-		qy := int(l.Close)
-		x11.XFillArc(d, drawable, gc, qx, qy, arcsize, arcsize, 0, 360*64)
-	}
 }
 
 type Data struct {
