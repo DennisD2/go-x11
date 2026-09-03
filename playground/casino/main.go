@@ -227,6 +227,13 @@ func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uin
 
 	tickLen := coo.len_tick / 2
 
+	gContextId := x11.XGContextFromGC(gc)
+	font := x11.XQueryFont(d, *(*x11.XID)(unsafe.Pointer(&gContextId)))
+	var textDimensions x11.XCharStruct // Alloziert den Speicher in Go
+	var dir int
+	var ascent int
+	var descent int
+
 	// X axis
 	coo_x_start := coo.margin_l
 	coo_x_stop := uint(width) - uint(coo.margin_r)
@@ -244,7 +251,9 @@ func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uin
 		x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 		// legend
 		ctext := coo.legend_x[i]
-		x11.XDrawString(d, drawable, gc, coo_x_start, coo_y_start+15, ctext)
+		x11.XTextExtents(font, ctext, len(ctext), &dir, &ascent, &descent, &textDimensions)
+		txt_x_start := coo_x_start - int(textDimensions.Width/2)
+		x11.XDrawString(d, drawable, gc, txt_x_start, coo_y_start+15, ctext)
 	}
 
 	// Y axis
@@ -266,43 +275,6 @@ func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uin
 		ctext := fmt.Sprintf("%d", i)
 		x11.XDrawString(d, drawable, gc, coo_x_start-18, coo_y_start+15, ctext)
 	}
-
-	gContextId := x11.XGContextFromGC(gc)
-
-	font := x11.XQueryFont(d, *(*x11.XID)(unsafe.Pointer(&gContextId)))
-
-	/*
-		var fontList x11.XmFontList
-
-		inargs := x11.AppendArgList(nil, x11.XmNrenderTable, (uintptr)(unsafe.Pointer(&fontList)))
-		x11.XtGetValues(canvas, inargs)
-
-		if fontList == nil {
-			println("no font for widget\n")
-			return
-		}
-
-		var context x11.XmFontContext
-		var fontContextStruct *x11.XFontStruct
-
-		if x11.XmFontListInitFontContext(&context, fontList) {
-			var charset x11.XmStringCharSet
-			x11.XmFontListGetNextFont(context, &charset, &fontContextStruct)
-			x11.XmFontListFreeFontContext(context)
-		} else {
-			println("x11 x1.XmFontListInitFontContext failed\n")
-			return
-		}
-
-		font := x11.XFontStruct(unsafe.Pointer(fontContextStruct))
-	*/
-
-	var overall x11.XCharStruct // Alloziert den Speicher in Go
-	var dir int
-	var ascent int
-	var descent int
-
-	x11.XTextExtents(font, "Hello", 5, &dir, &ascent, &descent, &overall)
 
 }
 

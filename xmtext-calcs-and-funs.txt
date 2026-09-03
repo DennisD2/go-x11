@@ -1,0 +1,26 @@
+
+	/*
+		var fontList x11.XmFontList
+
+		inargs := x11.AppendArgList(nil, x11.XmNrenderTable, (uintptr)(unsafe.Pointer(&fontList)))
+		x11.XtGetValues(canvas, inargs)
+
+		if fontList == nil {
+			println("no font for widget\n")
+			return
+		}
+
+		var context x11.XmFontContext
+		var fontContextStruct *x11.XFontStruct
+
+		if x11.XmFontListInitFontContext(&context, fontList) {
+			var charset x11.XmStringCharSet
+			x11.XmFontListGetNextFont(context, &charset, &fontContextStruct)
+			x11.XmFontListFreeFontContext(context)
+		} else {
+			println("x11 x1.XmFontListInitFontContext failed\n")
+			return
+		}
+
+		font := x11.XFontStruct(unsafe.Pointer(fontContextStruct))
+	*/
