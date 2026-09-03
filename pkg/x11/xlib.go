@@ -24,10 +24,11 @@ type Drawable uint64
 type GC unsafe.Pointer
 type XEvent unsafe.Pointer
 type XPointer unsafe.Pointer
-type XFontStruct unsafe.Pointer
-type XCharStruct unsafe.Pointer
+type XFontStruct struct{}
+type GContext unsafe.Pointer
 
 type EventMask int64
+type XID uint64
 
 const (
 	NoEventMask         EventMask = EventMask(C.NoEventMask)
@@ -191,7 +192,18 @@ func XDrawPoints(display *Display, d Drawable, gc GC, points []XPoint, mode int)
 	return int(ret)
 }
 
-func XTextExtents(font XFontStruct, text string, nchar int,
+func XQueryFont(display *Display, xid XID) *XFontStruct {
+	fontStruct := C.XQueryFont((*C.Display)(unsafe.Pointer(display)), C.XID(xid))
+	return (*XFontStruct)(unsafe.Pointer(fontStruct))
+}
+
+func XGContextFromGC(gc GC) GContext {
+	ret := C.XGContextFromGC((C.GC)(unsafe.Pointer(gc)))
+	goCtx := (*GContext)(unsafe.Pointer(&ret))
+	return *goCtx
+}
+
+func XTextExtents(font *XFontStruct, text string, nchar int,
 	dir *int, ascent *int, descent *int, overall *XCharStruct) {
 	cdir := C.int(*dir)
 	casc := C.int(*ascent)

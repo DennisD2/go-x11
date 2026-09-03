@@ -14,7 +14,10 @@ import "unsafe"
 // ============================================================================
 
 type XmString unsafe.Pointer
-type XmStringCharset unsafe.Pointer
+type XmStringCharset unsafe.Pointer // what ???
+type XmStringCharSet unsafe.Pointer // 2x ??? TODO FIX
+type XmFontContext unsafe.Pointer
+type XmFontList unsafe.Pointer
 
 type XmAnyCallbackStruct struct {
 	reason int
@@ -72,4 +75,20 @@ func XmStringConcat(a XmString, b XmString) XmString {
 	goa := C.XmString(unsafe.Pointer(a))
 	gob := C.XmString(unsafe.Pointer(b))
 	return XmString(C.XmStringConcat(goa, gob))
+}
+
+func XmFontListInitFontContext(context *XmFontContext, fontList XmFontList) bool {
+	return C.XmFontListInitFontContext((*C.XmFontContext)(unsafe.Pointer(context)),
+		(C.XmFontList)(unsafe.Pointer(fontList))) != 0
+}
+
+func XmFontListGetNextFont(context XmFontContext, charset *XmStringCharSet, font **XFontStruct) bool {
+	ret := C.XmFontListGetNextFont((C.XmFontContext)(unsafe.Pointer(context)),
+		(*C.XmStringCharSet)(unsafe.Pointer(charset)),
+		(**C.XFontStruct)(unsafe.Pointer(font)))
+	return ret != 0
+}
+
+func XmFontListFreeFontContext(context XmFontContext) {
+	C.XmFontListFreeFontContext((C.XmFontContext)(unsafe.Pointer(context)))
 }

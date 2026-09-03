@@ -267,6 +267,43 @@ func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uin
 		x11.XDrawString(d, drawable, gc, coo_x_start-18, coo_y_start+15, ctext)
 	}
 
+	gContextId := x11.XGContextFromGC(gc)
+
+	font := x11.XQueryFont(d, *(*x11.XID)(unsafe.Pointer(&gContextId)))
+
+	/*
+		var fontList x11.XmFontList
+
+		inargs := x11.AppendArgList(nil, x11.XmNrenderTable, (uintptr)(unsafe.Pointer(&fontList)))
+		x11.XtGetValues(canvas, inargs)
+
+		if fontList == nil {
+			println("no font for widget\n")
+			return
+		}
+
+		var context x11.XmFontContext
+		var fontContextStruct *x11.XFontStruct
+
+		if x11.XmFontListInitFontContext(&context, fontList) {
+			var charset x11.XmStringCharSet
+			x11.XmFontListGetNextFont(context, &charset, &fontContextStruct)
+			x11.XmFontListFreeFontContext(context)
+		} else {
+			println("x11 x1.XmFontListInitFontContext failed\n")
+			return
+		}
+
+		font := x11.XFontStruct(unsafe.Pointer(fontContextStruct))
+	*/
+
+	var overall x11.XCharStruct // Alloziert den Speicher in Go
+	var dir int
+	var ascent int
+	var descent int
+
+	x11.XTextExtents(font, "Hello", 5, &dir, &ascent, &descent, &overall)
+
 }
 
 type Data struct {

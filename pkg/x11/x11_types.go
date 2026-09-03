@@ -118,3 +118,13 @@ type XArc struct {
 	Angle1	int16
 	Angle2	int16
 }
+
+type XCharStruct struct {
+	Lbearing	int16
+	Rbearing	int16
+	Width		int16
+	Ascent		int16
+	Descent		int16
+	Attributes	uint16
+}
+

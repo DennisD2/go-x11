@@ -104,6 +104,7 @@ with a few, needed in almost every application. Other will follow.
 
 ### From Xlib
 Wrappers for:
+* XID
 * Display
 * Screen
 * Window
@@ -112,6 +113,9 @@ Wrappers for:
 * GC
 * XGCValues
 * XArc
+* XFontStruct
+* XCharStruct
+* GContext
 
 Xlib functions:
 * BlackPixelOfScreen
@@ -125,6 +129,9 @@ Xlib functions:
 * XFillArc
 * XDrawString
 * XDrawPoint
+* XQueryFont
+* XGContextFromGC
+* XTextExtents
 
 ### From Xt (X Toolkit)
 Wrapper for:
@@ -182,6 +189,9 @@ Xt Functions:
 Wrappers for:
 * XmString
 * XmStringCharset
+* XmFontContext
+* XmFontList
+* 
 
 Xm Functions:
 * XmStringCreate

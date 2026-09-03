@@ -19,6 +19,7 @@ type XtResourceList C.XtResourceList
 type XGCValues C.XGCValues
 type XArc C.XArc
 type XPoint C.XPoint
+type XCharStruct C.XCharStruct
 
 // We have these as manually defined Go types, for better usability
 // type OptionDescRec C.XrmOptionDescRec
