@@ -8,6 +8,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"strconv"
 	"time"
 	"unsafe"
 )
@@ -195,6 +196,11 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 		legend_x:      nil,
 		legend_y:      nil,
 	}
+	coordSystem.legend_x = make([]string, coordSystem.num_ticks_x+1)
+	for i := 0; i < coordSystem.num_ticks_x+1; i++ {
+		y := 2010 + i
+		coordSystem.legend_x[i] = strconv.Itoa(y)
+	}
 
 	drawCoordSystem(d, drawable, gc, width, height, &coordSystem)
 
@@ -217,6 +223,7 @@ func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uin
 
 	//TODO
 	// check numeric values below (15,18) these offsets need to be calculated by font size
+	// calculate better offset for legend text. Based on text size.
 
 	tickLen := coo.len_tick / 2
 
@@ -236,7 +243,7 @@ func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uin
 		coo_y_stop = uint(height) - uint(coo.margin_bottom) - uint(tickLen)
 		x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 		// legend
-		ctext := fmt.Sprintf("%d", i)
+		ctext := coo.legend_x[i]
 		x11.XDrawString(d, drawable, gc, coo_x_start, coo_y_start+15, ctext)
 	}
 
