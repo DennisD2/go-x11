@@ -95,6 +95,17 @@ func finance() {
 	}
 }
 
+type CoordSystemInfo struct {
+	margin_l      int
+	margin_r      int
+	margin_top    int
+	margin_bottom int
+	num_ticks     int
+	len_div       int
+	legend_x      []string
+	legend_y      []string
+}
+
 func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	println("Some drawing primitives...")
 
@@ -172,22 +183,41 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	}
 	x11.XDrawArcs(d, drawable, gc, arcs)
 
+	coordSystem := CoordSystemInfo{
+		margin_l:      20,
+		margin_r:      20,
+		margin_top:    20,
+		margin_bottom: 40,
+		num_ticks:     21,
+		len_div:       0,
+		legend_x:      nil,
+		legend_y:      nil,
+	}
+
+	drawCoordSystem(d, drawable, gc, width, height, &coordSystem)
+
+}
+
+func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uint16, height uint16,
+	coo *CoordSystemInfo) {
 	// Draw a XY coordinate system
-	coo_x_start := 20
-	coo_x_stop := uint(width) - 20
-	coo_y_start := int(height) - 40
-	coo_y_stop := uint(height) - 40
+
+	// X axis
+	coo_x_start := coo.margin_l
+	coo_x_stop := uint(width) - uint(coo.margin_r)
+	coo_y_start := int(height) - coo.margin_bottom
+	coo_y_stop := uint(height) - uint(coo.margin_bottom)
 	x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 
+	// Y axis
 	coo_x_start = 20
 	coo_x_stop = 20
 	coo_y_start = int(height) - 40
 	coo_y_stop = 20
 	x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 
-	divisionLength := 100
-	nDivisions := int(width) / divisionLength
-	for i := 1; i < nDivisions; i++ {
+	divisionLength := (int(width) - (coo.margin_r + coo.margin_l)) / coo.num_ticks
+	for i := 1; i < coo.num_ticks; i++ {
 		coo_x_start = 20 + i*divisionLength
 		coo_x_stop = 20 + uint(i*divisionLength)
 		coo_y_start = int(height) - 40 + 5
@@ -205,7 +235,6 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 		qy := int(l.Close)
 		x11.XFillArc(d, drawable, gc, qx, qy, 20, 20, 0, 360*64)
 	}
-
 }
 
 type Data struct {
