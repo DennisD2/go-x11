@@ -14,8 +14,7 @@ import "unsafe"
 // ============================================================================
 
 type XmString unsafe.Pointer
-type XmStringCharset unsafe.Pointer // what ???
-type XmStringCharSet unsafe.Pointer // 2x ??? TODO FIX
+type XmStringCharSet unsafe.Pointer
 type XmFontContext unsafe.Pointer
 type XmFontList unsafe.Pointer
 
@@ -49,7 +48,7 @@ const (
 // ============================================================================
 
 // XmStringCreate creates a Motif compound string
-func XmStringCreate(text string, charset XmStringCharset) XmString {
+func XmStringCreate(text string, charset XmStringCharSet) XmString {
 	c_text := C.CString(text)
 	c_charSet := (*C.char)(unsafe.Pointer(charset))
 	defer C.free(unsafe.Pointer(c_text))
@@ -58,7 +57,7 @@ func XmStringCreate(text string, charset XmStringCharset) XmString {
 }
 
 // XmStringCreateLtoR creates a Motif compound string from left-to-right text
-func XmStringCreateLtoR(text string, charset XmStringCharset) XmString {
+func XmStringCreateLtoR(text string, charset XmStringCharSet) XmString {
 	c_text := C.CString(text)
 	c_charSet := (*C.char)(unsafe.Pointer(charset))
 	defer C.free(unsafe.Pointer(c_text))
