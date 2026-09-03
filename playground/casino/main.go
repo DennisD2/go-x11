@@ -208,14 +208,7 @@ func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uin
 	coo_y_start := int(height) - coo.margin_bottom
 	coo_y_stop := uint(height) - uint(coo.margin_bottom)
 	x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
-
-	// Y axis
-	coo_x_start = 20
-	coo_x_stop = 20
-	coo_y_start = int(height) - 40
-	coo_y_stop = 20
-	x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
-
+	// ticks
 	divisionLength := (int(width) - (coo.margin_r + coo.margin_l)) / coo.num_ticks
 	for i := 1; i < coo.num_ticks; i++ {
 		coo_x_start = 20 + i*divisionLength
@@ -226,6 +219,13 @@ func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uin
 		ctext := fmt.Sprintf("%d", i)
 		x11.XDrawString(d, drawable, gc, coo_x_start, coo_y_start+15, ctext)
 	}
+
+	// Y axis
+	coo_x_start = coo.margin_l
+	coo_x_stop = uint(coo.margin_l)
+	coo_y_start = int(height) - coo.margin_bottom
+	coo_y_stop = uint(coo.margin_top)
+	x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 
 	divisionLength = int(width) / len(quoteData)
 	x11.XSetForeground(d, gc, 0xe7e78d)
