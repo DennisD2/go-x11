@@ -24,6 +24,8 @@ type Drawable uint64
 type GC unsafe.Pointer
 type XEvent unsafe.Pointer
 type XPointer unsafe.Pointer
+type XFontStruct unsafe.Pointer
+type XCharStruct unsafe.Pointer
 
 type EventMask int64
 
@@ -187,4 +189,24 @@ func XDrawPoints(display *Display, d Drawable, gc GC, points []XPoint, mode int)
 		C.int(len(points)),
 		C.int(mode))
 	return int(ret)
+}
+
+func XTextExtents(font XFontStruct, text string, nchar int,
+	dir *int, ascent *int, descent *int, overall *XCharStruct) {
+	cdir := C.int(*dir)
+	casc := C.int(*ascent)
+	cdesc := C.int(*descent)
+
+	ctext := C.CString(text)
+	defer C.free(unsafe.Pointer(ctext))
+
+	cFontStruct := (*C.XFontStruct)(unsafe.Pointer(font))
+	cCharStruct := (*C.XCharStruct)(unsafe.Pointer(overall))
+
+	C.XTextExtents(cFontStruct, ctext, C.int(nchar),
+		&cdir, &casc, &cdesc, cCharStruct)
+
+	*dir = int(cdir)
+	*ascent = int(casc)
+	*descent = int(cdesc)
 }
