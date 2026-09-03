@@ -100,7 +100,8 @@ type CoordSystemInfo struct {
 	margin_r      int
 	margin_top    int
 	margin_bottom int
-	num_ticks     int
+	num_ticks_x   int
+	num_ticks_y   int
 	len_div       int
 	legend_x      []string
 	legend_y      []string
@@ -188,7 +189,8 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 		margin_r:      20,
 		margin_top:    20,
 		margin_bottom: 40,
-		num_ticks:     21,
+		num_ticks_x:   20,
+		num_ticks_y:   10,
 		len_div:       0,
 		legend_x:      nil,
 		legend_y:      nil,
@@ -209,13 +211,15 @@ func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uin
 	coo_y_stop := uint(height) - uint(coo.margin_bottom)
 	x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 	// ticks
-	divisionLength := (int(width) - (coo.margin_r + coo.margin_l)) / coo.num_ticks
-	for i := 1; i < coo.num_ticks; i++ {
-		coo_x_start = 20 + i*divisionLength
-		coo_x_stop = 20 + uint(i*divisionLength)
+	divisionLength := (int(width) - (coo.margin_r + coo.margin_l)) / coo.num_ticks_x
+	for i := 0; i <= coo.num_ticks_x; i++ {
+		coo_x_start = coo.margin_l + i*divisionLength
+		coo_x_stop = uint(coo.margin_l) + uint(i*divisionLength)
+		// len of tick = 10 (5+5)
 		coo_y_start = int(height) - 40 + 5
 		coo_y_stop = uint(height) - 40 - 5
 		x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
+		// legend
 		ctext := fmt.Sprintf("%d", i)
 		x11.XDrawString(d, drawable, gc, coo_x_start, coo_y_start+15, ctext)
 	}
@@ -226,6 +230,19 @@ func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uin
 	coo_y_start = int(height) - coo.margin_bottom
 	coo_y_stop = uint(coo.margin_top)
 	x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
+	// ticks
+	divisionLength = (int(height) - (coo.margin_top + coo.margin_bottom)) / coo.num_ticks_y
+	for i := 0; i <= coo.num_ticks_y; i++ {
+		coo_y_start = int(coo.margin_bottom) + int(height) - int(i*divisionLength)
+		coo_y_stop = uint(coo.margin_bottom + int(height) - i*divisionLength)
+		// len of tick = 10 (5+5)
+		coo_x_start = int(coo.margin_l) + 5
+		coo_x_stop = uint(coo.margin_l) - 5
+		x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
+		// legend
+		ctext := fmt.Sprintf("%d", i)
+		x11.XDrawString(d, drawable, gc, coo_x_start, coo_y_start+15, ctext)
+	}
 
 	divisionLength = int(width) / len(quoteData)
 	x11.XSetForeground(d, gc, 0xe7e78d)
