@@ -241,7 +241,7 @@ func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uin
 		x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 		// legend
 		ctext := fmt.Sprintf("%d", i)
-		x11.XDrawString(d, drawable, gc, coo_x_start, coo_y_start+15, ctext)
+		x11.XDrawString(d, drawable, gc, coo_x_start-18, coo_y_start+15, ctext)
 	}
 
 	divisionLength = int(width) / len(quoteData)
