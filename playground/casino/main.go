@@ -97,6 +97,8 @@ func finance() {
 }
 
 type CoordSystemInfo struct {
+	width         int
+	height        int
 	margin_l      int
 	margin_r      int
 	margin_top    int
@@ -186,6 +188,8 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	x11.XDrawArcs(d, drawable, gc, arcs)
 
 	coordSystem := CoordSystemInfo{
+		width:         int(width),
+		height:        int(height),
 		margin_l:      20,
 		margin_r:      20,
 		margin_top:    20,
@@ -207,7 +211,7 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 		coordSystem.legend_y[i] = strconv.Itoa(y)
 	}
 
-	drawCoordSystem(d, drawable, gc, int(width), int(height), &coordSystem)
+	drawCoordSystem(d, drawable, gc, &coordSystem)
 
 	// some quote data points
 	divisionLength := (int(width) - (coordSystem.margin_r + coordSystem.margin_l)) / len(quoteData)
@@ -219,11 +223,15 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 		qy := int(l.Close)
 		x11.XFillArc(d, drawable, gc, qx, qy, arcsize, arcsize, 0, 360*64)
 	}
-
 }
 
-func drawXAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, width int, height int,
-	coo *CoordSystemInfo) {
+// drawCoordSystem Draw a XY coordinate system
+func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSystemInfo) {
+	drawXAxis(d, drawable, gc, coo)
+	drawYAxis(d, drawable, gc, coo)
+}
+
+func drawXAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSystemInfo) {
 
 	gContextId := x11.XGContextFromGC(gc)
 	font := x11.XQueryFont(d, *(*x11.XID)(unsafe.Pointer(&gContextId)))
@@ -238,18 +246,18 @@ func drawXAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, width int, heig
 	tickLen := coo.len_tick / 2
 
 	coo_x_start := coo.margin_l
-	coo_x_stop := uint(width) - uint(coo.margin_r)
-	coo_y_start := height - coo.margin_bottom
-	coo_y_stop := uint(height) - uint(coo.margin_bottom)
+	coo_x_stop := uint(coo.width) - uint(coo.margin_r)
+	coo_y_start := coo.height - coo.margin_bottom
+	coo_y_stop := uint(coo.height) - uint(coo.margin_bottom)
 	x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 	// ticks
-	divisionLength := (width - (coo.margin_r + coo.margin_l)) / coo.num_ticks_x
+	divisionLength := (coo.width - (coo.margin_r + coo.margin_l)) / coo.num_ticks_x
 	for i := 0; i <= coo.num_ticks_x; i++ {
 		coo_x_start = coo.margin_l + i*divisionLength
 		coo_x_stop = uint(coo.margin_l) + uint(i*divisionLength)
 		// len of tick = 10 (5+5)
-		coo_y_start = height - coo.margin_bottom + tickLen
-		coo_y_stop = uint(height) - uint(coo.margin_bottom) - uint(tickLen)
+		coo_y_start = coo.height - coo.margin_bottom + tickLen
+		coo_y_stop = uint(coo.height) - uint(coo.margin_bottom) - uint(tickLen)
 		x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 		// legend
 		ctext := coo.legend_x[i]
@@ -259,8 +267,7 @@ func drawXAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, width int, heig
 	}
 }
 
-func drawYAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, width int, height int,
-	coo *CoordSystemInfo) {
+func drawYAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSystemInfo) {
 	gContextId := x11.XGContextFromGC(gc)
 	font := x11.XQueryFont(d, *(*x11.XID)(unsafe.Pointer(&gContextId)))
 	var textDimensions x11.XCharStruct // Alloziert den Speicher in Go
@@ -275,14 +282,14 @@ func drawYAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, width int, heig
 
 	coo_x_start := coo.margin_l
 	coo_x_stop := uint(coo.margin_l)
-	coo_y_start := height - coo.margin_bottom
+	coo_y_start := coo.height - coo.margin_bottom
 	coo_y_stop := uint(coo.margin_top)
 	x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 	// ticks
-	divisionLength := (height - (coo.margin_top + coo.margin_bottom)) / coo.num_ticks_y
+	divisionLength := (coo.height - (coo.margin_top + coo.margin_bottom)) / coo.num_ticks_y
 	for i := 0; i <= coo.num_ticks_y; i++ {
-		coo_y_start = height - coo.margin_bottom - i*divisionLength
-		coo_y_stop = uint(height) - uint(coo.margin_bottom) - uint(i*divisionLength)
+		coo_y_start = coo.height - coo.margin_bottom - i*divisionLength
+		coo_y_stop = uint(coo.height) - uint(coo.margin_bottom) - uint(i*divisionLength)
 		// len of tick = 10 (5+5)
 		coo_x_start = int(coo.margin_l) + tickLen
 		coo_x_stop = uint(coo.margin_l) - uint(tickLen)
@@ -293,13 +300,6 @@ func drawYAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, width int, heig
 		txt_x_start := int(coo.margin_l) - int(textDimensions.Width) - 5
 		x11.XDrawString(d, drawable, gc, txt_x_start, coo_y_start+15, ctext)
 	}
-}
-
-// drawCoordSystem Draw a XY coordinate system
-func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, width int, height int,
-	coo *CoordSystemInfo) {
-	drawXAxis(d, drawable, gc, width, height, coo)
-	drawYAxis(d, drawable, gc, width, height, coo)
 }
 
 type Data struct {
