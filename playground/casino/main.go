@@ -202,7 +202,7 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 		coordSystem.legend_x[i] = strconv.Itoa(y)
 	}
 
-	drawCoordSystem(d, drawable, gc, width, height, &coordSystem)
+	drawCoordSystem(d, drawable, gc, int(width), int(height), &coordSystem)
 
 	// some quote data points
 	divisionLength := (int(width) - (coordSystem.margin_r + coordSystem.margin_l)) / len(quoteData)
@@ -255,7 +255,7 @@ func drawXAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, width int, heig
 	}
 }
 
-func drawYAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uint16, height uint16,
+func drawYAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, width int, height int,
 	coo *CoordSystemInfo) {
 	//gContextId := x11.XGContextFromGC(gc)
 	//font := x11.XQueryFont(d, *(*x11.XID)(unsafe.Pointer(&gContextId)))
@@ -272,13 +272,13 @@ func drawYAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uint16, h
 
 	coo_x_start := coo.margin_l
 	coo_x_stop := uint(coo.margin_l)
-	coo_y_start := int(height) - coo.margin_bottom
+	coo_y_start := height - coo.margin_bottom
 	coo_y_stop := uint(coo.margin_top)
 	x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 	// ticks
-	divisionLength := (int(height) - (coo.margin_top + coo.margin_bottom)) / coo.num_ticks_y
+	divisionLength := (height - (coo.margin_top + coo.margin_bottom)) / coo.num_ticks_y
 	for i := 0; i <= coo.num_ticks_y; i++ {
-		coo_y_start = int(height) - coo.margin_bottom - i*divisionLength
+		coo_y_start = height - coo.margin_bottom - i*divisionLength
 		coo_y_stop = uint(height) - uint(coo.margin_bottom) - uint(i*divisionLength)
 		// len of tick = 10 (5+5)
 		coo_x_start = int(coo.margin_l) + tickLen
@@ -291,9 +291,9 @@ func drawYAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uint16, h
 }
 
 // drawCoordSystem Draw a XY coordinate system
-func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uint16, height uint16,
+func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, width int, height int,
 	coo *CoordSystemInfo) {
-	drawXAxis(d, drawable, gc, int(width), int(height), coo)
+	drawXAxis(d, drawable, gc, width, height, coo)
 	drawYAxis(d, drawable, gc, width, height, coo)
 }
 
