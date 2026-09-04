@@ -217,7 +217,7 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 
 }
 
-func drawXAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uint16, height uint16,
+func drawXAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, width int, height int,
 	coo *CoordSystemInfo) {
 
 	gContextId := x11.XGContextFromGC(gc)
@@ -235,16 +235,16 @@ func drawXAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uint16, h
 
 	coo_x_start := coo.margin_l
 	coo_x_stop := uint(width) - uint(coo.margin_r)
-	coo_y_start := int(height) - coo.margin_bottom
+	coo_y_start := height - coo.margin_bottom
 	coo_y_stop := uint(height) - uint(coo.margin_bottom)
 	x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 	// ticks
-	divisionLength := (int(width) - (coo.margin_r + coo.margin_l)) / coo.num_ticks_x
+	divisionLength := (width - (coo.margin_r + coo.margin_l)) / coo.num_ticks_x
 	for i := 0; i <= coo.num_ticks_x; i++ {
 		coo_x_start = coo.margin_l + i*divisionLength
 		coo_x_stop = uint(coo.margin_l) + uint(i*divisionLength)
 		// len of tick = 10 (5+5)
-		coo_y_start = int(height) - coo.margin_bottom + tickLen
+		coo_y_start = height - coo.margin_bottom + tickLen
 		coo_y_stop = uint(height) - uint(coo.margin_bottom) - uint(tickLen)
 		x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 		// legend
@@ -293,7 +293,7 @@ func drawYAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uint16, h
 // drawCoordSystem Draw a XY coordinate system
 func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uint16, height uint16,
 	coo *CoordSystemInfo) {
-	drawXAxis(d, drawable, gc, width, height, coo)
+	drawXAxis(d, drawable, gc, int(width), int(height), coo)
 	drawYAxis(d, drawable, gc, width, height, coo)
 }
 
