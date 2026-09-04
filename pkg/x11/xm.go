@@ -76,11 +76,13 @@ func XmStringConcat(a XmString, b XmString) XmString {
 	return XmString(C.XmStringConcat(goa, gob))
 }
 
+// UNTESTED
 func XmFontListInitFontContext(context *XmFontContext, fontList XmFontList) bool {
 	return C.XmFontListInitFontContext((*C.XmFontContext)(unsafe.Pointer(context)),
 		(C.XmFontList)(unsafe.Pointer(fontList))) != 0
 }
 
+// UNTESTED
 func XmFontListGetNextFont(context XmFontContext, charset *XmStringCharSet, font **XFontStruct) bool {
 	ret := C.XmFontListGetNextFont((C.XmFontContext)(unsafe.Pointer(context)),
 		(*C.XmStringCharSet)(unsafe.Pointer(charset)),
@@ -88,6 +90,7 @@ func XmFontListGetNextFont(context XmFontContext, charset *XmStringCharSet, font
 	return ret != 0
 }
 
+// UNTESTED
 func XmFontListFreeFontContext(context XmFontContext) {
 	C.XmFontListFreeFontContext((C.XmFontContext)(unsafe.Pointer(context)))
 }
