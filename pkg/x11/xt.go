@@ -780,6 +780,10 @@ func XtWarning(message string) {
 	C.XtWarning(C.CString(message))
 }
 
+func XtStringConversionWarning(from_value string, to_type string) {
+	C.XtStringConversionWarning(C.CString(from_value), C.CString(to_type))
+}
+
 func calculateByteSize(class string, rtype string) int {
 	switch rtype {
 	case "Integer", "Int": // entspricht XtRInt
@@ -1010,8 +1014,4 @@ func XtGetApplicationResources(w Widget, base any, resources []GoXtResource, num
 	if err != nil {
 		fmt.Printf("Error during parsing/reflection: %v\n", err)
 	}
-}
-
-func XtStringConversionWarning(from_value string, to_type string) {
-	C.XtStringConversionWarning(C.CString(from_value), C.CString(to_type))
 }

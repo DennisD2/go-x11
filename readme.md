@@ -162,6 +162,7 @@ Xt Functions:
 * XtToolkitInitialize
 * XtAppCreateShell
 * XtWarning
+* XtStringConversionWarning
 * XtCreateWidget
 * XtCreateManagedWidget
 * XtRealizeWidget
