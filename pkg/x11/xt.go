@@ -617,21 +617,21 @@ func goEventHandlerBridge(w C.Widget, client_data C.XtPointer, event *C.XEvent, 
 		return
 	}
 
-	// 1. Wandle das client_data zurück in das Go cgo.Handle um
+	// convert client_data to Go cgo.Handle
 	handlePtr := (*cgo.Handle)(unsafe.Pointer(client_data))
 
-	// 2. Extrahiere die hinterlegte Go-Funktion
+	// get go function event handler to call
 	goFunc, ok := handlePtr.Value().(XtEventHandler)
 	if !ok || goFunc == nil {
 		return
 	}
 
-	// 3. Verpacke die C-Typen in deine Framework-Typen
+	// pack C types in Go types
 	goWidget := Widget(w)
 	goEvent := (*XEvent)(unsafe.Pointer(event))
 	goCAddr := CAddr(client_data)
 
-	// 4. Rufe den puren Go-Code auf!
+	// execute event handler with correct arguments
 	goFunc(goWidget, goCAddr, goEvent)
 }
 
