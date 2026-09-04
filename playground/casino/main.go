@@ -28,6 +28,50 @@ type QuoteData struct {
 	CurrencyCode string
 }
 
+var v_lower_y = 200
+var v_upper_y = 500
+var coordSystem = CoordSystemInfo{
+	swidth:        2000,
+	sheight:       1000,
+	vx:            0,
+	vy:            0,
+	vwidth:        2000,
+	v_lower_y:     v_lower_y,
+	v_upper_y:     v_upper_y,
+	width:         2000,
+	height:        1000,
+	margin_l:      20,
+	margin_r:      20,
+	margin_top:    20,
+	margin_bottom: 40,
+	num_ticks_x:   20,
+	num_ticks_y:   (v_upper_y - v_lower_y) / 100,
+	len_tick:      10,
+	legend_x:      nil,
+	legend_y:      nil,
+}
+
+type CoordSystemInfo struct {
+	swidth        int // source coordinate system width
+	sheight       int // source coordinate system height
+	vx            int // view coordinate system offset x
+	vy            int // view coordinate system offset y
+	vwidth        int // view coordinate system width
+	v_upper_y     int // view coordinate system upper y value to use (defines window inside v)
+	v_lower_y     int // view coordinate system lower y value to use (defines window inside v)
+	width         int // target coordinate system width (pixel coordinates)
+	height        int // target coordinate system width (pixel coordinates)
+	margin_l      int
+	margin_r      int
+	margin_top    int
+	margin_bottom int
+	num_ticks_x   int
+	num_ticks_y   int
+	len_tick      int
+	legend_x      []string
+	legend_y      []string
+}
+
 var quoteData []QuoteData
 
 func finance() {
@@ -96,27 +140,6 @@ func finance() {
 	}
 }
 
-type CoordSystemInfo struct {
-	swidth        int // source coordinate system width
-	sheight       int // source coordinate system height
-	vx            int // view coordinate system offset x
-	vy            int // view coordinate system offset y
-	vwidth        int // view coordinate system width
-	v_upper_y     int // view coordinate system upper y value to use (defines window inside v)
-	v_lower_y     int // view coordinate system lower y value to use (defines window inside v)
-	width         int // target coordinate system width (pixel coordinates)
-	height        int // target coordinate system width (pixel coordinates)
-	margin_l      int
-	margin_r      int
-	margin_top    int
-	margin_bottom int
-	num_ticks_x   int
-	num_ticks_y   int
-	len_tick      int
-	legend_x      []string
-	legend_y      []string
-}
-
 func transform(coo *CoordSystemInfo, x int, y int) (int, int) {
 	vheight := coo.v_upper_y - coo.v_lower_y
 	tx := (x - coo.vx) * coo.width / coo.vwidth
@@ -140,6 +163,9 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	x11.XtGetValues(canvas, inargs)
 
 	fmt.Printf("canvas width*height: %d x %d\n", width, height)
+	// update coordsystem struct
+	coordSystem.width = int(width)
+	coordSystem.height = int(height)
 
 	// FillRectangle
 	cw := x11.XtWindow(canvas)
@@ -201,28 +227,6 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	}
 	x11.XDrawArcs(d, drawable, gc, arcs)
 
-	v_lower_y := 200
-	v_upper_y := 500
-	coordSystem := CoordSystemInfo{
-		swidth:        2000,
-		sheight:       1000,
-		vx:            0,
-		vy:            0,
-		vwidth:        2000,
-		v_lower_y:     v_lower_y,
-		v_upper_y:     v_upper_y,
-		width:         int(width),
-		height:        int(height),
-		margin_l:      20,
-		margin_r:      20,
-		margin_top:    20,
-		margin_bottom: 40,
-		num_ticks_x:   20,
-		num_ticks_y:   (v_upper_y - v_lower_y) / 100,
-		len_tick:      10,
-		legend_x:      nil,
-		legend_y:      nil,
-	}
 	coordSystem.legend_x = make([]string, coordSystem.num_ticks_x+1)
 	for i := 0; i < coordSystem.num_ticks_x+1; i++ {
 		y := 2010 + i
@@ -255,6 +259,7 @@ func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *Coor
 	drawYAxis(d, drawable, gc, coo)
 }
 
+// drawXAxis draws X axis of a coordinate system
 func drawXAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSystemInfo) {
 
 	gContextId := x11.XGContextFromGC(gc)
@@ -291,6 +296,7 @@ func drawXAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSyste
 	}
 }
 
+// drawXAxis draws Y axis of a coordinate system
 func drawYAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSystemInfo) {
 	gContextId := x11.XGContextFromGC(gc)
 	font := x11.XQueryFont(d, *(*x11.XID)(unsafe.Pointer(&gContextId)))
@@ -324,6 +330,10 @@ func drawYAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSyste
 		txt_x_start := int(coo.margin_l) - int(textDimensions.Width) - 5
 		x11.XDrawString(d, drawable, gc, txt_x_start, coo_y_start+15, ctext)
 	}
+}
+
+func viewYSliderCallback(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
+	println("viewYSliderCallback")
 }
 
 type Data struct {
@@ -380,16 +390,24 @@ func main() {
 	args = x11.AppendArgList(args, x11.XtNheight, 1000)
 	canvas = x11.XtCreateManagedWidget("canvas", x11.DrawingAreaWidgetClass(), panel, args)
 
-	x11.XtCreateManagedWidget("button1", x11.PushButtonWidgetClass(), commands, nil)
-	x11.XtCreateManagedWidget("button2", x11.PushButtonWidgetClass(), commands, nil)
-	x11.XtCreateManagedWidget("button3", x11.PushButtonWidgetClass(), commands, nil)
+	x11.XtCreateManagedWidget("command1", x11.PushButtonWidgetClass(), commands, nil)
+	x11.XtCreateManagedWidget("command2", x11.PushButtonWidgetClass(), commands, nil)
+	x11.XtCreateManagedWidget("command3", x11.PushButtonWidgetClass(), commands, nil)
 
-	x11.XtCreateManagedWidget("button1", x11.PushButtonWidgetClass(), options, nil)
-	x11.XtCreateManagedWidget("button2", x11.PushButtonWidgetClass(), options, nil)
-	x11.XtCreateManagedWidget("button3", x11.PushButtonWidgetClass(), options, nil)
+	x11.XtCreateManagedWidget("option1", x11.PushButtonWidgetClass(), options, nil)
+	x11.XtCreateManagedWidget("option2", x11.PushButtonWidgetClass(), options, nil)
+	x11.XtCreateManagedWidget("option3", x11.PushButtonWidgetClass(), options, nil)
 
 	var data Data
 	x11.XtAddCallback(canvas, x11.XmNexposeCallback, redisplay, (x11.XtPointer)(unsafe.Pointer(&data)))
+
+	args = x11.AppendArgList(nil, x11.XmNminimum, uintptr(coordSystem.v_lower_y))
+	args = x11.AppendArgList(args, x11.XmNmaximum, uintptr(coordSystem.v_upper_y))
+	args = x11.AppendArgList(args, x11.XmNshowValue, 1)
+	args = x11.AppendArgList(args, x11.XmNorientation, uintptr(x11.XmHORIZONTAL))
+	viewYSlider := x11.XtCreateManagedWidget("view_y", x11.ScaleWidgetClass(), commands, args)
+	x11.XtAddCallback(viewYSlider, x11.XmNvalueChangedCallback, viewYSliderCallback, nil)
+	x11.XtAddCallback(viewYSlider, x11.XmNdragCallback, viewYSliderCallback, nil)
 
 	finance()
 
