@@ -28,40 +28,21 @@ type QuoteData struct {
 	CurrencyCode string
 }
 
-var v_lower_y = 200
-var v_upper_y = 500
-var coordSystem = CoordSystemInfo{
-	swidth:        2000,
-	sheight:       1000,
-	vx:            0,
-	vy:            0,
-	vwidth:        2000,
-	v_lower_y:     v_lower_y,
-	v_upper_y:     v_upper_y,
-	width:         2000,
-	height:        1000,
-	margin_l:      20,
-	margin_r:      20,
-	margin_top:    20,
-	margin_bottom: 40,
-	num_ticks_x:   20,
-	num_ticks_y:   (v_upper_y - v_lower_y) / 100,
-	len_tick:      10,
-	legend_x:      nil,
-	legend_y:      nil,
+type VArea struct {
+	x       int // view coordinate system offset x
+	y       int // view coordinate system offset y
+	lower_x int // view coordinate system lower x value to use (defines window inside s)
+	upper_x int // view coordinate system upper x value to use (defines window inside s)
+	lower_y int // view coordinate system lower y value to use (defines window inside s)
+	upper_y int // view coordinate system lower y value to use (defines window inside s)
 }
 
 type CoordSystemInfo struct {
-	swidth  int // source coordinate system width
-	sheight int // source coordinate system height
-	// v is window inside s
-	vx            int // view coordinate system offset x
-	vy            int // view coordinate system offset y
-	vwidth        int // view coordinate system width
-	v_upper_y     int // view coordinate system upper y value to use (defines window inside s)
-	v_lower_y     int // view coordinate system lower y value to use (defines window inside s)
-	width         int // target coordinate system width (pixel coordinates)
-	height        int // target coordinate system width (pixel coordinates)
+	swidth        int   // source coordinate system width
+	sheight       int   // source coordinate system height
+	v             VArea // v is window inside s
+	width         int   // target coordinate system width (pixel coordinates)
+	height        int   // target coordinate system width (pixel coordinates)
 	margin_l      int
 	margin_r      int
 	margin_top    int
@@ -71,6 +52,32 @@ type CoordSystemInfo struct {
 	len_tick      int
 	legend_x      []string
 	legend_y      []string
+}
+
+var varea = VArea{
+	x:       0,
+	y:       0,
+	lower_x: 0,
+	upper_x: 2000,
+	lower_y: 200,
+	upper_y: 500,
+}
+
+var coordSystem = CoordSystemInfo{
+	swidth:        2000,
+	sheight:       1000,
+	v:             varea,
+	width:         2000,
+	height:        1000,
+	margin_l:      20,
+	margin_r:      20,
+	margin_top:    20,
+	margin_bottom: 40,
+	num_ticks_x:   20,
+	num_ticks_y:   (varea.upper_y - varea.lower_y) / 100,
+	len_tick:      10,
+	legend_x:      nil,
+	legend_y:      nil,
 }
 
 var quoteData []QuoteData
@@ -142,9 +149,10 @@ func finance() {
 }
 
 func transform(coo *CoordSystemInfo, x int, y int) (int, int) {
-	vheight := coo.v_upper_y - coo.v_lower_y
-	tx := (x - coo.vx) * coo.width / coo.vwidth
-	ty := (vheight - (y - coo.v_lower_y) - coo.vy) * coo.height / vheight
+	vheight := coo.v.upper_y - coo.v.lower_y
+	vwidth := coo.v.upper_x - coo.v.lower_x
+	tx := (x - coo.v.x) * coo.width / vwidth
+	ty := (vheight - (y - coo.v.lower_y) - coo.v.y) * coo.height / vheight
 	return tx, ty
 }
 
@@ -178,7 +186,7 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 		coordSystem.legend_x[i] = strconv.Itoa(y)
 	}
 	coordSystem.legend_y = make([]string, coordSystem.num_ticks_y+1)
-	start_index := coordSystem.v_lower_y / 100
+	start_index := coordSystem.v.lower_y / 100
 	for i := start_index; i < coordSystem.num_ticks_y+1+start_index; i++ {
 		coordSystem.legend_y[i-start_index] = strconv.Itoa(i)
 	}
@@ -342,8 +350,8 @@ func viewYLowerSliderCallback(w x11.Widget, clientData x11.XtPointer, callData x
 	cb := (*x11.XmScaleCallbackStruct)(unsafe.Pointer(callData))
 	//fmt.Printf("LowerSliderCB reason %v, value: %v\n", cb.Reason, cb.Value)
 	newValue := int(cb.Value)
-	if newValue < coordSystem.v_upper_y {
-		coordSystem.v_lower_y = newValue
+	if newValue < coordSystem.v.upper_y {
+		coordSystem.v.lower_y = newValue
 	}
 	redisplay(canvas, nil, nil)
 }
@@ -352,8 +360,8 @@ func viewYUpperSliderCallback(w x11.Widget, clientData x11.XtPointer, callData x
 	cb := (*x11.XmScaleCallbackStruct)(unsafe.Pointer(callData))
 	//fmt.Printf("UpperSliderCB reason %v, value: %v\n", cb.Reason, cb.Value)
 	newValue := int(cb.Value)
-	if newValue > coordSystem.v_lower_y {
-		coordSystem.v_upper_y = newValue
+	if newValue > coordSystem.v.lower_y {
+		coordSystem.v.upper_y = newValue
 	}
 	redisplay(canvas, nil, nil)
 }
@@ -426,7 +434,7 @@ func main() {
 	// Slider Y Axis, view lower y value
 	args = x11.AppendArgList(nil, x11.XmNminimum, 0)
 	args = x11.AppendArgList(args, x11.XmNmaximum, uintptr(coordSystem.height))
-	args = x11.AppendArgList(args, x11.XmNvalue, uintptr(coordSystem.v_lower_y))
+	args = x11.AppendArgList(args, x11.XmNvalue, uintptr(coordSystem.v.lower_y))
 	args = x11.AppendArgList(args, x11.XmNshowValue, 1)
 	args = x11.AppendArgList(args, x11.XmNorientation, uintptr(x11.XmHORIZONTAL))
 	viewYLowerSlider := x11.XtCreateManagedWidget("view_y_lower", x11.ScaleWidgetClass(), commands, args)
@@ -436,7 +444,7 @@ func main() {
 	// Slider Y Axis, view upper y value
 	args = x11.AppendArgList(nil, x11.XmNminimum, 0)
 	args = x11.AppendArgList(args, x11.XmNmaximum, uintptr(coordSystem.height))
-	args = x11.AppendArgList(args, x11.XmNvalue, uintptr(coordSystem.v_upper_y))
+	args = x11.AppendArgList(args, x11.XmNvalue, uintptr(coordSystem.v.upper_y))
 	args = x11.AppendArgList(args, x11.XmNshowValue, 1)
 	args = x11.AppendArgList(args, x11.XmNorientation, uintptr(x11.XmHORIZONTAL))
 	viewYUpperSlider := x11.XtCreateManagedWidget("view_y_upper", x11.ScaleWidgetClass(), commands, args)
