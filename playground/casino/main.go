@@ -366,6 +366,26 @@ func viewYUpperSliderCallback(w x11.Widget, clientData x11.XtPointer, callData x
 	redisplay(canvas, nil, nil)
 }
 
+func viewXLowerSliderCallback(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
+	cb := (*x11.XmScaleCallbackStruct)(unsafe.Pointer(callData))
+	//fmt.Printf("LowerSliderCB reason %v, value: %v\n", cb.Reason, cb.Value)
+	newValue := int(cb.Value)
+	if newValue < coordSystem.view.upper_x {
+		coordSystem.view.lower_x = newValue
+	}
+	redisplay(canvas, nil, nil)
+}
+
+func viewXUpperSliderCallback(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
+	cb := (*x11.XmScaleCallbackStruct)(unsafe.Pointer(callData))
+	//fmt.Printf("UpperSliderCB reason %v, value: %v\n", cb.Reason, cb.Value)
+	newValue := int(cb.Value)
+	if newValue > coordSystem.view.lower_x {
+		coordSystem.view.upper_x = newValue
+	}
+	redisplay(canvas, nil, nil)
+}
+
 type Data struct {
 	x int
 }
@@ -450,6 +470,26 @@ func main() {
 	viewYUpperSlider := x11.XtCreateManagedWidget("view_y_upper", x11.ScaleWidgetClass(), commands, args)
 	x11.XtAddCallback(viewYUpperSlider, x11.XmNvalueChangedCallback, viewYUpperSliderCallback, nil)
 	x11.XtAddCallback(viewYUpperSlider, x11.XmNdragCallback, viewYUpperSliderCallback, nil)
+
+	// Slider X Axis, view lower x value
+	args = x11.AppendArgList(nil, x11.XmNminimum, 0)
+	args = x11.AppendArgList(args, x11.XmNmaximum, uintptr(coordSystem.width))
+	args = x11.AppendArgList(args, x11.XmNvalue, uintptr(coordSystem.view.lower_x))
+	args = x11.AppendArgList(args, x11.XmNshowValue, 1)
+	args = x11.AppendArgList(args, x11.XmNorientation, uintptr(x11.XmVERTICAL))
+	viewXLowerSlider := x11.XtCreateManagedWidget("view_y_lower", x11.ScaleWidgetClass(), options, args)
+	x11.XtAddCallback(viewXLowerSlider, x11.XmNvalueChangedCallback, viewXLowerSliderCallback, nil)
+	x11.XtAddCallback(viewXLowerSlider, x11.XmNdragCallback, viewXLowerSliderCallback, nil)
+
+	// Slider X Axis, view upper x value
+	args = x11.AppendArgList(nil, x11.XmNminimum, 0)
+	args = x11.AppendArgList(args, x11.XmNmaximum, uintptr(coordSystem.width))
+	args = x11.AppendArgList(args, x11.XmNvalue, uintptr(coordSystem.view.upper_x))
+	args = x11.AppendArgList(args, x11.XmNshowValue, 1)
+	args = x11.AppendArgList(args, x11.XmNorientation, uintptr(x11.XmVERTICAL))
+	viewXUpperSlider := x11.XtCreateManagedWidget("view_y_upper", x11.ScaleWidgetClass(), options, args)
+	x11.XtAddCallback(viewXUpperSlider, x11.XmNvalueChangedCallback, viewXUpperSliderCallback, nil)
+	x11.XtAddCallback(viewXUpperSlider, x11.XmNdragCallback, viewXUpperSliderCallback, nil)
 
 	finance()
 
