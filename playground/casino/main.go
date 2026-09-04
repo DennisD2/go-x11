@@ -149,7 +149,7 @@ func transform(coo *CoordSystemInfo, x int, y int) (int, int) {
 }
 
 func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
-	println("Some drawing primitives...")
+	//println("Some drawing primitives...")
 
 	var height uint16
 	var width uint16
@@ -162,7 +162,7 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	inargs := x11.AppendArgList(nil, x11.XmNheight, heightAsUintptr)
 	inargs = x11.AppendArgList(inargs, x11.XmNwidth, widthAsUintptr)
 	x11.XtGetValues(canvas, inargs)
-	fmt.Printf("canvas width*height: %d x %d\n", width, height)
+	//fmt.Printf("canvas width*height: %d x %d\n", width, height)
 	// update coordsystem struct
 	coordSystem.width = int(width)
 	coordSystem.height = int(height)
@@ -251,7 +251,7 @@ func someArbitraryGraphDrawing(d *x11.Display, drawable x11.Drawable, gc x11.GC,
 	x11.XSetForeground(d, gc, 0xe7e78d)
 	var arcsize uint = 20
 	for i, l := range quoteData {
-		fmt.Printf("Date: %s, Close: %.4f %s\n", l.Date, l.Close, l.CurrencyCode)
+		//fmt.Printf("Date: %s, Close: %.4f %s\n", l.Date, l.Close, l.CurrencyCode)
 		qx := i*divisionLength + coordSystem.margin_l - int(arcsize)/2
 		qy := int(l.Close)
 		tx, ty := transform(&coordSystem, qx, qy)
