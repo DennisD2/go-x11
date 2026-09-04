@@ -372,7 +372,7 @@ func main() {
 
 	shell := x11.XtAppInitialize(
 		&app,
-		"Editor",
+		"Casino",
 		xrmOptions,
 		os.Args,
 		fallbacks,
@@ -432,6 +432,7 @@ func main() {
 	viewYLowerSlider := x11.XtCreateManagedWidget("view_y_lower", x11.ScaleWidgetClass(), commands, args)
 	x11.XtAddCallback(viewYLowerSlider, x11.XmNvalueChangedCallback, viewYLowerSliderCallback, nil)
 	x11.XtAddCallback(viewYLowerSlider, x11.XmNdragCallback, viewYLowerSliderCallback, nil)
+
 	// Slider Y Axis, view upper y value
 	args = x11.AppendArgList(nil, x11.XmNminimum, 0)
 	args = x11.AppendArgList(args, x11.XmNmaximum, uintptr(coordSystem.height))
