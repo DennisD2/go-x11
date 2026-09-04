@@ -102,7 +102,8 @@ type CoordSystemInfo struct {
 	vx            int // view coordinate system offset x
 	vy            int // view coordinate system offset y
 	vwidth        int // view coordinate system width
-	vheight       int // view coordinate system height
+	v_upper_y     int // view coordinate system upper y value to use (defines window inside v)
+	v_lower_y     int // view coordinate system lower y value to use (defines window inside v)
 	width         int // target coordinate system width (pixel coordinates)
 	height        int // target coordinate system width (pixel coordinates)
 	margin_l      int
@@ -117,8 +118,9 @@ type CoordSystemInfo struct {
 }
 
 func transform(coo *CoordSystemInfo, x int, y int) (int, int) {
+	vheight := coo.v_upper_y - coo.v_lower_y
 	tx := (x - coo.vx) * coo.width / coo.vwidth
-	ty := (coo.vheight - y - coo.vy) * coo.height / coo.vheight
+	ty := (vheight - (y - coo.v_lower_y) - coo.vy) * coo.height / vheight
 	return tx, ty
 }
 
@@ -199,13 +201,16 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	}
 	x11.XDrawArcs(d, drawable, gc, arcs)
 
+	v_lower_y := 200
+	v_upper_y := 500
 	coordSystem := CoordSystemInfo{
 		swidth:        2000,
 		sheight:       1000,
 		vx:            0,
 		vy:            0,
 		vwidth:        2000,
-		vheight:       1000,
+		v_lower_y:     v_lower_y,
+		v_upper_y:     v_upper_y,
 		width:         int(width),
 		height:        int(height),
 		margin_l:      20,
@@ -213,7 +218,7 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 		margin_top:    20,
 		margin_bottom: 40,
 		num_ticks_x:   20,
-		num_ticks_y:   10,
+		num_ticks_y:   (v_upper_y - v_lower_y) / 100,
 		len_tick:      10,
 		legend_x:      nil,
 		legend_y:      nil,
@@ -224,9 +229,9 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 		coordSystem.legend_x[i] = strconv.Itoa(y)
 	}
 	coordSystem.legend_y = make([]string, coordSystem.num_ticks_y+1)
-	for i := 0; i < coordSystem.num_ticks_y+1; i++ {
-		y := i
-		coordSystem.legend_y[i] = strconv.Itoa(y)
+	start_index := coordSystem.v_lower_y / 100
+	for i := start_index; i < coordSystem.num_ticks_y+1+start_index; i++ {
+		coordSystem.legend_y[i-start_index] = strconv.Itoa(i)
 	}
 
 	drawCoordSystem(d, drawable, gc, &coordSystem)
