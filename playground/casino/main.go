@@ -217,15 +217,8 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 
 }
 
-func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uint16, height uint16,
+func drawXAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uint16, height uint16,
 	coo *CoordSystemInfo) {
-	// Draw a XY coordinate system
-
-	//TODO
-	// check numeric values below (15,18) these offsets need to be calculated by font size
-	// calculate better offset for legend text. Based on text size.
-
-	tickLen := coo.len_tick / 2
 
 	gContextId := x11.XGContextFromGC(gc)
 	font := x11.XQueryFont(d, *(*x11.XID)(unsafe.Pointer(&gContextId)))
@@ -234,7 +227,12 @@ func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uin
 	var ascent int
 	var descent int
 
-	// X axis
+	//TODO
+	// check numeric values below (15,18) these offsets need to be calculated by font size
+	// calculate better offset for legend text. Based on text size.
+
+	tickLen := coo.len_tick / 2
+
 	coo_x_start := coo.margin_l
 	coo_x_stop := uint(width) - uint(coo.margin_r)
 	coo_y_start := int(height) - coo.margin_bottom
@@ -255,15 +253,30 @@ func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uin
 		txt_x_start := coo_x_start - int(textDimensions.Width/2)
 		x11.XDrawString(d, drawable, gc, txt_x_start, coo_y_start+15, ctext)
 	}
+}
 
-	// Y axis
-	coo_x_start = coo.margin_l
-	coo_x_stop = uint(coo.margin_l)
-	coo_y_start = int(height) - coo.margin_bottom
-	coo_y_stop = uint(coo.margin_top)
+func drawYAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uint16, height uint16,
+	coo *CoordSystemInfo) {
+	//gContextId := x11.XGContextFromGC(gc)
+	//font := x11.XQueryFont(d, *(*x11.XID)(unsafe.Pointer(&gContextId)))
+	//var textDimensions x11.XCharStruct // Alloziert den Speicher in Go
+	//var dir int
+	//var ascent int
+	//var descent int
+
+	//TODO
+	// check numeric values below (15,18) these offsets need to be calculated by font size
+	// calculate better offset for legend text. Based on text size.
+
+	tickLen := coo.len_tick / 2
+
+	coo_x_start := coo.margin_l
+	coo_x_stop := uint(coo.margin_l)
+	coo_y_start := int(height) - coo.margin_bottom
+	coo_y_stop := uint(coo.margin_top)
 	x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 	// ticks
-	divisionLength = (int(height) - (coo.margin_top + coo.margin_bottom)) / coo.num_ticks_y
+	divisionLength := (int(height) - (coo.margin_top + coo.margin_bottom)) / coo.num_ticks_y
 	for i := 0; i <= coo.num_ticks_y; i++ {
 		coo_y_start = int(height) - coo.margin_bottom - i*divisionLength
 		coo_y_stop = uint(height) - uint(coo.margin_bottom) - uint(i*divisionLength)
@@ -275,7 +288,13 @@ func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uin
 		ctext := fmt.Sprintf("%d", i)
 		x11.XDrawString(d, drawable, gc, coo_x_start-18, coo_y_start+15, ctext)
 	}
+}
 
+// drawCoordSystem Draw a XY coordinate system
+func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uint16, height uint16,
+	coo *CoordSystemInfo) {
+	drawXAxis(d, drawable, gc, width, height, coo)
+	drawYAxis(d, drawable, gc, width, height, coo)
 }
 
 type Data struct {
