@@ -192,7 +192,7 @@ Wrappers for:
 * XmStringCharset
 * XmFontContext
 * XmFontList
-* 
+* XmScaleCallbackStruct
 
 Xm Functions:
 * XmStringCreate
