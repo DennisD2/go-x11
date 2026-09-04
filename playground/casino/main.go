@@ -334,6 +334,8 @@ func drawYAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSyste
 
 func viewYSliderCallback(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	println("viewYSliderCallback")
+	cb := (*x11.XmScaleCallbackStruct)(unsafe.Pointer(callData))
+	fmt.Printf("value: %v\n", cb.Value)
 }
 
 type Data struct {
