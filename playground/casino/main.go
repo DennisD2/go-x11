@@ -52,13 +52,14 @@ var coordSystem = CoordSystemInfo{
 }
 
 type CoordSystemInfo struct {
-	swidth        int // source coordinate system width
-	sheight       int // source coordinate system height
+	swidth  int // source coordinate system width
+	sheight int // source coordinate system height
+	// v is window inside s
 	vx            int // view coordinate system offset x
 	vy            int // view coordinate system offset y
 	vwidth        int // view coordinate system width
-	v_upper_y     int // view coordinate system upper y value to use (defines window inside v)
-	v_lower_y     int // view coordinate system lower y value to use (defines window inside v)
+	v_upper_y     int // view coordinate system upper y value to use (defines window inside s)
+	v_lower_y     int // view coordinate system lower y value to use (defines window inside s)
 	width         int // target coordinate system width (pixel coordinates)
 	height        int // target coordinate system width (pixel coordinates)
 	margin_l      int
@@ -332,10 +333,24 @@ func drawYAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSyste
 	}
 }
 
-func viewYSliderCallback(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
-	println("viewYSliderCallback")
+func viewYLowerSliderCallback(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	cb := (*x11.XmScaleCallbackStruct)(unsafe.Pointer(callData))
-	fmt.Printf("value: %v\n", cb.Value)
+	//fmt.Printf("LowerSliderCB reason %v, value: %v\n", cb.Reason, cb.Value)
+	newValue := int(cb.Value)
+	if newValue < coordSystem.v_upper_y {
+		coordSystem.v_lower_y = newValue
+	}
+	redisplay(canvas, nil, nil)
+}
+
+func viewYUpperSliderCallback(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
+	cb := (*x11.XmScaleCallbackStruct)(unsafe.Pointer(callData))
+	//fmt.Printf("UpperSliderCB reason %v, value: %v\n", cb.Reason, cb.Value)
+	newValue := int(cb.Value)
+	if newValue > coordSystem.v_lower_y {
+		coordSystem.v_upper_y = newValue
+	}
+	redisplay(canvas, nil, nil)
 }
 
 type Data struct {
@@ -403,13 +418,23 @@ func main() {
 	var data Data
 	x11.XtAddCallback(canvas, x11.XmNexposeCallback, redisplay, (x11.XtPointer)(unsafe.Pointer(&data)))
 
-	args = x11.AppendArgList(nil, x11.XmNminimum, uintptr(coordSystem.v_lower_y))
-	args = x11.AppendArgList(args, x11.XmNmaximum, uintptr(coordSystem.v_upper_y))
+	args = x11.AppendArgList(nil, x11.XmNminimum, 0)
+	args = x11.AppendArgList(args, x11.XmNmaximum, uintptr(coordSystem.height))
+	args = x11.AppendArgList(args, x11.XmNvalue, uintptr(coordSystem.v_lower_y))
 	args = x11.AppendArgList(args, x11.XmNshowValue, 1)
 	args = x11.AppendArgList(args, x11.XmNorientation, uintptr(x11.XmHORIZONTAL))
-	viewYSlider := x11.XtCreateManagedWidget("view_y", x11.ScaleWidgetClass(), commands, args)
-	x11.XtAddCallback(viewYSlider, x11.XmNvalueChangedCallback, viewYSliderCallback, nil)
-	x11.XtAddCallback(viewYSlider, x11.XmNdragCallback, viewYSliderCallback, nil)
+	viewYLowerSlider := x11.XtCreateManagedWidget("view_y_lower", x11.ScaleWidgetClass(), commands, args)
+	x11.XtAddCallback(viewYLowerSlider, x11.XmNvalueChangedCallback, viewYLowerSliderCallback, nil)
+	x11.XtAddCallback(viewYLowerSlider, x11.XmNdragCallback, viewYLowerSliderCallback, nil)
+
+	args = x11.AppendArgList(nil, x11.XmNminimum, 0)
+	args = x11.AppendArgList(args, x11.XmNmaximum, uintptr(coordSystem.height))
+	args = x11.AppendArgList(args, x11.XmNvalue, uintptr(coordSystem.v_upper_y))
+	args = x11.AppendArgList(args, x11.XmNshowValue, 1)
+	args = x11.AppendArgList(args, x11.XmNorientation, uintptr(x11.XmHORIZONTAL))
+	viewYUpperSlider := x11.XtCreateManagedWidget("view_y_upper", x11.ScaleWidgetClass(), commands, args)
+	x11.XtAddCallback(viewYUpperSlider, x11.XmNvalueChangedCallback, viewYUpperSliderCallback, nil)
+	x11.XtAddCallback(viewYUpperSlider, x11.XmNdragCallback, viewYUpperSliderCallback, nil)
 
 	finance()
 
