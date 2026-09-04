@@ -494,14 +494,16 @@ func goCallbackDispatcher(w C.Widget, client_data C.XtPointer, call_data C.XtPoi
 	callbackID := uintptr(client_data)
 
 	callbackMutex.Lock()
-	info, exists := callbackRegistry[callbackID]
+	// get info struct for this callbackID
+	callbackInfo, exists := callbackRegistry[callbackID]
 	callbackMutex.Unlock()
 
-	// Das aktuelle, dynamische call_data von C in den Go-Typ verpacken
+	// Create Go call data object from C call_data
 	currentCallData := XtPointer(unsafe.Pointer(call_data))
 
 	if exists {
-		info.Func(info.Widget, info.ClientData, currentCallData)
+		// Call callback with clientData and CallData
+		callbackInfo.Func(callbackInfo.Widget, callbackInfo.ClientData, currentCallData)
 	}
 }
 
