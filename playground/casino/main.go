@@ -97,8 +97,14 @@ func finance() {
 }
 
 type CoordSystemInfo struct {
-	width         int
-	height        int
+	swidth        int // source coordinate system width
+	sheight       int // source coordinate system height
+	vx            int // view coordinate system offset x
+	vy            int // view coordinate system offset y
+	vwidth        int // view coordinate system width
+	vheight       int // view coordinate system height
+	width         int // target coordinate system width (pixel coordinates)
+	height        int // target coordinate system width (pixel coordinates)
 	margin_l      int
 	margin_r      int
 	margin_top    int
@@ -108,6 +114,12 @@ type CoordSystemInfo struct {
 	len_tick      int
 	legend_x      []string
 	legend_y      []string
+}
+
+func transform(coo *CoordSystemInfo, x int, y int) (int, int) {
+	tx := (x - coo.vx) * coo.width / coo.vwidth
+	ty := (coo.vheight - y - coo.vy) * coo.height / coo.vheight
+	return tx, ty
 }
 
 func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
@@ -188,6 +200,12 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	x11.XDrawArcs(d, drawable, gc, arcs)
 
 	coordSystem := CoordSystemInfo{
+		swidth:        2000,
+		sheight:       1000,
+		vx:            0,
+		vy:            0,
+		vwidth:        2000,
+		vheight:       1000,
 		width:         int(width),
 		height:        int(height),
 		margin_l:      20,
@@ -221,7 +239,8 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 		fmt.Printf("Date: %s, Close: %.4f %s\n", l.Date, l.Close, l.CurrencyCode)
 		qx := i*divisionLength + coordSystem.margin_l - int(arcsize)/2
 		qy := int(l.Close)
-		x11.XFillArc(d, drawable, gc, qx, qy, arcsize, arcsize, 0, 360*64)
+		tx, ty := transform(&coordSystem, qx, qy)
+		x11.XFillArc(d, drawable, gc, tx, ty, arcsize, arcsize, 0, 360*64)
 	}
 }
 
