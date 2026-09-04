@@ -162,21 +162,35 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	inargs := x11.AppendArgList(nil, x11.XmNheight, heightAsUintptr)
 	inargs = x11.AppendArgList(inargs, x11.XmNwidth, widthAsUintptr)
 	x11.XtGetValues(canvas, inargs)
-
 	fmt.Printf("canvas width*height: %d x %d\n", width, height)
 	// update coordsystem struct
 	coordSystem.width = int(width)
 	coordSystem.height = int(height)
 
-	// FillRectangle
 	cw := x11.XtWindow(canvas)
 	drawable := x11.Drawable(cw)
 	d := x11.XtDisplay(canvas)
 	gc := x11.XCreateGC(d, drawable, 0, nil)
+
+	coordSystem.legend_x = make([]string, coordSystem.num_ticks_x+1)
+	for i := 0; i < coordSystem.num_ticks_x+1; i++ {
+		y := 2010 + i
+		coordSystem.legend_x[i] = strconv.Itoa(y)
+	}
+	coordSystem.legend_y = make([]string, coordSystem.num_ticks_y+1)
+	start_index := coordSystem.v_lower_y / 100
+	for i := start_index; i < coordSystem.num_ticks_y+1+start_index; i++ {
+		coordSystem.legend_y[i-start_index] = strconv.Itoa(i)
+	}
+	// FillRectangle
 	//x11.XSetForeground(d, gc, x11.BlackPixelOfScreen(x11.XtScreen(canvas)))
 	x11.XSetForeground(d, gc, 0x0000ff)
 	//x11.XDrawRectangle(d, drawable, gc, 10, 10, 90, 70)
 	x11.XFillRectangle(d, drawable, gc, 0, 0, uint(width), uint(height))
+
+	x11.XSetForeground(d, gc, 0xffff00)
+	// Draw a coordinate system
+	drawCoordSystem(d, drawable, gc, &coordSystem)
 
 	// Lines
 	x11.XSetForeground(d, gc, 0x00ff00)
@@ -228,20 +242,11 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	}
 	x11.XDrawArcs(d, drawable, gc, arcs)
 
-	coordSystem.legend_x = make([]string, coordSystem.num_ticks_x+1)
-	for i := 0; i < coordSystem.num_ticks_x+1; i++ {
-		y := 2010 + i
-		coordSystem.legend_x[i] = strconv.Itoa(y)
-	}
-	coordSystem.legend_y = make([]string, coordSystem.num_ticks_y+1)
-	start_index := coordSystem.v_lower_y / 100
-	for i := start_index; i < coordSystem.num_ticks_y+1+start_index; i++ {
-		coordSystem.legend_y[i-start_index] = strconv.Itoa(i)
-	}
-
-	drawCoordSystem(d, drawable, gc, &coordSystem)
-
 	// some quote data points
+	someArbitraryGraphDrawing(d, drawable, gc, width)
+}
+
+func someArbitraryGraphDrawing(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uint16) {
 	divisionLength := (int(width) - (coordSystem.margin_r + coordSystem.margin_l)) / len(quoteData)
 	x11.XSetForeground(d, gc, 0xe7e78d)
 	var arcsize uint = 20
@@ -418,6 +423,7 @@ func main() {
 	var data Data
 	x11.XtAddCallback(canvas, x11.XmNexposeCallback, redisplay, (x11.XtPointer)(unsafe.Pointer(&data)))
 
+	// Slider Y Axis, view lower y value
 	args = x11.AppendArgList(nil, x11.XmNminimum, 0)
 	args = x11.AppendArgList(args, x11.XmNmaximum, uintptr(coordSystem.height))
 	args = x11.AppendArgList(args, x11.XmNvalue, uintptr(coordSystem.v_lower_y))
@@ -426,7 +432,7 @@ func main() {
 	viewYLowerSlider := x11.XtCreateManagedWidget("view_y_lower", x11.ScaleWidgetClass(), commands, args)
 	x11.XtAddCallback(viewYLowerSlider, x11.XmNvalueChangedCallback, viewYLowerSliderCallback, nil)
 	x11.XtAddCallback(viewYLowerSlider, x11.XmNdragCallback, viewYLowerSliderCallback, nil)
-
+	// Slider Y Axis, view upper y value
 	args = x11.AppendArgList(nil, x11.XmNminimum, 0)
 	args = x11.AppendArgList(args, x11.XmNmaximum, uintptr(coordSystem.height))
 	args = x11.AppendArgList(args, x11.XmNvalue, uintptr(coordSystem.v_upper_y))
