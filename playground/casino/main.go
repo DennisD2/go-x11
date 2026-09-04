@@ -233,8 +233,7 @@ func drawXAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, width int, heig
 	var descent int
 
 	//TODO
-	// check numeric values below (15,18) these offsets need to be calculated by font size
-	// calculate better offset for legend text. Based on text size.
+	// check numeric values below (15) these offsets need to be calculated by font size
 
 	tickLen := coo.len_tick / 2
 
@@ -262,16 +261,15 @@ func drawXAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, width int, heig
 
 func drawYAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, width int, height int,
 	coo *CoordSystemInfo) {
-	//gContextId := x11.XGContextFromGC(gc)
-	//font := x11.XQueryFont(d, *(*x11.XID)(unsafe.Pointer(&gContextId)))
-	//var textDimensions x11.XCharStruct // Alloziert den Speicher in Go
-	//var dir int
-	//var ascent int
-	//var descent int
+	gContextId := x11.XGContextFromGC(gc)
+	font := x11.XQueryFont(d, *(*x11.XID)(unsafe.Pointer(&gContextId)))
+	var textDimensions x11.XCharStruct // Alloziert den Speicher in Go
+	var dir int
+	var ascent int
+	var descent int
 
 	//TODO
-	// check numeric values below (15,18) these offsets need to be calculated by font size
-	// calculate better offset for legend text. Based on text size.
+	// check numeric values below (5,15) these offsets need to be calculated by font size
 
 	tickLen := coo.len_tick / 2
 
@@ -291,7 +289,9 @@ func drawYAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, width int, heig
 		x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 		// legend
 		ctext := coo.legend_y[i]
-		x11.XDrawString(d, drawable, gc, coo_x_start-18, coo_y_start+15, ctext)
+		x11.XTextExtents(font, ctext, len(ctext), &dir, &ascent, &descent, &textDimensions)
+		txt_x_start := int(coo.margin_l) - int(textDimensions.Width) - 5
+		x11.XDrawString(d, drawable, gc, txt_x_start, coo_y_start+15, ctext)
 	}
 }
 
