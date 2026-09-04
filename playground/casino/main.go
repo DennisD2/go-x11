@@ -201,6 +201,11 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 		y := 2010 + i
 		coordSystem.legend_x[i] = strconv.Itoa(y)
 	}
+	coordSystem.legend_y = make([]string, coordSystem.num_ticks_y+1)
+	for i := 0; i < coordSystem.num_ticks_y+1; i++ {
+		y := i
+		coordSystem.legend_y[i] = strconv.Itoa(y)
+	}
 
 	drawCoordSystem(d, drawable, gc, int(width), int(height), &coordSystem)
 
@@ -285,7 +290,7 @@ func drawYAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, width int, heig
 		coo_x_stop = uint(coo.margin_l) - uint(tickLen)
 		x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 		// legend
-		ctext := fmt.Sprintf("%d", i)
+		ctext := coo.legend_y[i]
 		x11.XDrawString(d, drawable, gc, coo_x_start-18, coo_y_start+15, ctext)
 	}
 }
