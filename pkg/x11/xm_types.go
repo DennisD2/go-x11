@@ -26,6 +26,13 @@ type XmAnyCallbackStruct struct {
 	event  *XEvent
 }
 
+type XmScaleCallbackStruct struct {
+	Reason    int32
+	Event     *C.XEvent
+	Value     int32
+	Pad_cgo_0 [4]byte
+}
+
 type Orientation int
 
 const (
@@ -45,10 +52,3 @@ const (
 	XmATTACH_POSITION                          // 5
 	XmATTACH_SELF                              // 6
 )
-
-type XmScaleCallbackStruct struct {
-	Reason    int32
-	Event     *C.XEvent
-	Value     int32
-	Pad_cgo_0 [4]byte
-}

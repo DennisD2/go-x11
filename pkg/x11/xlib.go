@@ -7,7 +7,7 @@ package x11
 #include <stdint.h>
 #include <stdlib.h>
 
-// Xt includes
+// Xlib includes
 #include <X11/Xlib.h>
 */
 import "C"
