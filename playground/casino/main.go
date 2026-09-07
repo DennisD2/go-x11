@@ -148,6 +148,19 @@ func finance() {
 	}
 }
 
+func initCoordSystem() {
+	coordSystem.legend_x = make([]string, coordSystem.num_ticks_x+1)
+	for i := 0; i < coordSystem.num_ticks_x+1; i++ {
+		y := 2010 + i
+		coordSystem.legend_x[i] = strconv.Itoa(y)
+	}
+	coordSystem.legend_y = make([]string, coordSystem.num_ticks_y+1)
+	start_index := coordSystem.view.lower_y / 100
+	for i := start_index; i < coordSystem.num_ticks_y+1+start_index; i++ {
+		coordSystem.legend_y[i-start_index] = strconv.Itoa(i)
+	}
+}
+
 func transform(coo *CoordSystemInfo, x int, y int) (int, int) {
 	vheight := coo.view.upper_y - coo.view.lower_y
 	vwidth := coo.view.upper_x - coo.view.lower_x
@@ -157,8 +170,6 @@ func transform(coo *CoordSystemInfo, x int, y int) (int, int) {
 }
 
 func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
-	//println("Some drawing primitives...")
-
 	var height uint16
 	var width uint16
 	// get pointer to var
@@ -180,20 +191,9 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	d := x11.XtDisplay(canvas)
 	gc := x11.XCreateGC(d, drawable, 0, nil)
 
-	coordSystem.legend_x = make([]string, coordSystem.num_ticks_x+1)
-	for i := 0; i < coordSystem.num_ticks_x+1; i++ {
-		y := 2010 + i
-		coordSystem.legend_x[i] = strconv.Itoa(y)
-	}
-	coordSystem.legend_y = make([]string, coordSystem.num_ticks_y+1)
-	start_index := coordSystem.view.lower_y / 100
-	for i := start_index; i < coordSystem.num_ticks_y+1+start_index; i++ {
-		coordSystem.legend_y[i-start_index] = strconv.Itoa(i)
-	}
 	// FillRectangle
 	//x11.XSetForeground(d, gc, x11.BlackPixelOfScreen(x11.XtScreen(canvas)))
 	x11.XSetForeground(d, gc, 0x0000ff)
-	//x11.XDrawRectangle(d, drawable, gc, 10, 10, 90, 70)
 	x11.XFillRectangle(d, drawable, gc, 0, 0, uint(width), uint(height))
 
 	x11.XSetForeground(d, gc, 0xffff00)
@@ -492,6 +492,8 @@ func main() {
 	x11.XtAddCallback(viewYLowerSlider, x11.XmNdragCallback, viewYLowerSliderCallback, nil)
 
 	finance()
+
+	initCoordSystem()
 
 	x11.XtRealizeWidget(shell)
 
