@@ -282,11 +282,10 @@ func drawXAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSyste
 	var dir int
 	var ascent int
 	var descent int
-
+	tickLen := coo.len_tick / 2
+	
 	//TODO
 	// check numeric values below (15) these offsets need to be calculated by font size
-
-	tickLen := coo.len_tick / 2
 
 	coo_x_start := coo.margin_l
 	coo_x_stop := uint(coo.width) - uint(coo.margin_r)
@@ -319,11 +318,10 @@ func drawYAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSyste
 	var dir int
 	var ascent int
 	var descent int
+	tickLen := coo.len_tick / 2
 
 	//TODO
 	// check numeric values below (5,15) these offsets need to be calculated by font size
-
-	tickLen := coo.len_tick / 2
 
 	coo_x_start := coo.margin_l
 	coo_x_stop := uint(coo.margin_l)
