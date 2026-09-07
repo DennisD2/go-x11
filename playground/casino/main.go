@@ -275,15 +275,10 @@ func drawCoordSystem(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *Coor
 
 // drawXAxis draws X axis of a coordinate system
 func drawXAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSystemInfo) {
-
 	gContextId := x11.XGContextFromGC(gc)
 	font := x11.XQueryFont(d, *(*x11.XID)(unsafe.Pointer(&gContextId)))
-	var textDimensions x11.XCharStruct // Alloziert den Speicher in Go
-	var dir int
-	var ascent int
-	var descent int
 	tickLen := coo.len_tick / 2
-	
+
 	//TODO
 	// check numeric values below (15) these offsets need to be calculated by font size
 
@@ -303,6 +298,10 @@ func drawXAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSyste
 		coo_y_stop = uint(coo.height) - uint(coo.margin_bottom) - uint(tickLen)
 		x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 		// draw the legend
+		var textDimensions x11.XCharStruct
+		var dir int
+		var ascent int
+		var descent int
 		ctext := coo.legend_x[i]
 		x11.XTextExtents(font, ctext, len(ctext), &dir, &ascent, &descent, &textDimensions)
 		txt_x_start := coo_x_start - int(textDimensions.Width/2)
@@ -314,10 +313,6 @@ func drawXAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSyste
 func drawYAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSystemInfo) {
 	gContextId := x11.XGContextFromGC(gc)
 	font := x11.XQueryFont(d, *(*x11.XID)(unsafe.Pointer(&gContextId)))
-	var textDimensions x11.XCharStruct // Alloziert den Speicher in Go
-	var dir int
-	var ascent int
-	var descent int
 	tickLen := coo.len_tick / 2
 
 	//TODO
@@ -339,6 +334,10 @@ func drawYAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSyste
 		coo_x_stop = uint(coo.margin_l) - uint(tickLen)
 		x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 		// draw the legend
+		var textDimensions x11.XCharStruct // Alloziert den Speicher in Go
+		var dir int
+		var ascent int
+		var descent int
 		ctext := coo.legend_y[i]
 		x11.XTextExtents(font, ctext, len(ctext), &dir, &ascent, &descent, &textDimensions)
 		txt_x_start := int(coo.margin_l) - int(textDimensions.Width) - 5
