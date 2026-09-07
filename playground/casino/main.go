@@ -296,13 +296,14 @@ func drawXAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSyste
 	// ticks
 	divisionLength := (coo.width - (coo.margin_r + coo.margin_l)) / coo.num_ticks_x
 	for i := 0; i <= coo.num_ticks_x; i++ {
+		// draw the tick
 		coo_x_start = coo.margin_l + i*divisionLength
 		coo_x_stop = uint(coo.margin_l) + uint(i*divisionLength)
 		// len of tick = 10 (5+5)
 		coo_y_start = coo.height - coo.margin_bottom + tickLen
 		coo_y_stop = uint(coo.height) - uint(coo.margin_bottom) - uint(tickLen)
 		x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
-		// legend
+		// draw the legend
 		ctext := coo.legend_x[i]
 		x11.XTextExtents(font, ctext, len(ctext), &dir, &ascent, &descent, &textDimensions)
 		txt_x_start := coo_x_start - int(textDimensions.Width/2)
@@ -332,13 +333,14 @@ func drawYAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSyste
 	// ticks
 	divisionLength := (coo.height - (coo.margin_top + coo.margin_bottom)) / coo.num_ticks_y
 	for i := 0; i <= coo.num_ticks_y; i++ {
+		// draw the tick
 		coo_y_start = coo.height - coo.margin_bottom - i*divisionLength
 		coo_y_stop = uint(coo.height) - uint(coo.margin_bottom) - uint(i*divisionLength)
 		// len of tick = 10 (5+5)
 		coo_x_start = int(coo.margin_l) + tickLen
 		coo_x_stop = uint(coo.margin_l) - uint(tickLen)
 		x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
-		// legend
+		// draw the legend
 		ctext := coo.legend_y[i]
 		x11.XTextExtents(font, ctext, len(ctext), &dir, &ascent, &descent, &textDimensions)
 		txt_x_start := int(coo.margin_l) - int(textDimensions.Width) - 5
