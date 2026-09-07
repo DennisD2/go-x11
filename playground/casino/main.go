@@ -73,7 +73,7 @@ var coordSystem = CoordSystemInfo{
 	margin_r:      20,
 	margin_top:    20,
 	margin_bottom: 40,
-	num_ticks_x:   20,
+	num_ticks_x:   (viewArea.upper_x - viewArea.lower_x) / 100,
 	num_ticks_y:   (viewArea.upper_y - viewArea.lower_y) / 100,
 	len_tick:      10,
 	legend_x:      nil,
