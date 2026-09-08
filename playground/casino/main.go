@@ -43,12 +43,10 @@ type AreaDimension struct {
 }
 
 type CoordSystemInfo struct {
-	source     AreaDimension // source coordinate system dimension
-	view       VArea         // v is window inside s
-	legendView VArea         // legend is also a view into legend of s
-	target     AreaDimension // target coordinate system dimension (pixels)
-	//width         int           // target coordinate system width (pixel coordinates)
-	//height        int           // target coordinate system width (pixel coordinates)
+	source        AreaDimension // source coordinate system dimension
+	view          VArea         // v is window inside s
+	legendView    VArea         // legend is also a view into legend of s
+	target        AreaDimension // target coordinate system dimension (pixels)
 	margin_l      int
 	margin_r      int
 	margin_top    int
@@ -96,18 +94,16 @@ var legendViewArea = VArea{
 
 // Complete coordinate system
 var coordSystem = CoordSystemInfo{
-	source:     sourceDimension,
-	view:       viewArea,
-	legendView: legendViewArea,
-	//width:         2000,
-	//height:        1000,
+	source:        sourceDimension,
+	view:          viewArea,
+	legendView:    legendViewArea,
 	target:        targetDimension,
 	margin_l:      20,
 	margin_r:      20,
 	margin_top:    20,
 	margin_bottom: 40,
-	num_ticks_x:   2000 / 100, // swidth?
-	num_ticks_y:   1000 / 100, // sheight?
+	num_ticks_x:   sourceDimension.width / 100,  // swidth?
+	num_ticks_y:   sourceDimension.height / 100, // sheight?
 	len_tick:      10,
 	legend_x:      nil,
 	legend_y:      nil,
