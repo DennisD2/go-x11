@@ -218,16 +218,23 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	// update coordsystem struct
 	coordSystem.target.width = int(width)
 	coordSystem.target.height = int(height)
-	fmt.Printf("s=[%d,%d] -> v=[%d,%d,%d,%d] lv=[%d,%d,%d,%d]-> [%d,%d]\n", coordSystem.source.width, coordSystem.source.height,
-		coordSystem.view.lower_x, coordSystem.view.lower_y, coordSystem.view.upper_x, coordSystem.view.upper_y,
-		coordSystem.legendView.lower_x, coordSystem.legendView.lower_y, coordSystem.legendView.upper_x, coordSystem.legendView.upper_y,
-		coordSystem.target.width, coordSystem.target.height)
-
+	/*fmt.Printf("s=[%d,%d] -> v=[%d,%d,%d,%d] lv=[%d,%d,%d,%d]-> [%d,%d]\n", coordSystem.source.width, coordSystem.source.height,
+	coordSystem.view.lower_x, coordSystem.view.lower_y, coordSystem.view.upper_x, coordSystem.view.upper_y,
+	coordSystem.legendView.lower_x, coordSystem.legendView.lower_y, coordSystem.legendView.upper_x, coordSystem.legendView.upper_y,
+	coordSystem.target.width, coordSystem.target.height)
+	*/
 	cw := x11.XtWindow(canvas)
 	drawable := x11.Drawable(cw)
 	d := x11.XtDisplay(canvas)
 	gc := x11.XCreateGC(d, drawable, 0, nil)
 
+	drawSomeGraphicPrimitives(d, drawable, gc, width, height)
+
+	// some quote data points
+	someArbitraryGraphDrawing(d, drawable, gc, &coordSystem)
+}
+
+func drawSomeGraphicPrimitives(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uint16, height uint16) {
 	// FillRectangle
 	//x11.XSetForeground(d, gc, x11.BlackPixelOfScreen(x11.XtScreen(canvas)))
 	x11.XSetForeground(d, gc, 0x0000ff)
@@ -286,9 +293,6 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 		{500, 100, 20, 20, 0, 360 * 64},
 	}
 	x11.XDrawArcs(d, drawable, gc, arcs)
-
-	// some quote data points
-	someArbitraryGraphDrawing(d, drawable, gc, &coordSystem)
 }
 
 func someArbitraryGraphDrawing(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSystemInfo) {
@@ -296,7 +300,6 @@ func someArbitraryGraphDrawing(d *x11.Display, drawable x11.Drawable, gc x11.GC,
 	x11.XSetForeground(d, gc, 0xe7e78d)
 	var arcsize uint = 20
 	for i := coordSystem.legendView.lower_x; i <= coordSystem.legendView.upper_x; i++ {
-		//fmt.Printf("i,l = %d,%v\n", i, l)
 		qx := (i-coordSystem.legendView.lower_x)*divisionSize + coordSystem.margin_l - int(arcsize)/2
 		qy := int(quoteData[i].Close)
 		tx, ty := transform(&coordSystem, qx, qy)
@@ -326,7 +329,7 @@ func drawXAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSyste
 	x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 	// ticks
 	divisionSize := coordSystem.source.divisionSizeX * (coo.source.width - coo.margin_l - coo.margin_r) / (coo.view.upper_x - coo.view.lower_x)
-	fmt.Printf("division size x: %d\n", divisionSize)
+	//fmt.Printf("division size x: %d\n", divisionSize)
 	if divisionSize < coordSystem.source.divisionSizeX {
 		divisionSize = coordSystem.source.divisionSizeX
 	}
@@ -371,7 +374,7 @@ func drawYAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSyste
 	x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 	// ticks
 	divisionSize := coordSystem.source.divisionSizeY * (coo.source.height - coo.margin_bottom - coo.margin_top) / (coo.view.upper_y - coo.view.lower_y)
-	fmt.Printf("division size y: %d\n", divisionSize)
+	//fmt.Printf("division size y: %d\n", divisionSize)
 	if divisionSize < coordSystem.source.divisionSizeY {
 		divisionSize = coordSystem.source.divisionSizeY
 	}
