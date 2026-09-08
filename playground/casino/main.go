@@ -288,7 +288,7 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	x11.XDrawArcs(d, drawable, gc, arcs)
 
 	// some quote data points
-	someArbitraryGraphDrawing(d, drawable, gc, width)
+	//someArbitraryGraphDrawing(d, drawable, gc, width)
 }
 
 func someArbitraryGraphDrawing(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uint16) {
@@ -348,8 +348,8 @@ func drawXAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSyste
 
 // drawXAxis draws Y axis of a coordinate system
 func drawYAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSystemInfo) {
-	gContextId := x11.XGContextFromGC(gc)
-	font := x11.XQueryFont(d, *(*x11.XID)(unsafe.Pointer(&gContextId)))
+	//gContextId := x11.XGContextFromGC(gc)
+	//font := x11.XQueryFont(d, *(*x11.XID)(unsafe.Pointer(&gContextId)))
 	tickLen := coo.len_tick / 2
 
 	//TODO
@@ -361,32 +361,28 @@ func drawYAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSyste
 	coo_y_stop := uint(coo.margin_top)
 	x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 	// ticks
-	//divisionLength := (coo.height - (coo.margin_top + coo.margin_bottom)) / coo.num_ticks_y
-	divisionLength := (coo_y_start - int(coo_y_stop)) / coo.num_ticks_y
-	legend_start_index := coo.view.lower_y / 100
-	legend_end_index := coo.view.upper_y / 100
-	//var dummy int
-	//_, vts := transform(coo, dummy, visible_tick_start)
-	fmt.Printf("divisionLength=%d, legend_start_index=%d, legend_end_index=%d\n", divisionLength, legend_start_index, legend_end_index)
-	for i := 0; i <= coo.num_ticks_y; i++ {
+	divisionSize := coordSystem.source.divisionSizeY * (coo.source.height - coo.margin_bottom - coo.margin_top) / (coo.view.upper_y - coo.view.lower_y)
+	//_, divisionSize = transform(coo, 0, divisionSize)
+	fmt.Printf("division size: %d\n", divisionSize)
+	for i := coo.legendView.lower_y; i <= coo.legendView.upper_y; i++ {
 		// draw the tick
-		coo_y_start = coo.target.height - coo.margin_bottom - i*divisionLength
-		coo_y_stop = uint(coo.target.height) - uint(coo.margin_bottom) - uint(i*divisionLength)
+		coo_y_start = coo.target.height - coo.margin_bottom - (i-coo.legendView.lower_y+1)*divisionSize
+		coo_y_stop = uint(coo_y_start)
 		// len of tick = 10 (5+5)
 		coo_x_start = int(coo.margin_l) + tickLen
 		coo_x_stop = uint(coo.margin_l) - uint(tickLen)
 		x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 		// draw the legend
-		var textDimensions x11.XCharStruct
-		var dir int
-		var ascent int
-		var descent int
-		if i < legend_end_index {
-			ctext := coo.legend_y[i+legend_start_index]
-			x11.XTextExtents(font, ctext, len(ctext), &dir, &ascent, &descent, &textDimensions)
-			txt_x_start := int(coo.margin_l) - int(textDimensions.Width) - 5
-			x11.XDrawString(d, drawable, gc, txt_x_start, coo_y_start+15, ctext)
-		}
+		/*	var textDimensions x11.XCharStruct
+			var dir int
+			var ascent int
+			var descent int
+			if i >= coordSystem.legendView.lower_y && i <= coordSystem.legendView.upper_y {
+				ctext := coo.legend_y[i+coordSystem.legendView.lower_y]
+				x11.XTextExtents(font, ctext, len(ctext), &dir, &ascent, &descent, &textDimensions)
+				txt_x_start := int(coo.margin_l) - int(textDimensions.Width) - 5
+				x11.XDrawString(d, drawable, gc, txt_x_start, coo_y_start+15, ctext)
+			}*/
 	}
 }
 
