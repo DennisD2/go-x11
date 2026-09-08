@@ -114,7 +114,7 @@ var coordSystem = CoordSystemInfo{
 }
 
 // Transforms source coordinate x,y to target coordinates
-func transform(coo *CoordSystemInfo, x int, y int) (int, int) {
+func (coo *CoordSystemInfo) transform(x int, y int) (int, int) {
 	vheight := coo.view.upper_y - coo.view.lower_y
 	vwidth := coo.view.upper_x - coo.view.lower_x
 	tx := (x - coo.view.x) * (coo.target.width - coo.margin_l - coo.margin_r) / vwidth
@@ -190,15 +190,15 @@ func finance() {
 	}
 }
 
-func initCoordSystem() {
-	coordSystem.legend_x = make([]string, coordSystem.num_ticks_x+1)
-	for i := 0; i <= coordSystem.num_ticks_x; i++ {
+func (coo *CoordSystemInfo) init() {
+	coo.legend_x = make([]string, coo.num_ticks_x+1)
+	for i := 0; i <= coo.num_ticks_x; i++ {
 		y := 2010 + i
-		coordSystem.legend_x[i] = strconv.Itoa(y)
+		coo.legend_x[i] = strconv.Itoa(y)
 	}
-	coordSystem.legend_y = make([]string, coordSystem.num_ticks_y+1)
-	for i := 0; i <= coordSystem.num_ticks_y; i++ {
-		coordSystem.legend_y[i] = strconv.Itoa(i)
+	coo.legend_y = make([]string, coo.num_ticks_y+1)
+	for i := 0; i <= coo.num_ticks_y; i++ {
+		coo.legend_y[i] = strconv.Itoa(i)
 	}
 }
 
@@ -302,7 +302,7 @@ func someArbitraryGraphDrawing(d *x11.Display, drawable x11.Drawable, gc x11.GC,
 	for i := coordSystem.legendView.lower_x; i <= coordSystem.legendView.upper_x; i++ {
 		qx := (i-coordSystem.legendView.lower_x)*divisionSize + coordSystem.margin_l - int(arcsize)/2
 		qy := int(quoteData[i].Close)
-		tx, ty := transform(&coordSystem, qx, qy)
+		tx, ty := coo.transform(qx, qy)
 		x11.XFillArc(d, drawable, gc, tx, ty, arcsize, arcsize, 0, 360*64)
 	}
 }
@@ -553,7 +553,7 @@ func main() {
 
 	finance()
 
-	initCoordSystem()
+	coordSystem.init()
 
 	x11.XtRealizeWidget(shell)
 
