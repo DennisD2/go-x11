@@ -218,6 +218,10 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	// update coordsystem struct
 	coordSystem.target.width = int(width)
 	coordSystem.target.height = int(height)
+	fmt.Printf("s=[%d,%d] -> v=[%d,%d,%d,%d] lv=[%d,%d,%d,%d]-> [%d,%d]\n", coordSystem.source.width, coordSystem.source.height,
+		coordSystem.view.lower_x, coordSystem.view.lower_y, coordSystem.view.upper_x, coordSystem.view.upper_y,
+		coordSystem.legendView.lower_x, coordSystem.legendView.lower_y, coordSystem.legendView.upper_x, coordSystem.legendView.upper_y,
+		coordSystem.target.width, coordSystem.target.height)
 
 	cw := x11.XtWindow(canvas)
 	drawable := x11.Drawable(cw)
@@ -392,6 +396,7 @@ func viewYLowerSliderCallback(w x11.Widget, clientData x11.XtPointer, callData x
 	newValue := int(cb.Value)
 	if newValue < coordSystem.view.upper_y {
 		coordSystem.view.lower_y = newValue
+		coordSystem.legendView.lower_y = newValue / coordSystem.source.divisionSizeY
 	}
 	redisplay(canvas, nil, nil)
 }
@@ -402,6 +407,7 @@ func viewYUpperSliderCallback(w x11.Widget, clientData x11.XtPointer, callData x
 	newValue := int(cb.Value)
 	if newValue > coordSystem.view.lower_y {
 		coordSystem.view.upper_y = newValue
+		coordSystem.legendView.upper_y = newValue / coordSystem.source.divisionSizeY
 	}
 	redisplay(canvas, nil, nil)
 }
