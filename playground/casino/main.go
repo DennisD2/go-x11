@@ -288,17 +288,17 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	x11.XDrawArcs(d, drawable, gc, arcs)
 
 	// some quote data points
-	someArbitraryGraphDrawing(d, drawable, gc, width)
+	someArbitraryGraphDrawing(d, drawable, gc, &coordSystem)
 }
 
-func someArbitraryGraphDrawing(d *x11.Display, drawable x11.Drawable, gc x11.GC, width uint16) {
-	divisionLength := (int(width) - (coordSystem.margin_r + coordSystem.margin_l)) / len(quoteData)
+func someArbitraryGraphDrawing(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSystemInfo) {
+	divisionSize := coordSystem.source.divisionSizeX * (coo.source.width - coo.margin_l - coo.margin_r) / (coo.view.upper_x - coo.view.lower_x)
 	x11.XSetForeground(d, gc, 0xe7e78d)
 	var arcsize uint = 20
-	for i, l := range quoteData {
-		//fmt.Printf("Date: %s, Close: %.4f %s\n", l.Date, l.Close, l.CurrencyCode)
-		qx := i*divisionLength + coordSystem.margin_l - int(arcsize)/2
-		qy := int(l.Close)
+	for i := coordSystem.legendView.lower_x; i <= coordSystem.legendView.upper_x; i++ {
+		//fmt.Printf("i,l = %d,%v\n", i, l)
+		qx := (i-coordSystem.legendView.lower_x)*divisionSize + coordSystem.margin_l - int(arcsize)/2
+		qy := int(quoteData[i].Close)
 		tx, ty := transform(&coordSystem, qx, qy)
 		x11.XFillArc(d, drawable, gc, tx, ty, arcsize, arcsize, 0, 360*64)
 	}
@@ -325,7 +325,6 @@ func drawXAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSyste
 	coo_y_stop := uint(coo.target.height) - uint(coo.margin_bottom)
 	x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 	// ticks
-	//divisionLength := (coo.target.width - (coo.margin_r + coo.margin_l)) / coo.num_ticks_x
 	divisionSize := coordSystem.source.divisionSizeX * (coo.source.width - coo.margin_l - coo.margin_r) / (coo.view.upper_x - coo.view.lower_x)
 	fmt.Printf("division size x: %d\n", divisionSize)
 	if divisionSize < coordSystem.source.divisionSizeX {
