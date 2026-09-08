@@ -38,8 +38,10 @@ type VArea struct {
 }
 
 type AreaDimension struct {
-	width  int
-	height int
+	width         int
+	height        int
+	divisionSizeX int
+	divisionSizeY int
 }
 
 type CoordSystemInfo struct {
@@ -62,8 +64,10 @@ type CoordSystemInfo struct {
 
 // Source Coordinate system
 var sourceDimension = AreaDimension{
-	width:  2000,
-	height: 1000,
+	width:         2000,
+	height:        1000,
+	divisionSizeX: 100,
+	divisionSizeY: 100,
 }
 
 // view Coordinate system
@@ -102,8 +106,8 @@ var coordSystem = CoordSystemInfo{
 	margin_r:      20,
 	margin_top:    20,
 	margin_bottom: 40,
-	num_ticks_x:   sourceDimension.width / 100,  // swidth?
-	num_ticks_y:   sourceDimension.height / 100, // sheight?
+	num_ticks_x:   sourceDimension.width / sourceDimension.divisionSizeX,
+	num_ticks_y:   sourceDimension.height / sourceDimension.divisionSizeY,
 	len_tick:      10,
 	legend_x:      nil,
 	legend_y:      nil,
