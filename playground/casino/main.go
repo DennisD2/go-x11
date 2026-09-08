@@ -327,7 +327,7 @@ func drawXAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSyste
 	// ticks
 	//divisionLength := (coo.target.width - (coo.margin_r + coo.margin_l)) / coo.num_ticks_x
 	divisionSize := coordSystem.source.divisionSizeX * (coo.source.width - coo.margin_l - coo.margin_r) / (coo.view.upper_x - coo.view.lower_x)
-	fmt.Printf("division size: %d\n", divisionSize)
+	fmt.Printf("division size x: %d\n", divisionSize)
 	if divisionSize < coordSystem.source.divisionSizeX {
 		divisionSize = coordSystem.source.divisionSizeX
 	}
@@ -372,7 +372,7 @@ func drawYAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSyste
 	x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 	// ticks
 	divisionSize := coordSystem.source.divisionSizeY * (coo.source.height - coo.margin_bottom - coo.margin_top) / (coo.view.upper_y - coo.view.lower_y)
-	fmt.Printf("division size: %d\n", divisionSize)
+	fmt.Printf("division size y: %d\n", divisionSize)
 	if divisionSize < coordSystem.source.divisionSizeY {
 		divisionSize = coordSystem.source.divisionSizeY
 	}
