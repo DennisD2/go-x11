@@ -90,10 +90,10 @@ var targetDimension = AreaDimension{
 var legendViewArea = VArea{
 	x:       0,
 	y:       0,
-	lower_x: 0,
-	upper_x: 2000,
-	lower_y: 200,
-	upper_y: 500,
+	lower_x: viewArea.lower_x / sourceDimension.divisionSizeX,
+	upper_x: viewArea.upper_x / sourceDimension.divisionSizeX,
+	lower_y: viewArea.lower_y / sourceDimension.divisionSizeY,
+	upper_y: viewArea.upper_y / sourceDimension.divisionSizeY,
 }
 
 // Complete coordinate system
@@ -418,6 +418,7 @@ func viewXLowerSliderCallback(w x11.Widget, clientData x11.XtPointer, callData x
 	newValue := int(cb.Value)
 	if newValue < coordSystem.view.upper_x {
 		coordSystem.view.lower_x = newValue
+		coordSystem.legendView.lower_x = newValue / coordSystem.source.divisionSizeX
 	}
 	redisplay(canvas, nil, nil)
 }
@@ -428,6 +429,7 @@ func viewXUpperSliderCallback(w x11.Widget, clientData x11.XtPointer, callData x
 	newValue := int(cb.Value)
 	if newValue > coordSystem.view.lower_x {
 		coordSystem.view.upper_x = newValue
+		coordSystem.legendView.upper_x = newValue / coordSystem.source.divisionSizeX
 	}
 	redisplay(canvas, nil, nil)
 }
