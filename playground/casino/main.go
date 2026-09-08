@@ -326,7 +326,7 @@ func drawXAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSyste
 	x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 	// ticks
 	//divisionLength := (coo.target.width - (coo.margin_r + coo.margin_l)) / coo.num_ticks_x
-	divisionSize := coordSystem.source.divisionSizeY * (coo.source.width - coo.margin_l - coo.margin_r) / (coo.view.upper_x - coo.view.lower_x)
+	divisionSize := coordSystem.source.divisionSizeX * (coo.source.width - coo.margin_l - coo.margin_r) / (coo.view.upper_x - coo.view.lower_x)
 	fmt.Printf("division size: %d\n", divisionSize)
 	if divisionSize < coordSystem.source.divisionSizeX {
 		divisionSize = coordSystem.source.divisionSizeX
@@ -335,7 +335,7 @@ func drawXAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSyste
 
 	for i := coo.legendView.lower_x; i <= coo.legendView.upper_x; i++ {
 		// draw the tick
-		coo_x_start = coo.margin_l + (i-coo.legendView.lower_x+1)*divisionSize
+		coo_x_start = coo.margin_l + (i-coo.legendView.lower_x)*divisionSize
 		coo_x_stop = uint(coo_x_start)
 		// len of tick = 10 (5+5)
 		coo_y_start = coo.target.height - coo.margin_bottom + tickLen
@@ -347,7 +347,7 @@ func drawXAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSyste
 		var ascent int
 		var descent int
 		if i >= coordSystem.legendView.lower_x && i < coordSystem.legendView.upper_x {
-			ctext := coo.legend_x[legend_i+coordSystem.legendView.lower_x+1]
+			ctext := coo.legend_x[legend_i+coordSystem.legendView.lower_x]
 			x11.XTextExtents(font, ctext, len(ctext), &dir, &ascent, &descent, &textDimensions)
 			txt_x_start := coo_x_start - int(textDimensions.Width/2)
 			x11.XDrawString(d, drawable, gc, txt_x_start, coo_y_start+15, ctext)
