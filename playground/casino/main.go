@@ -37,23 +37,38 @@ type VArea struct {
 	upper_y int // view coordinate system lower y value to use (defines window inside s)
 }
 
+type AreaDimension struct {
+	width  int
+	height int
+}
+
 type CoordSystemInfo struct {
-	swidth        int   // source coordinate system width
-	sheight       int   // source coordinate system height
-	view          VArea // v is window inside s
-	width         int   // target coordinate system width (pixel coordinates)
-	height        int   // target coordinate system width (pixel coordinates)
+	source     AreaDimension // source coordinate system dimension
+	view       VArea         // v is window inside s
+	legendView VArea         // legend is also a view into legend of s
+	target     AreaDimension // target coordinate system dimension (pixels)
+	//width         int           // target coordinate system width (pixel coordinates)
+	//height        int           // target coordinate system width (pixel coordinates)
 	margin_l      int
 	margin_r      int
 	margin_top    int
 	margin_bottom int
 	num_ticks_x   int
 	num_ticks_y   int
+	division_x    int // size of x division in source units
+	division_y    int // size of y division in source units
 	len_tick      int
 	legend_x      []string
 	legend_y      []string
 }
 
+// Source Coordinate system
+var sourceDimension = AreaDimension{
+	width:  2000,
+	height: 1000,
+}
+
+// view Coordinate system
 var viewArea = VArea{
 	x:       0,
 	y:       0,
@@ -63,21 +78,48 @@ var viewArea = VArea{
 	upper_y: 500,
 }
 
+// Target Coordinate system
+var targetDimension = AreaDimension{
+	width:  2000,
+	height: 1000,
+}
+
+// legend view coordinate system
+var legendViewArea = VArea{
+	x:       0,
+	y:       0,
+	lower_x: 0,
+	upper_x: 2000,
+	lower_y: 200,
+	upper_y: 500,
+}
+
+// Complete coordinate system
 var coordSystem = CoordSystemInfo{
-	swidth:        2000,
-	sheight:       1000,
-	view:          viewArea,
-	width:         2000,
-	height:        1000,
+	source:     sourceDimension,
+	view:       viewArea,
+	legendView: legendViewArea,
+	//width:         2000,
+	//height:        1000,
+	target:        targetDimension,
 	margin_l:      20,
 	margin_r:      20,
 	margin_top:    20,
 	margin_bottom: 40,
-	num_ticks_x:   (viewArea.upper_x - viewArea.lower_x) / 100,
-	num_ticks_y:   (viewArea.upper_y - viewArea.lower_y) / 100,
+	num_ticks_x:   2000 / 100, // swidth?
+	num_ticks_y:   1000 / 100, // sheight?
 	len_tick:      10,
 	legend_x:      nil,
 	legend_y:      nil,
+}
+
+// Transforms source coordinate x,y to target coordinates
+func transform(coo *CoordSystemInfo, x int, y int) (int, int) {
+	vheight := coo.view.upper_y - coo.view.lower_y
+	vwidth := coo.view.upper_x - coo.view.lower_x
+	tx := (x - coo.view.x) * coo.target.width / vwidth
+	ty := (vheight - (y - coo.view.lower_y) - coo.view.y) * coo.target.height / vheight
+	return tx, ty
 }
 
 var quoteData []QuoteData
@@ -155,18 +197,9 @@ func initCoordSystem() {
 		coordSystem.legend_x[i] = strconv.Itoa(y)
 	}
 	coordSystem.legend_y = make([]string, coordSystem.num_ticks_y+1)
-	start_index := coordSystem.view.lower_y / 100
-	for i := start_index; i < coordSystem.num_ticks_y+1+start_index; i++ {
-		coordSystem.legend_y[i-start_index] = strconv.Itoa(i)
+	for i := 0; i < coordSystem.num_ticks_y+1; i++ {
+		coordSystem.legend_y[i] = strconv.Itoa(i)
 	}
-}
-
-func transform(coo *CoordSystemInfo, x int, y int) (int, int) {
-	vheight := coo.view.upper_y - coo.view.lower_y
-	vwidth := coo.view.upper_x - coo.view.lower_x
-	tx := (x - coo.view.x) * coo.width / vwidth
-	ty := (vheight - (y - coo.view.lower_y) - coo.view.y) * coo.height / vheight
-	return tx, ty
 }
 
 func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
@@ -183,8 +216,8 @@ func redisplay(w x11.Widget, clientData x11.XtPointer, callData x11.XtPointer) {
 	x11.XtGetValues(canvas, inargs)
 	//fmt.Printf("canvas width*height: %d x %d\n", width, height)
 	// update coordsystem struct
-	coordSystem.width = int(width)
-	coordSystem.height = int(height)
+	coordSystem.target.width = int(width)
+	coordSystem.target.height = int(height)
 
 	cw := x11.XtWindow(canvas)
 	drawable := x11.Drawable(cw)
@@ -283,19 +316,19 @@ func drawXAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSyste
 	// check numeric values below (15) these offsets need to be calculated by font size
 
 	coo_x_start := coo.margin_l
-	coo_x_stop := uint(coo.width) - uint(coo.margin_r)
-	coo_y_start := coo.height - coo.margin_bottom
-	coo_y_stop := uint(coo.height) - uint(coo.margin_bottom)
+	coo_x_stop := uint(coo.target.width) - uint(coo.margin_r)
+	coo_y_start := coo.target.height - coo.margin_bottom
+	coo_y_stop := uint(coo.target.height) - uint(coo.margin_bottom)
 	x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 	// ticks
-	divisionLength := (coo.width - (coo.margin_r + coo.margin_l)) / coo.num_ticks_x
+	divisionLength := (coo.target.width - (coo.margin_r + coo.margin_l)) / coo.num_ticks_x
 	for i := 0; i <= coo.num_ticks_x; i++ {
 		// draw the tick
 		coo_x_start = coo.margin_l + i*divisionLength
 		coo_x_stop = uint(coo.margin_l) + uint(i*divisionLength)
 		// len of tick = 10 (5+5)
-		coo_y_start = coo.height - coo.margin_bottom + tickLen
-		coo_y_stop = uint(coo.height) - uint(coo.margin_bottom) - uint(tickLen)
+		coo_y_start = coo.target.height - coo.margin_bottom + tickLen
+		coo_y_stop = uint(coo.target.height) - uint(coo.margin_bottom) - uint(tickLen)
 		x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 		// draw the legend
 		var textDimensions x11.XCharStruct
@@ -320,28 +353,36 @@ func drawYAxis(d *x11.Display, drawable x11.Drawable, gc x11.GC, coo *CoordSyste
 
 	coo_x_start := coo.margin_l
 	coo_x_stop := uint(coo.margin_l)
-	coo_y_start := coo.height - coo.margin_bottom
+	coo_y_start := coo.target.height - coo.margin_bottom
 	coo_y_stop := uint(coo.margin_top)
 	x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 	// ticks
-	divisionLength := (coo.height - (coo.margin_top + coo.margin_bottom)) / coo.num_ticks_y
+	//divisionLength := (coo.height - (coo.margin_top + coo.margin_bottom)) / coo.num_ticks_y
+	divisionLength := (coo_y_start - int(coo_y_stop)) / coo.num_ticks_y
+	legend_start_index := coo.view.lower_y / 100
+	legend_end_index := coo.view.upper_y / 100
+	//var dummy int
+	//_, vts := transform(coo, dummy, visible_tick_start)
+	fmt.Printf("divisionLength=%d, legend_start_index=%d, legend_end_index=%d\n", divisionLength, legend_start_index, legend_end_index)
 	for i := 0; i <= coo.num_ticks_y; i++ {
 		// draw the tick
-		coo_y_start = coo.height - coo.margin_bottom - i*divisionLength
-		coo_y_stop = uint(coo.height) - uint(coo.margin_bottom) - uint(i*divisionLength)
+		coo_y_start = coo.target.height - coo.margin_bottom - i*divisionLength
+		coo_y_stop = uint(coo.target.height) - uint(coo.margin_bottom) - uint(i*divisionLength)
 		// len of tick = 10 (5+5)
 		coo_x_start = int(coo.margin_l) + tickLen
 		coo_x_stop = uint(coo.margin_l) - uint(tickLen)
 		x11.XDrawLine(d, drawable, gc, int(coo_x_start), coo_y_start, coo_x_stop, coo_y_stop)
 		// draw the legend
-		var textDimensions x11.XCharStruct // Alloziert den Speicher in Go
+		var textDimensions x11.XCharStruct
 		var dir int
 		var ascent int
 		var descent int
-		ctext := coo.legend_y[i]
-		x11.XTextExtents(font, ctext, len(ctext), &dir, &ascent, &descent, &textDimensions)
-		txt_x_start := int(coo.margin_l) - int(textDimensions.Width) - 5
-		x11.XDrawString(d, drawable, gc, txt_x_start, coo_y_start+15, ctext)
+		if i < legend_end_index {
+			ctext := coo.legend_y[i+legend_start_index]
+			x11.XTextExtents(font, ctext, len(ctext), &dir, &ascent, &descent, &textDimensions)
+			txt_x_start := int(coo.margin_l) - int(textDimensions.Width) - 5
+			x11.XDrawString(d, drawable, gc, txt_x_start, coo_y_start+15, ctext)
+		}
 	}
 }
 
@@ -452,7 +493,7 @@ func main() {
 
 	// Slider X Axis, view lower x value
 	args = x11.AppendArgList(nil, x11.XmNminimum, 0)
-	args = x11.AppendArgList(args, x11.XmNmaximum, uintptr(coordSystem.width))
+	args = x11.AppendArgList(args, x11.XmNmaximum, uintptr(coordSystem.target.width))
 	args = x11.AppendArgList(args, x11.XmNvalue, uintptr(coordSystem.view.lower_x))
 	args = x11.AppendArgList(args, x11.XmNshowValue, 1)
 	args = x11.AppendArgList(args, x11.XmNorientation, uintptr(x11.XmHORIZONTAL))
@@ -462,7 +503,7 @@ func main() {
 
 	// Slider X Axis, view upper x value
 	args = x11.AppendArgList(nil, x11.XmNminimum, 0)
-	args = x11.AppendArgList(args, x11.XmNmaximum, uintptr(coordSystem.width))
+	args = x11.AppendArgList(args, x11.XmNmaximum, uintptr(coordSystem.target.width))
 	args = x11.AppendArgList(args, x11.XmNvalue, uintptr(coordSystem.view.upper_x))
 	args = x11.AppendArgList(args, x11.XmNshowValue, 1)
 	args = x11.AppendArgList(args, x11.XmNorientation, uintptr(x11.XmHORIZONTAL))
@@ -472,7 +513,7 @@ func main() {
 
 	// Slider Y Axis, view upper y value
 	args = x11.AppendArgList(nil, x11.XmNminimum, 0)
-	args = x11.AppendArgList(args, x11.XmNmaximum, uintptr(coordSystem.height))
+	args = x11.AppendArgList(args, x11.XmNmaximum, uintptr(coordSystem.target.height))
 	args = x11.AppendArgList(args, x11.XmNvalue, uintptr(coordSystem.view.upper_y))
 	args = x11.AppendArgList(args, x11.XmNshowValue, 1)
 	args = x11.AppendArgList(args, x11.XmNorientation, uintptr(x11.XmVERTICAL))
@@ -482,7 +523,7 @@ func main() {
 
 	// Slider Y Axis, view lower y value
 	args = x11.AppendArgList(nil, x11.XmNminimum, 0)
-	args = x11.AppendArgList(args, x11.XmNmaximum, uintptr(coordSystem.height))
+	args = x11.AppendArgList(args, x11.XmNmaximum, uintptr(coordSystem.target.height))
 	args = x11.AppendArgList(args, x11.XmNvalue, uintptr(coordSystem.view.lower_y))
 	args = x11.AppendArgList(args, x11.XmNshowValue, 1)
 	args = x11.AppendArgList(args, x11.XmNorientation, uintptr(x11.XmVERTICAL))
